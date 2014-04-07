@@ -1,4 +1,5 @@
-HopfieldANN
-===========
+Hopfield Artificial Neural Network
+==================================
 
-ANN
+Under construction.
+
