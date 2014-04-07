@@ -2,7 +2,7 @@ CXX = gcc
 CXXFLAGS = -Wall -Wextra -O3
 
 EXECUTABLE = hopfield
-SOURCES = ${wildcard *.cpp}
+SOURCES = ${wildcard *.c}
 HEADERS = ${wildcard *.h}
 OBJECTS = ${SOURCES:.cpp=.o}
 
