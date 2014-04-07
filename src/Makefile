@@ -11,7 +11,6 @@ all: ${EXECUTABLE}
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(OBJECTS) $(LDXXFLAGS) -o $@
-	@echo "-- Build: " $$(cat buildnumber.num)
 
 # Create dependency file
 depend: $(SOURCES)
