@@ -59,7 +59,21 @@ Four black-and-white images 10 x 12 ( . black  * white):
 		.***........
 		***.........
 		**..........
-		
 
+Building
+--------
+Go to the src directory.
+
+		cd src
+		make
+
+Executing
+---------
+Go to the src directory.
+
+		cd src
+		../hopfield ../data/Hopf02.dat
+
+		
 Under construction.
 
