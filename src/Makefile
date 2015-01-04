@@ -1,10 +1,10 @@
 CXX = gcc 
 CXXFLAGS = -Wall -Wextra -O3
 
-EXECUTABLE = hopfield
+EXECUTABLE = hopfieldann
 SOURCES = ${wildcard *.c}
 HEADERS = ${wildcard *.h}
-OBJECTS = ${SOURCES:.cpp=.o}
+OBJECTS = ${SOURCES:.c=.o}
 
 .PHONY: all
 all: ${EXECUTABLE}
