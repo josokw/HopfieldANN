@@ -27,11 +27,10 @@ static int Random(int min, int max)
       srand((unsigned int)time(NULL));
       count++;
    }
-
-   /* Previous implementation causes a run time bug using gcc in Lunix */
+   /* Previous implementation causes a run time bug using gcc in Linux */
    /* Generates only 0 values, RAND_MAX == MAX_INT in gcc              */
    /* return min + (int)((max - min + 1)* rand() / (RAND_MAX + 1.0));  */
-   return min + (rand() % (max - min + 1)) + 1;
+   return min + (rand() % (max - min + 1));
 }
 
 void LearnJ(int MaxPat, int PatSize, double J[][MAXN])
