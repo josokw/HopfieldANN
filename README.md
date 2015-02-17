@@ -67,6 +67,12 @@ Go to the src directory.
 		cd src
 		make
 
+Alternatively you can use Cmake to build.
+		mkdir build
+		cd build
+		cmake ../
+		make
+
 Executing
 ---------
 Go to the src directory.
