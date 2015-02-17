@@ -72,7 +72,7 @@ Executing
 Go to the src directory.
 
 		cd src
-		../hopfield ../data/Hopf02.dat
+		../hopfieldann ../data/Hopf02.dat
 
 Output
 ------
