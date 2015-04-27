@@ -68,17 +68,18 @@ Go to the src directory.
 		make
 
 Alternatively you can use Cmake to build.
-		mkdir build
-		cd build
-		cmake ../
-		make
+
+    mkdir build
+    cd build
+    cmake ..
+    make
 
 Executing
 ---------
 Go to the src directory.
 
-		cd src
-		../hopfieldann ../data/Hopf02.dat
+    cd src
+    ../hopfieldann ../data/Hopf02.dat
 
 Output
 ------
