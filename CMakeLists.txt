@@ -15,10 +15,10 @@ file(
     src/*.h
 )
 
-add_executable(hoppfieldann ${HOPFIELDANN_SOURCES})
+add_executable(hopfieldann ${HOPFIELDANN_SOURCES})
 
 install(
-    TARGETS hoppfieldann
+    TARGETS hopfieldann
     RUNTIME DESTINATION "."
 )
 

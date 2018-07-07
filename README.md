@@ -5,9 +5,11 @@ Console application implemented in ANSI-C.
 A Hopfield network is a recurrent artificial neural network (ANN) and was 
 invented by John Hopfield in 1982. A Hopfield network is a one layered network.
 Every neuron is connected to every other neuron except with itself. 
+
 Every connection is represented by a weight factor. These weight factors are 
 determined by the Hebb's learning rule (1949). 
-Associative memory: capacity 0.14 * number of neurons.
+
+Associative memory capacity: 0.14 * number of neurons.
 
 
 Input format
@@ -62,12 +64,8 @@ Four black-and-white images 10 x 12 ( . black  * white):
 
 Building
 --------
-Go to the src directory.
 
-		cd src
-		make
-
-Alternatively you can use Cmake to build.
+Use Cmake to build.
 
     mkdir build
     cd build
