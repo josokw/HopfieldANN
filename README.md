@@ -9,7 +9,8 @@ invented by John Hopfield in 1982. A Hopfield network is a one layered network.
 Every neuron is connected to every other neuron except with itself.
 
 Every connection is represented by a weight factor. These weight factors are
-determined by the Hebb's learning rule (1949).
+determined by the Hebb's learning rule (1949). It is often summarized as 
+"Neurons that fire together, wire together. Neurons that fire out of sync, fail to link".
 
 Associative memory capacity: 0.14 * number of neurons.
 
@@ -67,7 +68,7 @@ Four black-and-white images 10 x 12 ( . black  * white pixel) in plain ASCII tex
 Building
 --------
 
-Use Cmake to build application in build directory:
+Use Cmake to build the application in the build directory:
 
     mkdir build
     cd build
