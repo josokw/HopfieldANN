@@ -80,22 +80,17 @@ Executing
 
 If you are in the build directory:
 
-    ./hopfieldann ../data/Hopf02.dat
+    ./hopfieldann ../data/hopf02.dat
 
 Output
 ------
 
-    Hopfield's ANN Simulation: Associative Memory       version 1.3.2
+    Hopfield's ANN Simulation: Associative Memory HopfieldNN v1.3.4
 
-    - Patterns file name: ../data/hopf02.dat
-
-    - Loading patterns data .... ready
-
+    - Patterns file name: ../data/hopf02.dat   loading .... ready
     - Number of neurons: 10 * 12 = 120, number of patterns: 4
-
     - Learning patterns by hebbian learning rule .... ready
-
-    - Learning result: 1 connection matrix, size 120 x 120
+    - Learning result: connection matrix, size 120 x 120
 
     - Choose pattern to disturb by noise, index (1..4): 3
 
@@ -112,24 +107,20 @@ Output
 
     - Noise [%]: 30
 
-    - Pattern as vector:
+    - Pattern as 2D image and noisy pixels:
 
-    **.***.**..*..*.*.*...*.*.**.*.........**.*..*...*.**.***.**.**.*.......*.*....*.*...**.******.*..*......***.**......*.*
+    *..**.*.**.*     ##  # #   #
+    .**.....*...            #
+    ..**...**...           ##
+    ...**..*....           #
+    ...*.**.**..        ### ##
+    ..**..*.**.*          # ## #
+    .***..******       #  ######
+    **.***.**...      #   #  #
+    .***....*...     ###    #
+    ..*..*...**.      #  #   ##
 
-    - Pattern as 2D image:
-
-    **.***.**..*      #   #  # #
-    ..*.*.*...*.     #  # #   #
-    *.**.*......    #    #
-    ...**.*..*..          #  #
-    .*.**.***.**     #    ### ##
-    .**.*.......     # ##
-    *.*....*.*..    ##     # #
-    .**.******.*    #  #       #
-    ..*......***      #      ###
-    .**......*.*     ##      # #
-
-    ---- Energy: -9.283333
+    ---- Energy: -10.083333
 
     **********..
     .**.........
@@ -156,3 +147,5 @@ Output
     ............
 
     ---- Energy: -77.016667
+
+    - E(xit), L(oad new patterns data file), N(ext simulation) .....
