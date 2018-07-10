@@ -14,7 +14,7 @@ are determined by the Hebb's learning rule (1949). It is often summarized
 as "Neurons that fire together, wire together. Neurons that fire out of
 sync, fail to link".
 
-Maximum Associative memory capacity: 0.14 * number of neurons.
+Maximum associative memory capacity: 0.14 * number of neurons.
 
 Input format
 ------------
