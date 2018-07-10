@@ -20,4 +20,4 @@ before_script:
 
 script:
   - make
-  - ./hopfieldann ../data/hopf02.dat
+#  - ./hopfieldann ../data/hopf02.dat
