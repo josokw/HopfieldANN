@@ -12,13 +12,13 @@ are determined by the Hebb's learning rule (1949). It is often summarized
 as "Neurons that fire together, wire together. Neurons that fire out of
 sync, fail to link".
 
-Associative memory maximum capacity: 0.14 * number of neurons.
+Maximum Associative memory capacity: 0.14 * number of neurons.
 
 Input format
 ------------
 
-Four black-and-white images 10 x 12 ( . black  * white pixel) in plain
-ASCII text:
+Four black-and-white images 10 x 12 (binary pattern, . black pixel, * white
+pixel) in plain ASCII text:
 
         10 12 4
 
@@ -69,7 +69,7 @@ ASCII text:
 Building
 --------
 
-Use CMake to build the application in the build directory:
+Use *CMake* and *make* to build the application in the build directory:
 
     mkdir build
     cd build
@@ -89,9 +89,10 @@ Output
 The application shows the recovering from a distorted input to the trained
 state that is most similar to that input. Hopfield networks have a scalar
 value associated with each state of the network, referred to as the
-"energy" of the network. Repeated updating (by using the output as an
-input) of the network will eventually converge to a state which is a local
-minimum in the energy function.
+"energy" of the network. Repeated updating of the network by using the
+output as an input, will eventually converge to a state which is a local
+minimum in the energy function. The weight factors are stored in a
+connection matrix.
 
     Hopfield's ANN Simulation: Associative Memory HopfieldNN v1.3.4
 
