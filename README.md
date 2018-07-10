@@ -2,22 +2,23 @@
 Hopfield Artificial Neural Network
 ==================================
 
-Console application implemented in C.
-
 A Hopfield network is a recurrent artificial neural network (ANN) and was
-invented by John Hopfield in 1982. A Hopfield network is a one layered network.
+invented by John Hopfield in 1982. A Hopfield network is a one layered
+network.
 Every neuron is connected to every other neuron except with itself.
 
-Every connection is represented by a weight factor. These weight factors are
-determined by the Hebb's learning rule (1949). It is often summarized as
-"Neurons that fire together, wire together. Neurons that fire out of sync, fail to link".
+Every connection is represented by a weight factor. These weight factors
+are determined by the Hebb's learning rule (1949). It is often summarized
+as "Neurons that fire together, wire together. Neurons that fire out of
+sync, fail to link".
 
 Associative memory maximum capacity: 0.14 * number of neurons.
 
 Input format
 ------------
 
-Four black-and-white images 10 x 12 ( . black  * white pixel) in plain ASCII text:
+Four black-and-white images 10 x 12 ( . black  * white pixel) in plain
+ASCII text:
 
         10 12 4
 
@@ -68,7 +69,7 @@ Four black-and-white images 10 x 12 ( . black  * white pixel) in plain ASCII tex
 Building
 --------
 
-Use Cmake to build the application in the build directory:
+Use CMake to build the application in the build directory:
 
     mkdir build
     cd build
@@ -84,6 +85,13 @@ If you are in the build directory:
 
 Output
 ------
+
+The application shows the recovering from a distorted input to the trained
+state that is most similar to that input. Hopfield networks have a scalar
+value associated with each state of the network, referred to as the
+"energy" of the network. Repeated updating (by using the output as an
+input) of the network will eventually converge to a state which is a local
+minimum in the energy function.
 
     Hopfield's ANN Simulation: Associative Memory HopfieldNN v1.3.4
 
