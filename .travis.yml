@@ -1,4 +1,4 @@
-os: linux
+
 sudo: false
 language: C
 compiler: gcc
@@ -6,12 +6,11 @@ compiler: gcc
 addons:
   apt:
     sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7.3
-            
-      env:
-         - MATRIX_EVAL="CC=gcc-7.3 && CXX=g++-7.3"
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7.3         
+  env:
+    - MATRIX_EVAL="CC=gcc-7.3 && CXX=g++-7.3"
 
 before_script:
   - cmake --version
@@ -22,4 +21,3 @@ before_script:
 script:
   - make
   - ./hopfieldann ../data/hopf02.dat
-
