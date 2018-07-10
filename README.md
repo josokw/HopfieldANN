@@ -2,6 +2,8 @@
 Hopfield Artificial Neural Network
 ==================================
 
+[![Build Status](https://travis-ci.org/josokw/HopfieldANN.svg?branch=master)](https://travis-ci.org/josokw/HopfieldANN)
+
 A Hopfield network is a recurrent artificial neural network (ANN) and was
 invented by John Hopfield in 1982. A Hopfield network is a one layered
 network.
