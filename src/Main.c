@@ -5,14 +5,15 @@
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "AppInfo.h"
 #include "Hopfield.h"
 #include "HopfieldCalc.h"
 #include "HopfieldIO.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #define MAXFILENAME 100
 
@@ -34,6 +35,8 @@ int main(int argc, char *argv[])
     printf("\n\tUSAGE: Hopfield <patterns filename> <noisy patterns filename>\n\n");
     exit(EXIT_FAILURE);
   }
+
+  srand((unsigned int)time(NULL));
 
   printf("Hopfield's ANN Simulation: Associative Memory " APPNAME_VERSION "\n\n"
     "- Patterns file name: %s   loading .... ", argv[1]);
