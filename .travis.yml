@@ -1,6 +1,6 @@
 
 sudo: false
-language: C
+language: C++
 compiler: g++
 
 addons:
