@@ -1,16 +1,16 @@
 
 sudo: false
 language: C
-compiler: gcc
+compiler: g++
 
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - g++-7         
+      - g++-6.3         
   env:
-    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - MATRIX_EVAL="CC=g++-6 && CXX=g++-6"
 
 before_script:
   - cmake --version
@@ -20,7 +20,6 @@ before_script:
 
 script:
   - make
-#  - ./hopfieldann ../data/hopf02.dat
 
 notifications:
     email: false
