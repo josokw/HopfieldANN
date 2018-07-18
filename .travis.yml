@@ -1,16 +1,14 @@
 
-sudo: false
-language: C++
-compiler: g++
+language: c
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-6        
-  env:
-    - MATRIX_EVAL="CC=g++-6 && CXX=g++-6 && CXXFLAGS=-std=c99"
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      compiler: gcc
+
+before_install:
+  sudo apt-get install --assume-yes --quiet gcc-multilib
 
 before_script:
   - cmake --version
