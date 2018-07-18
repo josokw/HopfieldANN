@@ -4,9 +4,13 @@ project(HopfieldANN)
 # Squash deprecation warnings in Visual Studio
 if (MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_WARNINGS")
+else()
+    set_property(TARGET tgt PROPERTY C_STANDARD 99)
+    add_compile_options("-std=c99" "-Wall")
 endif (MSVC)
 
 include_directories(src)
+set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
 
 file(
     GLOB_RECURSE HOPFIELDANN_SOURCES
@@ -21,6 +25,8 @@ install(
     TARGETS hopfieldann
     RUNTIME DESTINATION "."
 )
+
+set_property(TARGET hopfieldann PROPERTY C_STANDARD 99)
 
 install(
     DIRECTORY "${CMAKE_SOURCE_DIR}/data"
