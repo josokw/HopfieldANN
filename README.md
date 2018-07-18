@@ -99,7 +99,7 @@ If the *build* directory is the current directory:
 
 ## Output
 
-The application shows the recovering from a distorted (kwonw) input pattern to the
+The application shows the recovering from a distorted known input pattern to the
 trained state that is most similar to that input.
 Hopfield networks have a scalar value associated with each state of the
 network, referred to as the "energy" of the network.
