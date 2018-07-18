@@ -1,6 +1,4 @@
-
-Hopfield Artificial Neural Network
-==================================
+# Hopfield Artificial Neural Network
 
 [![Build Status](https://travis-ci.org/josokw/HopfieldANN.svg?branch=master)](https://travis-ci.org/josokw/HopfieldANN)
 
@@ -15,12 +13,19 @@ as "Neurons that fire together, wire together. Neurons that fire out of
 sync, fail to link".
 
 Maximum associative memory capacity: 0.14 * number of neurons.
+If 120 neurons are available the maximum associative memory capacity equals
+16 patterns. 
 
-Input format
-------------
+## Input format
 
-Four black-and-white images 10 x 12 (binary pattern, . black pixel, * white
-pixel) in plain ASCII text:
+Example plain ASCII input file:
+
+- binary pattern 4 black-and-white images 10 x 12
+- . black pixel
+- \* white pixel
+
+The first line must be available and shows the size of each pattern and
+the number of patterns.
 
         10 12 4
 
@@ -68,33 +73,39 @@ pixel) in plain ASCII text:
         ***.........
         **..........
 
-Building
---------
+After reading each input pattern the weigth factors are updated by the
+Hebbian learning rule in the same symmetric connection matrix W.
+Because the neurons are not connected to itself the matrix W has a zero
+valued diagonal.
 
-Use *CMake* and *make* to build the application in the *build* directory:
+## Building
+
+The application does not use dynamic memory allocation.
+
+Use *CMake* and *make* to build the application:
 
     mkdir build
     cd build
     cmake ..
     make
 
-Executing
----------
+The excutable can be found in the *bin* directory.
 
-Go to the bin directory:
+## Executing
 
-    ./hopfieldann ../data/hopf02.dat
+If the *build* directory is the current directory:
 
-Output
-------
+    ../bin/hopfieldann ../data/hopf02.dat
 
-The application shows the recovering from a distorted input to the trained
-state that is most similar to that input. Hopfield networks have a scalar
-value associated with each state of the network, referred to as the
-"energy" of the network. Repeated updating of the network by using the
-output as an input, will eventually converge to a state which is a local
-minimum in the energy function. The weight factors are stored in a
-connection matrix.
+## Output
+
+The application shows the recovering from a distorted (kwonw) input pattern to the
+trained state that is most similar to that input.
+Hopfield networks have a scalar value associated with each state of the
+network, referred to as the "energy" of the network.
+Repeated updating of the network by using the output as an input, will
+eventually converge to a state which is a local minimum in the energy
+function.
 
     Hopfield's ANN associative memory: hopfieldann v1.4.0
 
@@ -162,3 +173,10 @@ connection matrix.
 
 
     - E(xit), L(oad new patterns data file), N(ext simulation) .....
+
+Not all associated output patterns will be in every detail the same as the
+learned input patterns.
+Sometimes the associated output can be something we hasn't taught it.
+"Hallucinations" is one of the main problems.
+A Hopfield network can not tell you if the association is an
+"hallucination".
