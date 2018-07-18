@@ -17,14 +17,12 @@ file(
 )
 
 add_executable(hopfieldann ${HOPFIELDANN_SOURCES})
+set_property(TARGET hopfieldann PROPERTY C_STANDARD 99)
 
 install(
     TARGETS hopfieldann
     RUNTIME DESTINATION "."
 )
-
-set_property(TARGET hopfieldann PROPERTY C_STANDARD 99)
-set_property(TARGET hopfieldann PROPERTY C_STANDARD 99)
 
 install(
     DIRECTORY "${CMAKE_SOURCE_DIR}/data"
