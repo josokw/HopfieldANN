@@ -1,6 +1,7 @@
 #include "HopfieldCalc.h"
 #include "HopfieldIO.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <math.h>
 #include <stdlib.h>
@@ -23,16 +24,37 @@ static int Random(int min, int max)
     return min + (rand() % (max - min + 1));
 }
 
-bool isSymmetric(const double W[][MAXN])
+bool isSymmetric(const int patternSize, const double W[][MAXN])
 {
-    return true;
+    assert(patternSize < MAXN);
+
+    bool isSymmetric = true;
+
+    for (int i = 1; i < patternSize; i++)
+    {
+        for (int j = i; j < patternSize; j++)
+        {
+            if (!equals(W[i][j], W[j][i]))
+            {
+                isSymmetric = false;
+                break;           
+            }
+        }
+        if (!isSymmetric)
+        {
+            break;
+        }
+    }
+    return isSymmetric;
 }
 
-bool hasZeroDiagonal(const double W[][MAXN])
+bool hasZeroDiagonal(const int patternSize, const double W[][MAXN])
 {
+    assert(patternSize < MAXN);
+
     bool hasZD = true;
 
-    for (int i = 0; i < MAXN; i++)
+    for (int i = 0; i < patternSize; i++)
     {
         if (!equals(W[i][i], 0.0))
         {
@@ -49,8 +71,11 @@ void learnW(const int MaxPat, const int patternSize, double W[][MAXN])
     {
         for (int column = row; column < patternSize; column++)
         {
-            W[row][column] = 0.0;
-            if (row != column)
+            if (row == column)
+            {
+                W[row][column] = 0.0;
+            }
+            else
             {
                 for (int Pat = 0; Pat < MaxPat; Pat++)
                 {
@@ -62,6 +87,8 @@ void learnW(const int MaxPat, const int patternSize, double W[][MAXN])
             }
         }
     }
+    assert(hasZeroDiagonal(patternSize, W));
+    assert(isSymmetric(patternSize, W));
 }
 
 int addNoise(const int patternSize, int PatNumber, double Pat[], int Chance)
@@ -99,7 +126,9 @@ int addNoise(const int patternSize, int PatNumber, double Pat[], int Chance)
     return Nnoise;
 }
 
-void calcOut(int patternSize, const double W[][MAXN], const double InPattern[],
+void calcOut(int patternSize, 
+             const double W[][MAXN], 
+             const double InPattern[],
              double OutPattern[])
 {
     for (int outIndex = 0; outIndex < patternSize; outIndex++)
@@ -117,14 +146,15 @@ void copyPattern(const int patternSize,
                  double sourcePattern[],
                  double targetPattern[])
 {
-    for (int index = 0; index < patternSize; index++)
+    for (int i = 0; i < patternSize; i++)
     {
-        targetPattern[index] = sourcePattern[index];
+        targetPattern[i] = sourcePattern[i];
     }
 }
 
 double calcEnergy(const int patternSize,
-                  const double Pattern[], const double W[][MAXN])
+                  const double Pattern[], 
+                  const double W[][MAXN])
 {
     double energy = 0.0;
 

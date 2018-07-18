@@ -9,8 +9,8 @@ extern "C"
 {
 #endif
 
-bool isSymmetric(const double W[][MAXN]);
-bool hasZeroDiagonal(const double W[][MAXN]);
+bool isSymmetric(const int patternSize, const double W[][MAXN]);
+bool hasZeroDiagonal(const int patternSize, const double W[][MAXN]);
 
 void learnW(const int maxPat, const int patSize, double W[][MAXN]);
 
