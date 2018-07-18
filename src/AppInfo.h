@@ -4,10 +4,9 @@
 #define APPNAME "hopfieldann"
 
 #define MAJOR_VERSION "1"
-#define MINOR_VERSION "3"
-#define REVISION_VERSION "5"
+#define MINOR_VERSION "4"
+#define REVISION_VERSION "0"
 #define VERSION MAJOR_VERSION "." MINOR_VERSION "." REVISION_VERSION
 #define APPNAME_VERSION APPNAME " v" VERSION
 
 #endif
-

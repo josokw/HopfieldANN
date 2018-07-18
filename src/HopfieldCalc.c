@@ -1,11 +1,19 @@
 #include "HopfieldCalc.h"
 #include "HopfieldIO.h"
 
+#include <stdbool.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 
-static int Sign(double value)
+#define EPSILON 1e-9
+
+static bool equals(double d1, double d2)
+{
+    return fabs(d1 - d2) < EPSILON;
+}
+
+static int sign(double value)
 {
     return (value >= 0) ? 1 : -1;
 }
@@ -15,11 +23,11 @@ static int Random(int min, int max)
     return min + (rand() % (max - min + 1));
 }
 
-void LearnJ(int MaxPat, int PatSize, double J[][MAXN])
+void learnJ(const int MaxPat, const int patternSize, double J[][MAXN])
 {
-    for (int row = 0; row < PatSize; row++)
+    for (int row = 0; row < patternSize; row++)
     {
-        for (int column = row; column < PatSize; column++)
+        for (int column = row; column < patternSize; column++)
         {
             J[row][column] = 0.0;
             if (row != column)
@@ -28,7 +36,7 @@ void LearnJ(int MaxPat, int PatSize, double J[][MAXN])
                 {
                     J[row][column] += Patterns[Pat][row] *
                                       Patterns[Pat][column] /
-                                      (double)PatSize;
+                                      (double)patternSize;
                     J[column][row] = J[row][column];
                 }
             }
@@ -36,30 +44,28 @@ void LearnJ(int MaxPat, int PatSize, double J[][MAXN])
     }
 }
 
-int AddNoise(int PatSize, int PatNumber, double Pat[], int Chance)
+int addNoise(const int patternSize, int PatNumber, double Pat[], int Chance)
 {
     int n;
     int NoiseIndex;
     int NoiseArray[MAXN] = {0};
     int Nnoise;
 
-    if (Chance < 0)
-        Chance = 0;
-    if (Chance > 75)
-        Chance = 75;
+    if (Chance < 0) Chance = 0;
+    if (Chance > 75) Chance = 75;
 
-    Nnoise = PatSize * Chance / 100;
+    Nnoise = patternSize * Chance / 100;
     n = 0;
     while (n < Nnoise)
     {
-        NoiseIndex = Random(0, PatSize);
+        NoiseIndex = Random(0, patternSize);
         if (NoiseArray[NoiseIndex] == 0)
         {
             NoiseArray[NoiseIndex] = 1;
             n++;
         }
     }
-    for (int index = 0; index < PatSize; index++)
+    for (int index = 0; index < patternSize; index++)
     {
         if (NoiseArray[index] == 1)
         {
@@ -73,39 +79,38 @@ int AddNoise(int PatSize, int PatNumber, double Pat[], int Chance)
     return Nnoise;
 }
 
-void CalcOut(int PatSize, const double J[][MAXN], const double InPattern[],
+void calcOut(int patternSize, const double J[][MAXN], const double InPattern[],
              double OutPattern[])
 {
-    for (int outIndex = 0; outIndex < PatSize; outIndex++)
+    for (int outIndex = 0; outIndex < patternSize; outIndex++)
     {
         double delta = 0.0;
-        for (int inIndex = 0; inIndex < PatSize; inIndex++)
+        for (int inIndex = 0; inIndex < patternSize; inIndex++)
         {
             delta += InPattern[inIndex] * J[outIndex][inIndex];
         }
-        OutPattern[outIndex] = Sign(delta);
+        OutPattern[outIndex] = sign(delta);
     }
 }
 
-void CopyPattern(int PatSize, const double sourcePattern[],
+void copyPattern(const int patternSize, 
+                 double sourcePattern[],
                  double targetPattern[])
 {
-    int index;
-
-    for (index = 0; index < PatSize; index++)
+    for (int index = 0; index < patternSize; index++)
     {
         targetPattern[index] = sourcePattern[index];
     }
 }
 
-double CalcEnergy(int PatSize,
+double calcEnergy(const int patternSize,
                   const double Pattern[], const double J[][MAXN])
 {
     double energy = 0.0;
 
-    for (int i = 0; i < PatSize; i++)
+    for (int i = 0; i < patternSize; i++)
     {
-        for (int j = 0; j < PatSize; j++)
+        for (int j = 0; j < patternSize; j++)
         {
             energy += Pattern[i] * Pattern[j] * J[i][j];
         }
@@ -115,26 +120,26 @@ double CalcEnergy(int PatSize,
     return energy;
 }
 
-void CalcAssociations(int PatSize,
+void calcAssociations(const int patternSize,
                       const double J[][MAXN],
                       const double InputPattern[],
                       const double InputPatternWithNoise[],
                       double AssociationPattern[])
 {
-    double En = 0.0;
+    double energy = 0.0;
     double En_1 = 0.0;
 
     showPatternAndDifference(InputPattern, InputPatternWithNoise);
-    En = CalcEnergy(PatSize, InputPatternWithNoise, J);
-    printf("\n---- Energy: %f\n\n", En);
+    energy = calcEnergy(patternSize, InputPatternWithNoise, J);
+    printf("\n    Energy = %9.4f\n\n", energy);
 
     do
     {
-        En_1 = En;
-        CalcOut(PatSize, J, InputPatternWithNoise, AssociationPattern);
-        En = CalcEnergy(PatSize, AssociationPattern, J);
-        CopyPattern(PatSize, AssociationPattern, InputPatternWithNoise);
+        En_1 = energy;
+        calcOut(patternSize, J, InputPatternWithNoise, AssociationPattern);
+        energy = calcEnergy(patternSize, AssociationPattern, J);
+        copyPattern(patternSize, AssociationPattern, InputPatternWithNoise);
         showPatternAndDifference(InputPattern, AssociationPattern);
-        printf("\n---- Energy: %f\n\n", En);
-    } while (fabs(En_1 - En) > 1e-9);
+        printf("\n    Energy = %9.4f\n\n", energy);
+    } while (!equals(En_1, energy));
 }

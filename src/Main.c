@@ -1,10 +1,3 @@
-/*---------------------------------------------------------------------------*/
-/* Simulation Hopfield ANN                                                   */
-/*                                                                           */
-/* Developed by: Jos Onokiewicz                                              */
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-
 #include "AppInfo.h"
 #include "Hopfield.h"
 #include "HopfieldCalc.h"
@@ -31,15 +24,15 @@ int main(int argc, char *argv[])
 
   if (!(argc == 2 || argc ==3 ))
   {
-    printf("\n\tUSAGE: Hopfield <patterns filename>\n\n");
-    printf("\n\tUSAGE: Hopfield <patterns filename> <noisy patterns filename>\n\n");
+    fprintf(stderr, "\n\tUSAGE: hopfieldann <patterns filename>\n\n");
+    fprintf(stderr, "\n\tUSAGE: hopfieldann <patterns filename> <noisy patterns filename>\n\n");
     exit(EXIT_FAILURE);
   }
 
   srand((unsigned int)time(NULL));
 
-  printf("Hopfield's ANN Simulation: Associative Memory " APPNAME_VERSION "\n\n"
-    "- Patterns file name: %s   loading .... ", argv[1]);
+  printf("Hopfield's ANN associative memory: " APPNAME_VERSION "\n\n"
+         "- Patterns file name: %s   loading .... ", argv[1]);
 
   readFile(argv[1]);
   printf("ready\n"
@@ -47,7 +40,7 @@ int main(int argc, char *argv[])
     nRows, nColumns, patSize, nPatterns);
 
   printf("- Learning patterns by hebbian learning rule .... ");
-  LearnJ(nPatterns, patSize, J);
+  learnJ(nPatterns, patSize, J);
   printf("ready\n");
   printf("- Learning result: connection matrix, size %d x %d\n\n", 
          nRows*nColumns, nRows*nColumns);
@@ -78,7 +71,7 @@ int main(int argc, char *argv[])
         "- Number of neurons: %d * %d = %d, number of patterns: %d\n\n",
         nRows, nColumns, patSize, nPatterns);
       printf("- Learning patterns by hebbian learning rule .... ");
-      LearnJ(nPatterns, patSize, J);
+      learnJ(nPatterns, patSize, J);
       printf("ready\n\n");
       printf("- Learning result: 1 connection matrix, size %d x %d\n\n", 
              nRows * nColumns, nRows * nColumns);
@@ -101,16 +94,16 @@ int main(int argc, char *argv[])
         indexPattern--;
         showIndexedPattern(indexPattern);
         puts("");
-        CopyPattern(patSize, Patterns[indexPattern], InputPattern);
-        CopyPattern(patSize, Patterns[indexPattern], InputPatternWithNoise);
+        copyPattern(patSize, Patterns[indexPattern], InputPattern);
+        copyPattern(patSize, Patterns[indexPattern], InputPatternWithNoise);
         printf("- Noise [%%]: ");
         scanf(" %d", &Noise);
         
-        AddNoise(patSize, indexPattern, InputPatternWithNoise, Noise);
+        addNoise(patSize, indexPattern, InputPatternWithNoise, Noise);
         /* printf("- Pattern as vector:\n\n"); */
         /* showPatternAsVector(InputPatternWithNoise); */
         printf("\n\n- Pattern as 2D image and noisy pixels:\n\n");
-        CalcAssociations(patSize, J, InputPattern, InputPatternWithNoise, OutputPattern);
+        calcAssociations(patSize, J, InputPattern, InputPatternWithNoise, OutputPattern);
         puts("");
         break;
       case 3:
@@ -126,11 +119,11 @@ int main(int argc, char *argv[])
         indexPattern--;
         showIndexedNoisyPattern(indexPattern);
         puts("");
-        CopyPattern(patSize, NoisyPatterns[indexPattern], InputPattern);
+        copyPattern(patSize, NoisyPatterns[indexPattern], InputPattern);
         /* printf("- Pattern as vector:\n\n"); */
         /* showPatternAsVector(InputPattern); */
         printf("\n\n- Pattern as 2D image:\n\n");
-        CalcAssociations(patSize, J, InputPattern, InputPattern, OutputPattern);
+        calcAssociations(patSize, J, InputPattern, InputPattern, OutputPattern);
         puts("");
         break;
       default:

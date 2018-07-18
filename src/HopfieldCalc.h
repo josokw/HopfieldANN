@@ -8,23 +8,25 @@ extern "C"
 {
 #endif
 
-    void LearnJ(int MaxPat, int PatSize, double J[][MAXN]);
+void learnJ(const int maxPat, const int patSize, double J[][MAXN]);
 
-    int AddNoise(int PatSize, int PatNumber, double Pat[], int Chance);
+int addNoise(const int PatSize, int PatNumber, double Pat[], int Chance);
 
-    void CalcOut(int PatSize, const double J[][MAXN], const double InPattern[],
-                 double OutPattern[]);
+void calcOut(const int PatSize, const double J[][MAXN],
+             const double InPattern[],
+             double OutPattern[]);
 
-    void CopyPattern(int PatSize, const double sourcePattern[],
-                     double targetPattern[]);
+void copyPattern(const int patternSize, double sourcePattern[],
+                 double targetPattern[]);
 
-    double CalcEnergy(int PatSize, const double Pattern[], const double J[][MAXN]);
+double calcEnergy(const int patternSize, const double Pattern[],
+                  const double J[][MAXN]);
 
-    void CalcAssociations(int Patsize,
-                          const double J[][MAXN],
-                          const double InputPattern[],
-                          const double InputPatternWithNoise[],
-                          double AssociationPattern[]);
+void calcAssociations(const int patternSize,
+                      const double J[][MAXN],
+                      const double InputPattern[],
+                      const double InputPatternWithNoise[],
+                      double AssociationPattern[]);
 
 #ifdef __cplusplus
 }
