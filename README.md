@@ -12,9 +12,9 @@ are determined by the Hebb's learning rule (1949). It is often summarized
 as "Neurons that fire together, wire together. Neurons that fire out of
 sync, fail to link".
 
-Maximum associative memory capacity: 0.14 * number of neurons.
-If 120 neurons are available the maximum associative memory capacity equals
-16 patterns. 
+Maximum associative memory capacity: Pmax = 0.14 * number of neurons.
+Above this maximum the network is no longer capable to work as an associative memory. 
+If 120 neurons are available the Pmax equals 16 patterns. 
 
 ## Input format
 
