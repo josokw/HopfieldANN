@@ -2,6 +2,27 @@
 
 [![Build Status](https://travis-ci.org/josokw/HopfieldANN.svg?branch=master)](https://travis-ci.org/josokw/HopfieldANN)
 
+## Building
+
+The application does not use dynamic memory allocation.
+
+Use *CMake* and *make* to build the application:
+
+    mkdir build
+    cd build
+    cmake ..
+    make
+
+The excutable can be found in the *bin* directory.
+
+## Executing
+
+If the *build* directory is the current directory:
+
+    ../bin/hopfieldann ../data/hopf02.dat
+
+## Hopfield recurrent artificial neural network
+
 A Hopfield network is a recurrent artificial neural network (ANN) and was
 invented by John Hopfield in 1982. A Hopfield network is a one layered
 network.
@@ -13,12 +34,14 @@ as "Neurons that fire together, wire together. Neurons that fire out of
 sync, fail to link".
 
 Maximum associative memory capacity: Pmax = 0.14 * number of neurons.
-Above this maximum the network is no longer capable to work as an associative memory. 
-If 120 neurons are available the Pmax equals 16 patterns. 
+Above this maximum the network is no longer capable to work as an associative 
+memory. 
+If 120 neurons are available the Pmax equals 16 patterns that can stored 
+and retrieved.
 
-## Input format
+## Input for learning patterns
 
-Example plain ASCII input file:
+Example input format plain ASCII input file:
 
 - binary pattern 4 black-and-white images 10 x 12
 - . black pixel
@@ -78,29 +101,10 @@ Hebbian learning rule in the same symmetric connection matrix W.
 Because the neurons are not connected to itself the matrix W has a zero
 valued diagonal.
 
-## Building
+## Output pattern recognition
 
-The application does not use dynamic memory allocation.
-
-Use *CMake* and *make* to build the application:
-
-    mkdir build
-    cd build
-    cmake ..
-    make
-
-The excutable can be found in the *bin* directory.
-
-## Executing
-
-If the *build* directory is the current directory:
-
-    ../bin/hopfieldann ../data/hopf02.dat
-
-## Output
-
-The application shows the recovering from a distorted known input pattern to the
-trained state that is most similar to that input.
+The application shows the recovering from a distorted known input pattern 
+to the trained state that is most similar to that input.
 Hopfield networks have a scalar value associated with each state of the
 network, referred to as the "energy" of the network.
 Repeated updating of the network by using the output as an input, will
