@@ -71,7 +71,7 @@ pixel) in plain ASCII text:
 Building
 --------
 
-Use *CMake* and *make* to build the application in the build directory:
+Use *CMake* and *make* to build the application in the *build* directory:
 
     mkdir build
     cd build
@@ -81,7 +81,7 @@ Use *CMake* and *make* to build the application in the build directory:
 Executing
 ---------
 
-If you are in the build directory:
+Go to the bin directory:
 
     ./hopfieldann ../data/hopf02.dat
 
@@ -96,7 +96,7 @@ output as an input, will eventually converge to a state which is a local
 minimum in the energy function. The weight factors are stored in a
 connection matrix.
 
-    Hopfield's ANN Simulation: Associative Memory HopfieldNN v1.3.4
+    Hopfield's ANN associative memory: hopfieldann v1.4.0
 
     - Patterns file name: ../data/hopf02.dat   loading .... ready
     - Number of neurons: 10 * 12 = 120, number of patterns: 4
@@ -118,20 +118,21 @@ connection matrix.
 
     - Noise [%]: 30
 
+
     - Pattern as 2D image and noisy pixels:
 
-    *..**.*.**.*     ##  # #   #
-    .**.....*...            #
-    ..**...**...           ##
-    ...**..*....           #
-    ...*.**.**..        ### ##
-    ..**..*.**.*          # ## #
-    .***..******       #  ######
-    **.***.**...      #   #  #
-    .***....*...     ###    #
-    ..*..*...**.      #  #   ##
+    ******.*.*..          # #
+    .****.......       ##
+    *****...*..*    ##  #   #  #
+    *..**.*..*..    #     #  #
+    .***.*..*.*.     ## ##  # #
+    .****...*.**     #  #   # ##
+    .**.....*..*            #  #
+    .*******..*.    #       ###
+    ..****.*.*.*      #### # # #
+    ............
 
-    ---- Energy: -10.083333
+        Energy =   -8.6167
 
     **********..
     .**.........
@@ -144,7 +145,7 @@ connection matrix.
     ............
     ............
 
-    ---- Energy: -77.016667
+        Energy =  -77.0167
 
     **********..
     .**.........
@@ -157,6 +158,7 @@ connection matrix.
     ............
     ............
 
-    ---- Energy: -77.016667
+        Energy =  -77.0167
+
 
     - E(xit), L(oad new patterns data file), N(ext simulation) .....
