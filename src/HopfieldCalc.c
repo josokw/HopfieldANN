@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define EPSILON 1e-9
+static const double EPSILON = 1e-8;
 
 static bool equals(double d1, double d2)
 {
@@ -23,21 +23,41 @@ static int Random(int min, int max)
     return min + (rand() % (max - min + 1));
 }
 
-void learnJ(const int MaxPat, const int patternSize, double J[][MAXN])
+bool isSymmetric(const double W[][MAXN])
+{
+    return true;
+}
+
+bool hasZeroDiagonal(const double W[][MAXN])
+{
+    bool hasZD = true;
+
+    for (int i = 0; i < MAXN; i++)
+    {
+        if (!equals(W[i][i], 0.0))
+        {
+            hasZD = false;
+            break;
+        }
+    }
+    return hasZD;
+}
+
+void learnW(const int MaxPat, const int patternSize, double W[][MAXN])
 {
     for (int row = 0; row < patternSize; row++)
     {
         for (int column = row; column < patternSize; column++)
         {
-            J[row][column] = 0.0;
+            W[row][column] = 0.0;
             if (row != column)
             {
                 for (int Pat = 0; Pat < MaxPat; Pat++)
                 {
-                    J[row][column] += Patterns[Pat][row] *
+                    W[row][column] += Patterns[Pat][row] *
                                       Patterns[Pat][column] /
                                       (double)patternSize;
-                    J[column][row] = J[row][column];
+                    W[column][row] = W[row][column];
                 }
             }
         }
@@ -79,7 +99,7 @@ int addNoise(const int patternSize, int PatNumber, double Pat[], int Chance)
     return Nnoise;
 }
 
-void calcOut(int patternSize, const double J[][MAXN], const double InPattern[],
+void calcOut(int patternSize, const double W[][MAXN], const double InPattern[],
              double OutPattern[])
 {
     for (int outIndex = 0; outIndex < patternSize; outIndex++)
@@ -87,7 +107,7 @@ void calcOut(int patternSize, const double J[][MAXN], const double InPattern[],
         double delta = 0.0;
         for (int inIndex = 0; inIndex < patternSize; inIndex++)
         {
-            delta += InPattern[inIndex] * J[outIndex][inIndex];
+            delta += InPattern[inIndex] * W[outIndex][inIndex];
         }
         OutPattern[outIndex] = sign(delta);
     }
@@ -104,7 +124,7 @@ void copyPattern(const int patternSize,
 }
 
 double calcEnergy(const int patternSize,
-                  const double Pattern[], const double J[][MAXN])
+                  const double Pattern[], const double W[][MAXN])
 {
     double energy = 0.0;
 
@@ -112,7 +132,7 @@ double calcEnergy(const int patternSize,
     {
         for (int j = 0; j < patternSize; j++)
         {
-            energy += Pattern[i] * Pattern[j] * J[i][j];
+            energy += Pattern[i] * Pattern[j] * W[i][j];
         }
     }
     energy *= -0.5;
@@ -121,7 +141,7 @@ double calcEnergy(const int patternSize,
 }
 
 void calcAssociations(const int patternSize,
-                      const double J[][MAXN],
+                      const double W[][MAXN],
                       const double InputPattern[],
                       const double InputPatternWithNoise[],
                       double AssociationPattern[])
@@ -130,14 +150,14 @@ void calcAssociations(const int patternSize,
     double En_1 = 0.0;
 
     showPatternAndDifference(InputPattern, InputPatternWithNoise);
-    energy = calcEnergy(patternSize, InputPatternWithNoise, J);
+    energy = calcEnergy(patternSize, InputPatternWithNoise, W);
     printf("\n    Energy = %9.4f\n\n", energy);
 
     do
     {
         En_1 = energy;
-        calcOut(patternSize, J, InputPatternWithNoise, AssociationPattern);
-        energy = calcEnergy(patternSize, AssociationPattern, J);
+        calcOut(patternSize, W, InputPatternWithNoise, AssociationPattern);
+        energy = calcEnergy(patternSize, AssociationPattern, W);
         copyPattern(patternSize, AssociationPattern, InputPatternWithNoise);
         showPatternAndDifference(InputPattern, AssociationPattern);
         printf("\n    Energy = %9.4f\n\n", energy);

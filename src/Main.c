@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
   char FileName[MAXFILENAME];
   const char MenuChars[] = "ELNeln";
 
-  if (!(argc == 2 || argc ==3 ))
+  if (!((argc == 2) || (argc == 3)))
   {
     fprintf(stderr, "\n\tUSAGE: hopfieldann <patterns filename>\n\n");
     fprintf(stderr, "\n\tUSAGE: hopfieldann <patterns filename> <noisy patterns filename>\n\n");
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     nRows, nColumns, patSize, nPatterns);
 
   printf("- Learning patterns by hebbian learning rule .... ");
-  learnJ(nPatterns, patSize, J);
+  learnW(nPatterns, patSize, W);
   printf("ready\n");
   printf("- Learning result: connection matrix, size %d x %d\n\n", 
          nRows*nColumns, nRows*nColumns);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         "- Number of neurons: %d * %d = %d, number of patterns: %d\n\n",
         nRows, nColumns, patSize, nPatterns);
       printf("- Learning patterns by hebbian learning rule .... ");
-      learnJ(nPatterns, patSize, J);
+      learnW(nPatterns, patSize, W);
       printf("ready\n\n");
       printf("- Learning result: 1 connection matrix, size %d x %d\n\n", 
              nRows * nColumns, nRows * nColumns);
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
       switch (argc)
       {
       case 2:
-        printf("\n- Choose pattern to disturb by noise, index (1..%d): ", nPatterns);
+        printf("- Choose pattern to disturb by noise, index (1..%d): ", nPatterns);
         scanf(" %d", &indexPattern);
         puts("");
         if (indexPattern < 1 || indexPattern > nPatterns+1)
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
         /* printf("- Pattern as vector:\n\n"); */
         /* showPatternAsVector(InputPatternWithNoise); */
         printf("\n\n- Pattern as 2D image and noisy pixels:\n\n");
-        calcAssociations(patSize, J, InputPattern, InputPatternWithNoise, OutputPattern);
+        calcAssociations(patSize, W, InputPattern, InputPatternWithNoise, OutputPattern);
         puts("");
         break;
       case 3:
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
         /* printf("- Pattern as vector:\n\n"); */
         /* showPatternAsVector(InputPattern); */
         printf("\n\n- Pattern as 2D image:\n\n");
-        calcAssociations(patSize, J, InputPattern, InputPattern, OutputPattern);
+        calcAssociations(patSize, W, InputPattern, InputPattern, OutputPattern);
         puts("");
         break;
       default:

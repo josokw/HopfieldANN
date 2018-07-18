@@ -12,6 +12,6 @@
 
 extern double Patterns[][MAXN];
 extern double NoisyPatterns[][MAXN];
-extern double J[][MAXN];
+extern double W[][MAXN];
 
 #endif

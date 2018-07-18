@@ -1,6 +1,4 @@
-/*---------------------------------------------------------------------------*/
-/* Simulation Hopfield ANN                                                   */
-/*---------------------------------------------------------------------------*/
+// Simulation Hopfield ANN         
 
 #include "HopfieldIO.h"
 #include "Hopfield.h"
@@ -164,29 +162,26 @@ void showIndexedNoisyPattern(int index)
   showPatternAndDifference(NoisyPatterns[index], NoisyPatterns[index]);
 }
 
-void showPattern(const double Pattern[])
+void showPattern(const double pattern[])
 {
-  int nR;
-  int nC;
-
-  for (nR = 0; nR < nRows; nR++)
+  for (int nR = 0; nR < nRows; nR++)
   {
-    for (nC = 0; nC < nColumns; nC++)
+    for (int nC = 0; nC < nColumns; nC++)
     {
-      if (Pattern[nR * nColumns + nC] == +1.0)
+      if (pattern[nR * nColumns + nC] > 0.0)
       {
         printf("*");
       }
       else
       {
-        if (Pattern[nR * nColumns + nC] == -1.0)
+        if (pattern[nR * nColumns + nC] < 0.0)
         {
           printf(".");
         }
         else
         {
           fprintf(stderr, "\n\tERROR: pattern value %+f out of range\n\n", 
-            Pattern[nR * nColumns + nC]);
+                  pattern[nR * nColumns + nC]);
           getchar();	
           exit(EXIT_FAILURE);  
         }
@@ -196,39 +191,40 @@ void showPattern(const double Pattern[])
   }
 }
 
-void showPatternAndDifference(const double Pattern[], const double PatternWithNoise[])
+void showPatternAndDifference(const double pattern[], 
+                              const double patternWithNoise[])
 {
-  int nR;
-  int nC;
+  //int nR;
+  //int nC;
 
-  for (nR = 0; nR < nRows; nR++)
+  for (int nR = 0; nR < nRows; nR++)
   {
-    for (nC = 0; nC < nColumns; nC++)
+    for (int nC = 0; nC < nColumns; nC++)
     {
-      if (PatternWithNoise[nR * nColumns + nC] == +1.0)
+      if (patternWithNoise[nR * nColumns + nC] == +1.0)
       {
         printf("*");
       }
       else
       {
-        if (PatternWithNoise[nR * nColumns + nC] == -1.0)
+                                      
+        if (patternWithNoise[nR * nColumns + nC] == -1.0)
         {
           printf(".");
         }
         else
         {
           fprintf(stderr, "\n\tERROR: pattern value %+f out of range\n\n", 
-            Pattern[nR * nColumns + nC]);
+            pattern[nR * nColumns + nC]);
           getchar();	
           exit(EXIT_FAILURE);  
         }
       }
     }
-
     printf("    ");
-    for (nC = 0; nC < nColumns; nC++)
+    for (int nC = 0; nC < nColumns; nC++)
     {
-      if (PatternWithNoise[nR * nColumns + nC] == Pattern[nR * nColumns + nC])
+      if (patternWithNoise[nR * nColumns + nC] == pattern[nR * nColumns + nC])
       {
         printf(" ");
       }
@@ -241,25 +237,25 @@ void showPatternAndDifference(const double Pattern[], const double PatternWithNo
   } 
 }
 
-void showPatternAsVector(const double Pattern[])
+void showPatternAsVector(const double pattern[])
 {
   int n;
 
   for (n = 0; n < nRows * nColumns; n++)
   {
-    if (Pattern[n] == +1.0)
+    if (pattern[n] == +1.0)
     {
       printf("*");
     }
     else
     {
-      if (Pattern[n] == -1.0)
+      if (pattern[n] == -1.0)
       {
         printf(".");
       }
       else
       {
-        fprintf(stderr, "\n\tERROR: pattern value %+f out of range\n\n", Pattern[n]);
+        fprintf(stderr, "\n\tERROR: pattern value %+f out of range\n\n", pattern[n]);
         getchar();	
         exit(EXIT_FAILURE);  
       }

@@ -2,5 +2,5 @@
 
 double Patterns[MAXP][MAXN];
 double NoisyPatterns[MAXP][MAXN];
-/* Symmetric, zero-diagonal connection matrix */
-double J[MAXN][MAXN];
+// Weight connection matrix: is symmetric and has zero-diagonal.
+double W[MAXN][MAXN];

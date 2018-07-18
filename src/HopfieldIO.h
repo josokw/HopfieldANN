@@ -17,11 +17,14 @@ extern "C" {
 
 void readFile(const char fileName[]);
 void readNoisyFile(const char fileName[]);
+
 void showIndexedPattern(int index);
 void showIndexedNoisyPattern(int index);
-void showPattern(const double Pattern[]);
-void showPatternAndDifference(const double Pattern[], const double PatternWithNoise[]);
-void showPatternAsVector(const double Pattern[]);
+
+void showPattern(const double pattern[]);
+void showPatternAndDifference(const double pattern[], 
+                              const double patternWithNoise[]);
+void showPatternAsVector(const double pattern[]);
 
 #ifdef __cplusplus
 }
