@@ -64,14 +64,14 @@ int storageCapacity(const int patternSize)
    return 0.14 * patternSize;
 }
 
-void learnW(const int MaxPat, const int patternSize, double W[][MAXN])
+void learnW(const int nPatterns, const int patternSize, double W[][MAXN])
 {
    for (int row = 0; row < patternSize; row++) {
       for (int column = row; column < patternSize; column++) {
          if (row == column) {
             W[row][column] = 0.0;
          } else {
-            for (int pat = 0; pat < MaxPat; pat++) {
+            for (int pat = 0; pat < nPatterns; pat++) {
                W[row][column] += Patterns[pat][row] *
                                  Patterns[pat][column] /
                                  (double)patternSize;

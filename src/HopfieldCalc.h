@@ -12,7 +12,7 @@ bool isSymmetric(const int patternSize, const double W[][MAXN]);
 bool hasZeroDiagonal(const int patternSize, const double W[][MAXN]);
 int storageCapacity(const int patternSize);
 
-void learnW(const int maxPat, const int patternSize, double W[][MAXN]);
+void learnW(const int nPatterns, const int patternSize, double W[][MAXN]);
 
 int addNoise(const int patternSize, int PatNumber, double Pat[],
              int Chance);
