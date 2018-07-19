@@ -39,6 +39,9 @@ memory.
 If 120 neurons are available the Pmax equals 16 patterns that can stored 
 and retrieved.
 
+More detailed information:
+[Hopfield Wikipedia](https://en.wikipedia.org/wiki/Hopfield_network).
+
 ## Input for learning patterns
 
 Example input format plain ASCII input file:
