@@ -5,6 +5,8 @@
 ## Building
 
 The application does not use dynamic memory allocation.
+The maximum number of neurons and the maximum number of input learning patterns
+can be configured in C file *HopfieldConfig.h*.
 
 Use *CMake* and *make* to build the application:
 
