@@ -24,9 +24,9 @@ static int Random(int min, int max)
    return min + (rand() % (max - min + 1));
 }
 
-bool isSymmetric(const int patternSize, const double W[][MAXN])
+bool isSymmetric(const int patternSize, const double W[][NMAX_NEURONS])
 {
-   assert(patternSize < MAXN);
+   assert(patternSize < NMAX_NEURONS);
 
    bool isSymmetric = true;
 
@@ -44,9 +44,9 @@ bool isSymmetric(const int patternSize, const double W[][MAXN])
    return isSymmetric;
 }
 
-bool hasZeroDiagonal(const int patternSize, const double W[][MAXN])
+bool hasZeroDiagonal(const int patternSize, const double W[][NMAX_NEURONS])
 {
-   assert(patternSize < MAXN);
+   assert(patternSize < NMAX_NEURONS);
 
    bool hasZD = true;
 
@@ -64,13 +64,14 @@ int storageCapacity(const int patternSize)
    return 0.14 * patternSize;
 }
 
-void learnW(const int nPatterns, const int patternSize, double W[][MAXN])
+void learnW(const int nPatterns, const int patternSize, double W[][NMAX_NEURONS])
 {
    for (int row = 0; row < patternSize; row++) {
       for (int column = row; column < patternSize; column++) {
          if (row == column) {
             W[row][column] = 0.0;
-         } else {
+         }
+         else {
             for (int pat = 0; pat < nPatterns; pat++) {
                W[row][column] += Patterns[pat][row] *
                                  Patterns[pat][column] /
@@ -89,7 +90,7 @@ int addNoise(const int patternSize, int PatNumber, double pat[],
 {
    int n;
    int NoiseIndex;
-   int NoiseArray[MAXN] = {0};
+   int NoiseArray[NMAX_NEURONS] = {0};
    int Nnoise;
 
    if (Chance < 0)
@@ -109,14 +110,15 @@ int addNoise(const int patternSize, int PatNumber, double pat[],
    for (int index = 0; index < patternSize; index++) {
       if (NoiseArray[index] == 1) {
          pat[index] = -Patterns[PatNumber][index];
-      } else {
+      }
+      else {
          pat[index] = Patterns[PatNumber][index];
       }
    }
    return Nnoise;
 }
 
-void calcOut(int patternSize, const double W[][MAXN],
+void calcOut(int patternSize, const double W[][NMAX_NEURONS],
              const double inputPattern[], double outputPattern[])
 {
    for (int outIndex = 0; outIndex < patternSize; outIndex++) {
@@ -137,7 +139,7 @@ void copyPattern(const int patternSize, double sourcePattern[],
 }
 
 double calcEnergy(const int patternSize, const double pattern[],
-                  const double W[][MAXN])
+                  const double W[][NMAX_NEURONS])
 {
    double energy = 0.0;
 
@@ -151,7 +153,7 @@ double calcEnergy(const int patternSize, const double pattern[],
    return energy;
 }
 
-void calcAssociations(const int patternSize, const double W[][MAXN],
+void calcAssociations(const int patternSize, const double W[][NMAX_NEURONS],
                       const double inputPattern[],
                       const double inputPatternWithNoise[],
                       double associationPattern[])

@@ -1,6 +1,6 @@
 #include "Hopfield.h"
 
-double Patterns[MAXP][MAXN] = {0.0};
-double NoisyPatterns[MAXP][MAXN] = {0.0};
+double Patterns[NMAX_PATTERNS][NMAX_NEURONS] = {0.0};
+double NoisyPatterns[NMAX_PATTERNS][NMAX_NEURONS] = {0.0};
 // Weight connection matrix: is symmetric and has zero-diagonal.
-double W[MAXN][MAXN] = {0.0};
+double W[NMAX_NEURONS][NMAX_NEURONS] = {0.0};

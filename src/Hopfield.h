@@ -3,8 +3,8 @@
 
 #include "HopfieldConfig.h"
 
-extern double Patterns[][MAXN];
-extern double NoisyPatterns[][MAXN];
-extern double W[][MAXN];
+extern double Patterns[][NMAX_NEURONS];
+extern double NoisyPatterns[][NMAX_NEURONS];
+extern double W[][NMAX_NEURONS];
 
 #endif

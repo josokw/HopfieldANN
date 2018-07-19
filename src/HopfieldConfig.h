@@ -2,8 +2,8 @@
 #define HOPFIELDCONFIG_H
 
 /* Max number of neurons */
-#define MAXN 1000
+#define NMAX_NEURONS 1000
 /* Max number of patterns */
-#define MAXP 25
+#define NMAX_PATTERNS 25
 
 #endif

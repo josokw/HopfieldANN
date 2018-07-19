@@ -17,8 +17,6 @@ int nNoisyPatterns = 0;
 
 void readFile(const char fileName[])
 {
-   char line[MAXN] = {'\0'};
-
    hfDataFile = fopen(fileName, "r");
    if (hfDataFile == NULL) {
       fprintf(stderr, "\n\n\tERROR: file '%s' can not be opened\n\n",
@@ -35,25 +33,30 @@ void readFile(const char fileName[])
    }
    patSize = nColumns * nRows;
 
-   if (patSize > MAXN) {
+   if (patSize > NMAX_NEURONS) {
       fprintf(stderr, "\n\tERROR: size input vector must be < %d\n\n",
-              MAXN);
+              NMAX_NEURONS);
       getchar();
       exit(EXIT_FAILURE);
    }
 
+   // Line has maximum size if pattern is flat: height = 1
+   char line[NMAX_NEURONS + 1] = {'\0'};
+
    for (int nP = 0; nP < nPatterns; nP++) {
       for (int nR = 0; nR < nRows; nR++) {
-         if (fgets(line, MAXN, hfDataFile) != NULL) {
+         if (fgets(line, NMAX_NEURONS, hfDataFile) != NULL) {
             if (line[0] != '\n' && line[0] != '\r') {
                for (int nC = 0; nC < nColumns; nC++) {
                   if (line[nC] == '*') {
                      Patterns[nP][nR * nColumns + nC] = 1;
-                  } else {
+                  }
+                  else {
                      Patterns[nP][nR * nColumns + nC] = -1;
                   }
                }
-            } else {
+            }
+            else {
                nR--;
             }
          }
@@ -74,7 +77,7 @@ void showIndexedPattern(int index)
 
 void readNoisyFile(const char fileName[])
 {
-   char line[MAXN] = {'\0'};
+   char line[NMAX_NEURONS] = {'\0'};
    int nR = 0;
    int nC = 0;
    int nP = 0;
@@ -95,7 +98,7 @@ void readNoisyFile(const char fileName[])
       getchar();
       exit(EXIT_FAILURE);
    }
-   
+
    if (nRows != nNoisyRows || nColumns != nNoisyColumns) {
       fprintf(stderr, "\n\n\tERROR: format error in file '%s'\n\n",
               fileName);
@@ -103,25 +106,27 @@ void readNoisyFile(const char fileName[])
       exit(EXIT_FAILURE);
    }
 
-   if (patSize > MAXN) {
+   if (patSize > NMAX_NEURONS) {
       fprintf(stderr, "\n\tERROR: size input vector must be < %d\n\n",
-              MAXN);
+              NMAX_NEURONS);
       getchar();
       exit(EXIT_FAILURE);
    }
 
    for (nP = 0; nP < nPatterns; nP++) {
       for (nR = 0; nR < nRows; nR++) {
-         if (fgets(line, MAXN, hfDataFile) != NULL) {
+         if (fgets(line, NMAX_NEURONS, hfDataFile) != NULL) {
             if (line[0] != '\n' && line[0] != '\r') {
                for (nC = 0; nC < nColumns; nC++) {
                   if (line[nC] == '*') {
                      NoisyPatterns[nP][nR * nColumns + nC] = 1;
-                  } else {
+                  }
+                  else {
                      NoisyPatterns[nP][nR * nColumns + nC] = -1;
                   }
                }
-            } else {
+            }
+            else {
                nR--;
             }
          }
@@ -147,10 +152,12 @@ void showPattern(const double pattern[])
       for (int nC = 0; nC < nColumns; nC++) {
          if (pattern[nR * nColumns + nC] > 0.0) {
             printf("*");
-         } else {
+         }
+         else {
             if (pattern[nR * nColumns + nC] < 0.0) {
                printf(".");
-            } else {
+            }
+            else {
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
                        pattern[nR * nColumns + nC]);
@@ -170,10 +177,12 @@ void showPatternAndDifference(const double pattern[],
       for (int nC = 0; nC < nColumns; nC++) {
          if (patternWithNoise[nR * nColumns + nC] == +1.0) {
             printf("*");
-         } else {
+         }
+         else {
             if (patternWithNoise[nR * nColumns + nC] == -1.0) {
                printf(".");
-            } else {
+            }
+            else {
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
                        pattern[nR * nColumns + nC]);
@@ -187,7 +196,8 @@ void showPatternAndDifference(const double pattern[],
          if (patternWithNoise[nR * nColumns + nC] ==
              pattern[nR * nColumns + nC]) {
             printf(" ");
-         } else {
+         }
+         else {
             printf("#");
          }
       }
@@ -202,10 +212,12 @@ void showPatternAsVector(const double pattern[])
    for (n = 0; n < nRows * nColumns; n++) {
       if (pattern[n] == +1.0) {
          printf("*");
-      } else {
+      }
+      else {
          if (pattern[n] == -1.0) {
             printf(".");
-         } else {
+         }
+         else {
             fprintf(stderr,
                     "\n\tERROR: pattern value %+f out of range\n\n",
                     pattern[n]);

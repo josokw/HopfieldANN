@@ -12,9 +12,9 @@
 
 int main(int argc, char *argv[])
 {
-   double InputPattern[MAXN] = {0};
-   double InputPatternWithNoise[MAXN] = {0};
-   double OutputPattern[MAXN] = {0};
+   double InputPattern[NMAX_NEURONS] = {0};
+   double InputPatternWithNoise[NMAX_NEURONS] = {0};
+   double OutputPattern[NMAX_NEURONS] = {0};
    // double En = 0.0;
    int Noise = 0;
    int indexPattern;
@@ -165,7 +165,8 @@ int main(int argc, char *argv[])
          printf(
             "- E(xit), L(oad new patterns data file), N(ext simulation) "
             "..... ");
-      } else {
+      }
+      else {
          printf("- E(xit), N(ext simulation) ..... ");
       }
       Menu = getchar();
