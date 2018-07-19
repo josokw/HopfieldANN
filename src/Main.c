@@ -39,6 +39,12 @@ int main(int argc, char *argv[])
     "- Number of neurons: %d * %d = %d, number of patterns: %d\n",
     nRows, nColumns, patSize, nPatterns);
 
+  int stCapacity = storageCapacity(patSize);
+  if (stCapacity < nPatterns)
+  {
+    fprintf(stderr, "- Warning: associative storage capacity %d exceeded\n", stCapacity);
+  }
+
   printf("- Learning patterns by hebbian learning rule .... ");
   learnW(nPatterns, patSize, W);
   printf("ready\n");
@@ -70,6 +76,13 @@ int main(int argc, char *argv[])
       printf("ready\n\n"
         "- Number of neurons: %d * %d = %d, number of patterns: %d\n\n",
         nRows, nColumns, patSize, nPatterns);
+
+      int stCapacity = storageCapacity(patSize);
+      if (stCapacity < nPatterns)
+      {
+         fprintf(stderr, "- Warning: associative storage capacity %d exceeded\n", stCapacity);
+      }
+
       printf("- Learning patterns by hebbian learning rule .... ");
       learnW(nPatterns, patSize, W);
       printf("ready\n\n");
@@ -127,7 +140,7 @@ int main(int argc, char *argv[])
         puts("");
         break;
       default:
-        printf("\n\tSYSTEM ERROR: this should never happen!\n\n");
+        fprintf(stderr, "\n\tSYSTEM ERROR: this should never happen!\n\n");
         getchar();
         exit(EXIT_FAILURE);
       }

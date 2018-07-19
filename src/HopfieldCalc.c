@@ -65,6 +65,11 @@ bool hasZeroDiagonal(const int patternSize, const double W[][MAXN])
     return hasZD;
 }
 
+int storageCapacity(const int patternSize)
+{
+    return 0.14 * patternSize;
+}
+
 void learnW(const int MaxPat, const int patternSize, double W[][MAXN])
 {
     for (int row = 0; row < patternSize; row++)

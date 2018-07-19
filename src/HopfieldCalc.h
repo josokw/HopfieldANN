@@ -11,6 +11,7 @@ extern "C"
 
 bool isSymmetric(const int patternSize, const double W[][MAXN]);
 bool hasZeroDiagonal(const int patternSize, const double W[][MAXN]);
+int storageCapacity(const int patternSize);
 
 void learnW(const int maxPat, const int patSize, double W[][MAXN]);
 
