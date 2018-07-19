@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------*/
-/* Simulation Hopfield ANN                                                   */
+/* Simulation Hopfield ANN */
 /*---------------------------------------------------------------------------*/
 
 #ifndef HOPFIELDIO_H
@@ -22,7 +22,7 @@ void showIndexedPattern(int index);
 void showIndexedNoisyPattern(int index);
 
 void showPattern(const double pattern[]);
-void showPatternAndDifference(const double pattern[], 
+void showPatternAndDifference(const double pattern[],
                               const double patternWithNoise[]);
 void showPatternAsVector(const double pattern[]);
 
