@@ -71,9 +71,9 @@ void learnW(const int MaxPat, const int patternSize, double W[][MAXN])
          if (row == column) {
             W[row][column] = 0.0;
          } else {
-            for (int Pat = 0; Pat < MaxPat; Pat++) {
-               W[row][column] += Patterns[Pat][row] *
-                                 Patterns[Pat][column] /
+            for (int pat = 0; pat < MaxPat; pat++) {
+               W[row][column] += Patterns[pat][row] *
+                                 Patterns[pat][column] /
                                  (double)patternSize;
                W[column][row] = W[row][column];
             }
@@ -84,7 +84,7 @@ void learnW(const int MaxPat, const int patternSize, double W[][MAXN])
    assert(isSymmetric(patternSize, W));
 }
 
-int addNoise(const int patternSize, int PatNumber, double Pat[],
+int addNoise(const int patternSize, int PatNumber, double pat[],
              int Chance)
 {
    int n;
@@ -108,23 +108,23 @@ int addNoise(const int patternSize, int PatNumber, double Pat[],
    }
    for (int index = 0; index < patternSize; index++) {
       if (NoiseArray[index] == 1) {
-         Pat[index] = -Patterns[PatNumber][index];
+         pat[index] = -Patterns[PatNumber][index];
       } else {
-         Pat[index] = Patterns[PatNumber][index];
+         pat[index] = Patterns[PatNumber][index];
       }
    }
    return Nnoise;
 }
 
 void calcOut(int patternSize, const double W[][MAXN],
-             const double InPattern[], double OutPattern[])
+             const double inputPattern[], double outputPattern[])
 {
    for (int outIndex = 0; outIndex < patternSize; outIndex++) {
       double delta = 0.0;
       for (int inIndex = 0; inIndex < patternSize; inIndex++) {
-         delta += InPattern[inIndex] * W[outIndex][inIndex];
+         delta += inputPattern[inIndex] * W[outIndex][inIndex];
       }
-      OutPattern[outIndex] = sign(delta);
+      outputPattern[outIndex] = sign(delta);
    }
 }
 
@@ -136,14 +136,14 @@ void copyPattern(const int patternSize, double sourcePattern[],
    }
 }
 
-double calcEnergy(const int patternSize, const double Pattern[],
+double calcEnergy(const int patternSize, const double pattern[],
                   const double W[][MAXN])
 {
    double energy = 0.0;
 
    for (int i = 0; i < patternSize; i++) {
       for (int j = 0; j < patternSize; j++) {
-         energy += Pattern[i] * Pattern[j] * W[i][j];
+         energy += pattern[i] * pattern[j] * W[i][j];
       }
    }
    energy *= -0.5;
@@ -152,23 +152,23 @@ double calcEnergy(const int patternSize, const double Pattern[],
 }
 
 void calcAssociations(const int patternSize, const double W[][MAXN],
-                      const double InputPattern[],
-                      const double InputPatternWithNoise[],
-                      double AssociationPattern[])
+                      const double inputPattern[],
+                      const double inputPatternWithNoise[],
+                      double associationPattern[])
 {
    double energy = 0.0;
-   double En_1 = 0.0;
+   double energyPrevious = 0.0;
 
-   showPatternAndDifference(InputPattern, InputPatternWithNoise);
-   energy = calcEnergy(patternSize, InputPatternWithNoise, W);
+   showPatternAndDifference(inputPattern, inputPatternWithNoise);
+   energy = calcEnergy(patternSize, inputPatternWithNoise, W);
    printf("\n    Energy = %9.4f\n\n", energy);
 
    do {
-      En_1 = energy;
-      calcOut(patternSize, W, InputPatternWithNoise, AssociationPattern);
-      energy = calcEnergy(patternSize, AssociationPattern, W);
-      copyPattern(patternSize, AssociationPattern, InputPatternWithNoise);
-      showPatternAndDifference(InputPattern, AssociationPattern);
+      energyPrevious = energy;
+      calcOut(patternSize, W, inputPatternWithNoise, associationPattern);
+      energy = calcEnergy(patternSize, associationPattern, W);
+      copyPattern(patternSize, associationPattern, inputPatternWithNoise);
+      showPatternAndDifference(inputPattern, associationPattern);
       printf("\n    Energy = %9.4f\n\n", energy);
-   } while (!equals(En_1, energy));
+   } while (!equals(energyPrevious, energy));
 }
