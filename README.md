@@ -1,27 +1,8 @@
 # Hopfield Artificial Neural Network
 
+The Hopfield application is a text console application implemented in C99.
+
 [![Build Status](https://travis-ci.org/josokw/HopfieldANN.svg?branch=master)](https://travis-ci.org/josokw/HopfieldANN)
-
-## Building
-
-The application does not use dynamic memory allocation.
-The maximum number of neurons and the maximum number of input learning patterns
-can be configured in the C file *HopfieldConfig.h*.
-
-Use *CMake* and *make* to build the application:
-
-    mkdir build
-    cd build
-    cmake ..
-    make
-
-The excutable can be found in the *bin* directory.
-
-## Executing
-
-If the *build* directory is the current directory:
-
-    ../bin/hopfieldann ../data/hopf02.dat
 
 ## Hopfield recurrent artificial neural network
 
@@ -33,18 +14,28 @@ Every neuron is connected to every other neuron except with itself.
 Every connection is represented by a weight factor. These weight factors
 are determined by the Hebb's learning rule (1949). It is often summarized
 as "Neurons that fire together, wire together. Neurons that fire out of
-sync, fail to link".
+sync, fail to link". 
 
-Maximum associative memory capacity: Pmax = 0.14 * number of neurons.
-Above this maximum the network is no longer capable to work as an associative 
-memory. 
-If 120 neurons are available the Pmax equals 16 patterns that can stored 
+These connections are implemented in a symmetric and zero valued diagonal
+matrix W:
+
+    W[i][j] == W[j][i]
+    
+    W[i][i] == 0.0.
+
+Maximum associative memory capacity:
+
+    Pmax = 0.14 * number of neurons
+
+Above this maximum the network is no longer capable to work as an
+associative memory.
+If 120 neurons are available the Pmax equals 16 patterns that can stored
 and retrieved.
 
-More detailed information:
+More detailed information reference:
 [Hopfield Wikipedia](https://en.wikipedia.org/wiki/Hopfield_network).
 
-## Input for learning patterns
+## Example input for learning 4 patterns
 
 Example input format plain ASCII input file:
 
@@ -108,7 +99,7 @@ valued diagonal.
 
 ## Output pattern recognition
 
-The application shows the recovering from a distorted known input pattern 
+The application shows the recovering from a distorted known input pattern
 to the trained state that is most similar to that input.
 Hopfield networks have a scalar value associated with each state of the
 network, referred to as the "energy" of the network.
@@ -189,3 +180,33 @@ Sometimes the associated output can be something we hasn't taught it.
 "Hallucinations" is one of the main problems.
 A Hopfield network can not tell you if the association is an
 "hallucination".
+
+## Building: using C99, CMake and make
+
+The application does not use dynamic memory allocation.
+The maximum number of neurons and the maximum number of input learning
+patterns can be configured in the C file *HopfieldConfig.h*.
+
+Use *CMake* and *make* to build the application:
+
+    mkdir build
+    cd build
+    cmake ..
+    make
+
+The excutable can be found in the *bin* directory.
+
+## Executing: using an input file containing patterns to learn
+
+Some input file examples can be found in the *data* directory.
+Starting the program without parameters will show the usage help:
+
+    USAGE: hopfieldann <patterns filename>
+
+    USAGE: hopfieldann <patterns filename> <noisy patterns filename>
+
+If the *build* directory is the current directory:
+
+    ../bin/hopfieldann ../data/hopf01.dat
+
+    ../bin/hopfieldann ../data/hopf01.dat ../data/hopf01noisy.dat
