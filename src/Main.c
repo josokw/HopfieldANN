@@ -10,37 +10,32 @@
 
 #define MAXFILENAME 100
 
+void usage(int argc, char *argv[]);
+void clearInput(void);
+
 int main(int argc, char *argv[])
 {
    double InputPattern[NMAX_NEURONS] = {0};
    double InputPatternWithNoise[NMAX_NEURONS] = {0};
    double OutputPattern[NMAX_NEURONS] = {0};
-   // double En = 0.0;
+
    int Noise = 0;
    int indexPattern;
    char Menu = '\0';
    char FileName[MAXFILENAME];
    const char MenuChars[] = "ELNeln";
 
-   if (!((argc == 2) || (argc == 3))) {
-      fprintf(stderr, "\n\tUSAGE: hopfieldann <patterns filename>\n");
-      fprintf(stderr,
-              "\n\tUSAGE: hopfieldann <patterns filename> <noisy patterns "
-              "filename>\n\n");
-      exit(EXIT_FAILURE);
-   }
-
+   usage(argc, argv);
    srand((unsigned int)time(NULL));
 
    printf("Hopfield's ANN associative memory: " APPNAME_VERSION
-          "\n\n"
-          "- Patterns file name: %s   loading .... ",
+          "\n\n- Input patterns file name: %s, loading .... ",
           argv[1]);
 
    readFile(argv[1]);
    printf(
       "ready\n"
-      "- Number of neurons: %d * %d = %d, number of patterns: %d\n",
+      "- Number of neurons: %d * %d = %d, number of patterns = %d\n",
       nRows, nColumns, patSize, nPatterns);
 
    int stCapacity = storageCapacity(patSize);
@@ -50,10 +45,12 @@ int main(int argc, char *argv[])
               stCapacity);
    }
 
-   printf("- Learning patterns by Hebbian learning rule .... ");
+   printf(
+      "- Learning patterns by Hebbian learning rule, "
+      "training starts .... ");
    learnHebbian(nPatterns, patSize, W);
    printf("ready\n");
-   printf("- Learning result: connection matrix, size %d x %d\n\n",
+   printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
           nRows * nColumns, nRows * nColumns);
 
    if (argc == 3) {
@@ -67,12 +64,12 @@ int main(int argc, char *argv[])
    while (Menu != 'E' && Menu != 'e') {
       if (argc == 2 && (Menu == 'L' || Menu == 'l')) {
          fgetc(stdin); /* remove /n previous input */
-         printf("- Patterns file name: ");
+         printf("- Input patterns file name: ");
          fgets(FileName, MAXFILENAME, stdin);
          if (FileName[strlen(FileName) - 1] == '\n') {
             FileName[strlen(FileName) - 1] = '\0'; /* remove /n input */
          }
-         printf("\n- Loading patterns data .... ");
+         printf("\n- Loading input patterns data .... ");
          readFile(FileName);
          printf(
             "ready\n\n"
@@ -115,7 +112,7 @@ int main(int argc, char *argv[])
                copyPattern(patSize, Patterns[indexPattern], InputPattern);
                copyPattern(patSize, Patterns[indexPattern],
                            InputPatternWithNoise);
-               printf("- Noise [%%]: ");
+               printf("- Noise level [%%]: ");
                scanf(" %d", &Noise);
 
                addNoiseToPattern(patSize, indexPattern,
@@ -157,20 +154,36 @@ int main(int argc, char *argv[])
                exit(EXIT_FAILURE);
          }
       }
-      while (getchar() != '\n') {
-         ;
-      }
-      fflush(stdin);
+      clearInput();
       if (argc == 2) {
          printf(
             "- E(xit), L(oad new patterns data file), N(ext simulation) "
-            "..... ");
+            ".... ");
       }
       else {
-         printf("- E(xit), N(ext simulation) ..... ");
+         printf("- E(xit), N(ext simulation) .... ");
       }
       Menu = getchar();
    }
 
    return 0;
+}
+
+void usage(int argc, char *argv[])
+{
+   if (!((argc == 2) || (argc == 3))) {
+      fprintf(stderr,
+              "\n\tUSAGE: hopfieldann <input patterns filename>\n");
+      fprintf(stderr,
+              "\n\tUSAGE: hopfieldann <input patterns filename> "
+              "<noisy patterns filename>\n\n");
+      exit(EXIT_FAILURE);
+   }
+}
+
+void clearInput(void)
+{
+   while (getchar() != '\n') {
+      // empty loop
+   }
 }

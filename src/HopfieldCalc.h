@@ -19,8 +19,10 @@ void learnHebbian(const int nPatterns, const int patternSize,
 int addNoiseToPattern(const int patternSize, int PatNumber,
                       double pattern[], int Chance);
 
-void calcOut(const int patternSize, const double W[][NMAX_NEURONS],
-             const double inputPattern[], double outputPattern[]);
+void calcOutputPattern(const int patternSize,
+                       const double W[][NMAX_NEURONS],
+                       const double inputPattern[],
+                       double outputPattern[]);
 
 void copyPattern(const int patternSize, const double sourcePattern[],
                  double targetPattern[]);
