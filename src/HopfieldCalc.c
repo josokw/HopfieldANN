@@ -128,8 +128,8 @@ void calcOut(int patternSize, const double W[][NMAX_NEURONS],
    }
 }
 
-void copyPattern(const int patternSize, double sourcePattern[],
-                 double targetPattern[])
+void copyPattern(const int patternSize, const double *sourcePattern,
+                 double *targetPattern)
 {
    for (int i = 0; i < patternSize; i++) {
       targetPattern[i] = sourcePattern[i];
@@ -151,42 +151,49 @@ double calcEnergy(const int patternSize, const double pattern[],
    return energy;
 }
 
-void calcAssociatedPattern(const int patternSize,
+double calcAssociatedPattern(const int patternSize,
                            const double W[][NMAX_NEURONS],
                            const double inputPattern[],
                            double associatedPattern[])
 {
    double energy = calcEnergy(patternSize, inputPattern, W);
    double energyPrevious = 0.0;
+   double pattern[patternSize];
+
+   copyPattern(patternSize, inputPattern, pattern);
    do {
       energyPrevious = energy;
-      calcOut(patternSize, W, inputPattern, associatedPattern);
+      calcOut(patternSize, W, pattern, associatedPattern);
       energy = calcEnergy(patternSize, associatedPattern, W);
-      copyPattern(patternSize, associatedPattern, inputPattern);
+      copyPattern(patternSize, associatedPattern, pattern);
       printf("\n    Energy = %9.4f\n\n", energy);
    } while (!equals(energyPrevious, energy));
    showPattern(associatedPattern);
+
+   return energy;
 }
 
 void showAssociatedPattern(const int patternSize,
                            const double W[][NMAX_NEURONS],
                            const double inputPattern[],
                            const double inputPatternWithNoise[],
-                           double associationPattern[])
+                           double associatedPattern[])
 {
    double energy = 0.0;
    double energyPrevious = 0.0;
+   double patternWithNoise[patternSize];
 
-   showPatternAndDifference(inputPattern, inputPatternWithNoise);
-   energy = calcEnergy(patternSize, inputPatternWithNoise, W);
+   copyPattern(patternSize, inputPatternWithNoise, patternWithNoise);
+   showPatternAndDifference(inputPattern, patternWithNoise);
+   energy = calcEnergy(patternSize, patternWithNoise, W);
    printf("\n    Energy = %9.4f\n\n", energy);
 
    do {
       energyPrevious = energy;
-      calcOut(patternSize, W, inputPatternWithNoise, associationPattern);
-      energy = calcEnergy(patternSize, associationPattern, W);
-      copyPattern(patternSize, associationPattern, inputPatternWithNoise);
-      showPatternAndDifference(inputPattern, associationPattern);
+      calcOut(patternSize, W, patternWithNoise, associatedPattern);
+      energy = calcEnergy(patternSize, associatedPattern, W);
+      copyPattern(patternSize, associatedPattern, patternWithNoise);
+      showPatternAndDifference(inputPattern, associatedPattern);
       printf("\n    Energy = %9.4f\n\n", energy);
    } while (!equals(energyPrevious, energy));
 }

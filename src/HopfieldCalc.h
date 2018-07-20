@@ -22,16 +22,16 @@ int addNoiseToPattern(const int patternSize, int PatNumber,
 void calcOut(const int patternSize, const double W[][NMAX_NEURONS],
              const double inputPattern[], double outputPattern[]);
 
-void copyPattern(const int patternSize, double sourcePattern[],
+void copyPattern(const int patternSize, const double sourcePattern[],
                  double targetPattern[]);
 
 double calcEnergy(const int patternSize, const double pattern[],
                   const double W[][NMAX_NEURONS]);
 
-void calcAssociatedPattern(const int patternSize,
-                           const double W[][NMAX_NEURONS],
-                           const double inputPattern[],
-                           double associatedPattern[]);
+double calcAssociatedPattern(const int patternSize,
+                             const double W[][NMAX_NEURONS],
+                             const double inputPattern[],
+                             double associatedPattern[]);
 
 void showAssociatedPattern(const int patternSize,
                            const double W[][NMAX_NEURONS],
