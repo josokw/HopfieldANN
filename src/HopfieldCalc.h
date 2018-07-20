@@ -28,11 +28,16 @@ void copyPattern(const int patternSize, double sourcePattern[],
 double calcEnergy(const int patternSize, const double pattern[],
                   const double W[][NMAX_NEURONS]);
 
-void calcAssociations(const int patternSize,
-                      const double W[][NMAX_NEURONS],
-                      const double inputPattern[],
-                      const double inputPatternWithNoise[],
-                      double associationPattern[]);
+void calcAssociatedPattern(const int patternSize,
+                           const double W[][NMAX_NEURONS],
+                           const double inputPattern[],
+                           double associatedPattern[]);
+
+void showAssociatedPattern(const int patternSize,
+                           const double W[][NMAX_NEURONS],
+                           const double inputPattern[],
+                           const double inputPatternWithNoise[],
+                           double associatedPattern[]);
 
 #ifdef __cplusplus
 }

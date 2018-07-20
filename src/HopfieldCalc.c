@@ -151,11 +151,28 @@ double calcEnergy(const int patternSize, const double pattern[],
    return energy;
 }
 
-void calcAssociations(const int patternSize,
-                      const double W[][NMAX_NEURONS],
-                      const double inputPattern[],
-                      const double inputPatternWithNoise[],
-                      double associationPattern[])
+void calcAssociatedPattern(const int patternSize,
+                           const double W[][NMAX_NEURONS],
+                           const double inputPattern[],
+                           double associatedPattern[])
+{
+   double energy = calcEnergy(patternSize, inputPattern, W);
+   double energyPrevious = 0.0;
+   do {
+      energyPrevious = energy;
+      calcOut(patternSize, W, inputPattern, associatedPattern);
+      energy = calcEnergy(patternSize, associatedPattern, W);
+      copyPattern(patternSize, associatedPattern, inputPattern);
+      printf("\n    Energy = %9.4f\n\n", energy);
+   } while (!equals(energyPrevious, energy));
+   showPattern(associatedPattern);
+}
+
+void showAssociatedPattern(const int patternSize,
+                           const double W[][NMAX_NEURONS],
+                           const double inputPattern[],
+                           const double inputPatternWithNoise[],
+                           double associationPattern[])
 {
    double energy = 0.0;
    double energyPrevious = 0.0;

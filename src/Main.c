@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
               stCapacity);
    }
 
-   printf("- Learning patterns by hebbian learning rule .... ");
+   printf("- Learning patterns by Hebbian learning rule .... ");
    learnHebbian(nPatterns, patSize, W);
    printf("ready\n");
    printf("- Learning result: connection matrix, size %d x %d\n\n",
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
                stCapacity);
          }
 
-         printf("- Learning patterns by hebbian learning rule .... ");
+         printf("- Learning patterns by Hebbian learning rule .... ");
          learnHebbian(nPatterns, patSize, W);
          printf("ready\n\n");
          printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
                /* printf("- Pattern as vector:\n\n"); */
                /* showPatternAsVector(InputPatternWithNoise); */
                printf("\n\n- Pattern as 2D image and noisy pixels:\n\n");
-               calcAssociations(patSize, W, InputPattern,
-                                InputPatternWithNoise, OutputPattern);
+               showAssociatedPattern(patSize, W, InputPattern,
+                                     InputPatternWithNoise, OutputPattern);
                puts("");
                break;
             case 3:
@@ -146,8 +146,8 @@ int main(int argc, char *argv[])
                /* printf("- Pattern as vector:\n\n"); */
                /* showPatternAsVector(InputPattern); */
                printf("\n\n- Pattern as 2D image:\n\n");
-               calcAssociations(patSize, W, InputPattern, InputPattern,
-                                OutputPattern);
+               showAssociatedPattern(patSize, W, InputPattern,
+                                     InputPattern, OutputPattern);
                puts("");
                break;
             default:
