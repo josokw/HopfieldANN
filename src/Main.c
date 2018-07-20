@@ -118,8 +118,8 @@ int main(int argc, char *argv[])
                printf("- Noise [%%]: ");
                scanf(" %d", &Noise);
 
-               addNoise(patSize, indexPattern, InputPatternWithNoise,
-                        Noise);
+               addNoiseToPattern(patSize, indexPattern,
+                                 InputPatternWithNoise, Noise);
                /* printf("- Pattern as vector:\n\n"); */
                /* showPatternAsVector(InputPatternWithNoise); */
                printf("\n\n- Pattern as 2D image and noisy pixels:\n\n");

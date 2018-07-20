@@ -1,6 +1,7 @@
 # Hopfield Artificial Neural Network
 
-The Hopfield application is a text console application implemented in C99.
+The Hopfield ANN application is a text console application implemented in
+C99.
 
 [![Build Status](https://travis-ci.org/josokw/HopfieldANN.svg?branch=master)](https://travis-ci.org/josokw/HopfieldANN)
 
@@ -14,13 +15,13 @@ Every neuron is connected to every other neuron except with itself.
 Every connection is represented by a weight factor. These weight factors
 are determined by the Hebb's learning rule (1949). It is often summarized
 as "Neurons that fire together, wire together. Neurons that fire out of
-sync, fail to link". 
+sync, fail to link".
 
 These connections are implemented in a symmetric and zero valued diagonal
 matrix W:
 
     W[i][j] == W[j][i]
-    
+
     W[i][i] == 0.0.
 
 Maximum associative memory capacity:
@@ -35,11 +36,11 @@ and retrieved.
 More detailed information reference:
 [Hopfield Wikipedia](https://en.wikipedia.org/wiki/Hopfield_network).
 
-## Example input for learning 4 patterns
+## Input example for learning (training) 4 patterns
 
-Example input format plain ASCII input file:
+Example input format plain ASCII input file for training the network:
 
-- binary pattern 4 black-and-white images 10 x 12
+- 4 binary patterns (black-and-white images) 10 x 12
 - . black pixel
 - \* white pixel
 

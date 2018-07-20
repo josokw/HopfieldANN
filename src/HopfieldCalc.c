@@ -86,21 +86,18 @@ void learnHebbian(const int nPatterns, const int patternSize,
    assert(isSymmetric(patternSize, W));
 }
 
-int addNoise(const int patternSize, int PatNumber, double pat[],
-             int Chance)
+int addNoiseToPattern(const int patternSize, int PatNumber,
+                      double pattern[], int Chance)
 {
-   int n;
-   int NoiseIndex;
-   int NoiseArray[NMAX_NEURONS] = {0};
-   int Nnoise;
-
    if (Chance < 0)
       Chance = 0;
    if (Chance > 75)
       Chance = 75;
 
-   Nnoise = patternSize * Chance / 100;
-   n = 0;
+   int Nnoise = patternSize * Chance / 100;
+   int NoiseIndex = 0;
+   int NoiseArray[NMAX_NEURONS] = {0};
+   int n = 0;
    while (n < Nnoise) {
       NoiseIndex = Random(0, patternSize);
       if (NoiseArray[NoiseIndex] == 0) {
@@ -110,10 +107,10 @@ int addNoise(const int patternSize, int PatNumber, double pat[],
    }
    for (int index = 0; index < patternSize; index++) {
       if (NoiseArray[index] == 1) {
-         pat[index] = -Patterns[PatNumber][index];
+         pattern[index] = -Patterns[PatNumber][index];
       }
       else {
-         pat[index] = Patterns[PatNumber][index];
+         pattern[index] = Patterns[PatNumber][index];
       }
    }
    return Nnoise;

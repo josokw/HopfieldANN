@@ -16,8 +16,8 @@ int storageCapacity(const int patternSize);
 void learnHebbian(const int nPatterns, const int patternSize,
                   double W[][NMAX_NEURONS]);
 
-int addNoise(const int patternSize, int PatNumber, double Pat[],
-             int Chance);
+int addNoiseToPattern(const int patternSize, int PatNumber,
+                      double pattern[], int Chance);
 
 void calcOut(const int patternSize, const double W[][NMAX_NEURONS],
              const double inputPattern[], double outputPattern[]);
