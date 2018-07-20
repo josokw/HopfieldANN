@@ -64,7 +64,7 @@ int storageCapacity(const int patternSize)
    return 0.14 * patternSize;
 }
 
-void learnW(const int nPatterns, const int patternSize, double W[][NMAX_NEURONS])
+void learnHebbian(const int nPatterns, const int patternSize, double W[][NMAX_NEURONS])
 {
    for (int row = 0; row < patternSize; row++) {
       for (int column = row; column < patternSize; column++) {

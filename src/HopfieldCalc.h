@@ -13,8 +13,8 @@ bool hasZeroDiagonal(const int patternSize,
                      const double W[][NMAX_NEURONS]);
 int storageCapacity(const int patternSize);
 
-void learnW(const int nPatterns, const int patternSize,
-            double W[][NMAX_NEURONS]);
+void learnHebbian(const int nPatterns, const int patternSize,
+                  double W[][NMAX_NEURONS]);
 
 int addNoise(const int patternSize, int PatNumber, double Pat[],
              int Chance);

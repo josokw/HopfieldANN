@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
    }
 
    printf("- Learning patterns by hebbian learning rule .... ");
-   learnW(nPatterns, patSize, W);
+   learnHebbian(nPatterns, patSize, W);
    printf("ready\n");
    printf("- Learning result: connection matrix, size %d x %d\n\n",
           nRows * nColumns, nRows * nColumns);
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
          }
 
          printf("- Learning patterns by hebbian learning rule .... ");
-         learnW(nPatterns, patSize, W);
+         learnHebbian(nPatterns, patSize, W);
          printf("ready\n\n");
          printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
                 nRows * nColumns, nRows * nColumns);
