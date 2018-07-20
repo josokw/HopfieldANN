@@ -36,9 +36,9 @@ int main(int argc, char *argv[])
    printf(
       "ready\n"
       "- Number of neurons: %d * %d = %d, number of patterns = %d\n",
-      nRows, nColumns, patSize, nPatterns);
+      nRows, nColumns, patternSize, nPatterns);
 
-   int stCapacity = storageCapacity(patSize);
+   int stCapacity = storageCapacity(patternSize);
    if (stCapacity < nPatterns) {
       fprintf(stderr,
               "- Warning: associative storage capacity %d exceeded\n",
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
    printf(
       "- Learning patterns by Hebbian learning rule, "
       "training starts .... ");
-   learnHebbian(nPatterns, patSize, W);
+   learnHebbian(nPatterns, patternSize, W);
    printf("ready\n");
    printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
           nRows * nColumns, nRows * nColumns);
@@ -75,9 +75,9 @@ int main(int argc, char *argv[])
             "ready\n\n"
             "- Number of neurons: %d * %d = %d, number of patterns: "
             "%d\n\n",
-            nRows, nColumns, patSize, nPatterns);
+            nRows, nColumns, patternSize, nPatterns);
 
-         int stCapacity = storageCapacity(patSize);
+         int stCapacity = storageCapacity(patternSize);
          if (stCapacity < nPatterns) {
             fprintf(
                stderr,
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
          }
 
          printf("- Learning patterns by Hebbian learning rule .... ");
-         learnHebbian(nPatterns, patSize, W);
+         learnHebbian(nPatterns, patternSize, W);
          printf("ready\n\n");
          printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
                 nRows * nColumns, nRows * nColumns);
@@ -109,18 +109,18 @@ int main(int argc, char *argv[])
                indexPattern--;
                showIndexedPattern(indexPattern);
                puts("");
-               copyPattern(patSize, Patterns[indexPattern], InputPattern);
-               copyPattern(patSize, Patterns[indexPattern],
+               copyPattern(patternSize, Patterns[indexPattern], InputPattern);
+               copyPattern(patternSize, Patterns[indexPattern],
                            InputPatternWithNoise);
                printf("- Noise level [%%]: ");
                scanf(" %d", &Noise);
 
-               addNoiseToPattern(patSize, indexPattern,
+               addNoiseToPattern(patternSize, indexPattern,
                                  InputPatternWithNoise, Noise);
                /* printf("- Pattern as vector:\n\n"); */
                /* showPatternAsVector(InputPatternWithNoise); */
                printf("\n\n- Pattern as 2D image and noisy pixels:\n\n");
-               showAssociatedPattern(patSize, W, InputPattern,
+               showAssociatedPattern(patternSize, W, InputPattern,
                                      InputPatternWithNoise, OutputPattern);
                puts("");
                break;
@@ -138,12 +138,12 @@ int main(int argc, char *argv[])
                indexPattern--;
                showIndexedNoisyPattern(indexPattern);
                puts("");
-               copyPattern(patSize, NoisyPatterns[indexPattern],
+               copyPattern(patternSize, NoisyPatterns[indexPattern],
                            InputPattern);
                /* printf("- Pattern as vector:\n\n"); */
                /* showPatternAsVector(InputPattern); */
                printf("\n\n- Pattern as 2D image:\n\n");
-               showAssociatedPattern(patSize, W, InputPattern,
+               showAssociatedPattern(patternSize, W, InputPattern,
                                      InputPattern, OutputPattern);
                puts("");
                break;

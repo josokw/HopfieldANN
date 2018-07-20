@@ -10,7 +10,7 @@ static FILE *hfDataFile = NULL;
 int nRows = 0;
 int nColumns = 0;
 int nPatterns = 0;
-int patSize = 0;
+int patternSize = 0;
 int nNoisyRows = 0;
 int nNoisyColumns = 0;
 int nNoisyPatterns = 0;
@@ -31,9 +31,9 @@ void readFile(const char fileName[])
       getchar();
       exit(EXIT_FAILURE);
    }
-   patSize = nColumns * nRows;
+   patternSize = nColumns * nRows;
 
-   if (patSize > NMAX_NEURONS) {
+   if (patternSize > NMAX_NEURONS) {
       fprintf(stderr, "\n\tERROR: size input vector must be < %d\n\n",
               NMAX_NEURONS);
       getchar();
@@ -106,7 +106,7 @@ void readNoisyFile(const char fileName[])
       exit(EXIT_FAILURE);
    }
 
-   if (patSize > NMAX_NEURONS) {
+   if (patternSize > NMAX_NEURONS) {
       fprintf(stderr, "\n\tERROR: size input vector must be < %d\n\n",
               NMAX_NEURONS);
       getchar();

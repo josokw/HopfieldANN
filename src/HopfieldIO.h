@@ -8,7 +8,7 @@
 extern int nRows;
 extern int nColumns;
 extern int nPatterns;
-extern int patSize;
+extern int patternSize;
 extern int nNoisyPatterns;
 
 #ifdef __cplusplus
