@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
    const char MenuChars[] = "ELNeln";
 
    if (!((argc == 2) || (argc == 3))) {
-      fprintf(stderr, "\n\tUSAGE: hopfieldann <patterns filename>\n\n");
+      fprintf(stderr, "\n\tUSAGE: hopfieldann <patterns filename>\n");
       fprintf(stderr,
               "\n\tUSAGE: hopfieldann <patterns filename> <noisy patterns "
               "filename>\n\n");

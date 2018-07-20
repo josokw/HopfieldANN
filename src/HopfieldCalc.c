@@ -64,7 +64,8 @@ int storageCapacity(const int patternSize)
    return 0.14 * patternSize;
 }
 
-void learnHebbian(const int nPatterns, const int patternSize, double W[][NMAX_NEURONS])
+void learnHebbian(const int nPatterns, const int patternSize,
+                  double W[][NMAX_NEURONS])
 {
    for (int row = 0; row < patternSize; row++) {
       for (int column = row; column < patternSize; column++) {
@@ -153,7 +154,8 @@ double calcEnergy(const int patternSize, const double pattern[],
    return energy;
 }
 
-void calcAssociations(const int patternSize, const double W[][NMAX_NEURONS],
+void calcAssociations(const int patternSize,
+                      const double W[][NMAX_NEURONS],
                       const double inputPattern[],
                       const double inputPatternWithNoise[],
                       double associationPattern[])
