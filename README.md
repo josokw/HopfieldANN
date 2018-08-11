@@ -4,6 +4,7 @@ The Hopfield ANN application is a text console application implemented in
 C99.
 
 [![Build Status](https://travis-ci.org/josokw/HopfieldANN.svg?branch=master)](https://travis-ci.org/josokw/HopfieldANN)
+[![CodeFactor](https://www.codefactor.io/repository/github/josokw/hopfieldann/badge)](https://www.codefactor.io/repository/github/josokw/hopfieldann)
 
 ## Hopfield recurrent artificial neural network
 
