@@ -4,6 +4,8 @@ The Hopfield ANN application is a text console application implemented in
 C99 showing the recovery of noisy (damaged) learned images.
 
 [![Build Status](https://travis-ci.org/josokw/HopfieldANN.svg?branch=master)](https://travis-ci.org/josokw/HopfieldANN)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19574b004e4b4d17ac51f55155698b78)](https://www.codacy.com/project/josokw/HopfieldANN/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=josokw/HopfieldANN&amp;utm_campaign=Badge_Grade_Dashboard)
+[![CodeFactor](https://www.codefactor.io/repository/github/josokw/hopfieldann/badge)](https://www.codefactor.io/repository/github/josokw/hopfieldann)
 
 ## Hopfield recurrent artificial neural network
 
