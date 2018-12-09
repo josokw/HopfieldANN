@@ -2,6 +2,7 @@
 
 #include "HopfieldIO.h"
 #include "Hopfield.h"
+#include "HopfieldCalc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,10 +120,10 @@ void readNoisyFile(const char fileName[])
             if (line[0] != '\n' && line[0] != '\r') {
                for (nC = 0; nC < nColumns; nC++) {
                   if (line[nC] == '*') {
-                     NoisyPatterns[nP][nR * nColumns + nC] = 1;
+                     NoisyPatterns[nP][nR * nColumns + nC] = 1.0;
                   }
                   else {
-                     NoisyPatterns[nP][nR * nColumns + nC] = -1;
+                     NoisyPatterns[nP][nR * nColumns + nC] = -1.0;
                   }
                }
             }
@@ -175,11 +176,11 @@ void showPatternAndDifference(const double pattern[],
 {
    for (int nR = 0; nR < nRows; nR++) {
       for (int nC = 0; nC < nColumns; nC++) {
-         if (patternWithNoise[nR * nColumns + nC] == +1.0) {
+         if (equals(patternWithNoise[nR * nColumns + nC], +1.0)) {
             printf("*");
          }
          else {
-            if (patternWithNoise[nR * nColumns + nC] == -1.0) {
+            if (equals(patternWithNoise[nR * nColumns + nC], -1.0)) {
                printf(".");
             }
             else {
@@ -193,8 +194,8 @@ void showPatternAndDifference(const double pattern[],
       }
       printf("    ");
       for (int nC = 0; nC < nColumns; nC++) {
-         if (patternWithNoise[nR * nColumns + nC] ==
-             pattern[nR * nColumns + nC]) {
+         if (equals(patternWithNoise[nR * nColumns + nC],
+                    pattern[nR * nColumns + nC])) {
             printf(" ");
          }
          else {
@@ -210,11 +211,11 @@ void showPatternAsVector(const double pattern[])
    int n;
 
    for (n = 0; n < nRows * nColumns; n++) {
-      if (pattern[n] == +1.0) {
+      if (equals(pattern[n], +1.0)) {
          printf("*");
       }
       else {
-         if (pattern[n] == -1.0) {
+         if (equals(pattern[n], -1.0)) {
             printf(".");
          }
          else {

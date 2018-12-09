@@ -7,12 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static const double EPSILON = 1e-8;
-
-static bool equals(double d1, double d2)
-{
-   return fabs(d1 - d2) < EPSILON;
-}
+static const double EPSILON = 1e-6;
 
 static int sign(double value)
 {
@@ -22,6 +17,11 @@ static int sign(double value)
 static int Random(int min, int max)
 {
    return min + (rand() % (max - min + 1));
+}
+
+bool equals(double d1, double d2)
+{
+   return fabs(d1 - d2) < EPSILON;
 }
 
 bool isSymmetric(const int patternSize, const double W[][NMAX_NEURONS])

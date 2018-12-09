@@ -8,6 +8,7 @@
 extern "C" {
 #endif
 
+bool equals(double d1, double d2);
 bool isSymmetric(const int patternSize, const double W[][NMAX_NEURONS]);
 bool hasZeroDiagonal(const int patternSize,
                      const double W[][NMAX_NEURONS]);

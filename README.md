@@ -1,7 +1,7 @@
 # Hopfield Artificial Neural Network
 
 The Hopfield ANN application is a text console application implemented in
-C99.
+C99 showing the recovery of noisy (damaged) learned images.
 
 [![Build Status](https://travis-ci.org/josokw/HopfieldANN.svg?branch=master)](https://travis-ci.org/josokw/HopfieldANN)
 
