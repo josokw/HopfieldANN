@@ -13,14 +13,15 @@ A Hopfield network is a recurrent artificial neural network (ANN) and was
 invented by John Hopfield in 1982. A Hopfield network is a one layered
 network.
 Every neuron is connected to every other neuron except with itself.
+The neurons have a **binary output** taking the values –1 and 1.
 
-Every connection is represented by a weight factor. These weight factors
+Every connection is represented by a **weight factor**. These weight factors
 are determined by the Hebb's learning rule (1949). It is often summarized
 as "Neurons that fire together, wire together. Neurons that fire out of
-sync, fail to link".
+sync, fail to link". 
 
 These connections are implemented in a symmetric and zero valued diagonal
-matrix W:
+**matrix W**:
 
     W[i][j] == W[j][i]
 
@@ -40,7 +41,7 @@ More detailed information reference:
 
 ## Input example for learning (training) 4 patterns
 
-Example input format plain ASCII input file for training the network:
+Example input format plain ASCII input file for training the network: **supervised learning**.
 
 - 4 binary patterns (black-and-white images) 10 x 12
 - . black pixel
