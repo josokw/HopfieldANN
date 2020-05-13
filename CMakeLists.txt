@@ -17,7 +17,7 @@ file(
 )
 
 add_executable(hopfieldann ${HOPFIELDANN_SOURCES})
-set_property(TARGET hopfieldann PROPERTY C_STANDARD 99)
+# set_property(TARGET hopfieldann PROPERTY C_STANDARD 11)
 
 install(
     TARGETS hopfieldann
