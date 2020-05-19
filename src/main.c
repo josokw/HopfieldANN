@@ -96,7 +96,8 @@ int main(int argc, char *argv[])
          switch (argc) {
             case 2:
                printf(
-                  "- Choose pattern to disturb by noise, index (1..%d): ",
+                  "\n- Choose pattern to disturb by noise, index "
+                  "(1..%d): ",
                   nPatterns);
                scanf(" %d", &indexPattern);
                puts("");
@@ -109,7 +110,8 @@ int main(int argc, char *argv[])
                indexPattern--;
                showIndexedPattern(indexPattern);
                puts("");
-               copyPattern(patternSize, Patterns[indexPattern], InputPattern);
+               copyPattern(patternSize, Patterns[indexPattern],
+                           InputPattern);
                copyPattern(patternSize, Patterns[indexPattern],
                            InputPatternWithNoise);
                printf("- Noise level [%%]: ");
@@ -119,7 +121,10 @@ int main(int argc, char *argv[])
                                  InputPatternWithNoise, Noise);
                /* printf("- Pattern as vector:\n\n"); */
                /* showPatternAsVector(InputPatternWithNoise); */
-               printf("\n\n- Pattern as 2D image and noisy pixels:\n\n");
+               printf(
+                  "\n\n- Pattern %d as 2D image and %d%% noisy "
+                  "pixels:\n\n",
+                  indexPattern + 1, Noise);
                showAssociatedPattern(patternSize, W, InputPattern,
                                      InputPatternWithNoise, OutputPattern);
                puts("");
@@ -136,6 +141,7 @@ int main(int argc, char *argv[])
                   exit(EXIT_FAILURE);
                }
                indexPattern--;
+               puts("");
                showIndexedNoisyPattern(indexPattern);
                puts("");
                copyPattern(patternSize, NoisyPatterns[indexPattern],

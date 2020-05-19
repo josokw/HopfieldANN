@@ -220,12 +220,22 @@ The excutable can be found in the *bin* directory.
 Some input file examples can be found in the *data* directory.
 Starting the program without parameters will show the usage help:
 
+```
     USAGE: hopfieldann <patterns filename>
 
     USAGE: hopfieldann <patterns filename> <noisy patterns filename>
+```
 
 If the *build* directory is the current directory:
-
+```
     ../bin/hopfieldann ../data/hopf01.dat
 
     ../bin/hopfieldann ../data/hopf01.dat ../data/hopf01noisy.dat
+```
+## Test scripts
+
+Using file re-direction for generating test data:
+
+```
+../bin/hopfieldann ../data/hopf01.dat < ../testScripts/test_1.txt > ../testScripts/result_test_1.txt
+```
