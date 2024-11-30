@@ -10,7 +10,7 @@
 
 #define MAXFILENAME 100
 
-void usage(int argc, char *argv[]);
+void usage(int argc);
 void clearInput(void);
 
 int main(int argc, char *argv[])
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
    char FileName[MAXFILENAME];
    const char MenuChars[] = "ELNeln";
 
-   usage(argc, argv);
+   usage(argc);
    srand((unsigned int)time(NULL));
 
    printf("Hopfield's ANN associative memory: " APPNAME_VERSION
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
    return 0;
 }
 
-void usage(int argc, char *argv[])
+void usage(int argc)
 {
    if (!((argc == 2) || (argc == 3))) {
       fprintf(stderr,

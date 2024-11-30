@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(HopfiledANN C)
+project(HopfieldANN C)
 
 set(C_MAKE_C_STANDARD 99)
+add_compile_options(-Wall -Wextra)
 
 include_directories(src)
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
