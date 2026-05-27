@@ -1,12 +1,23 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 
-project(HopfieldANN C)
+project(HopfieldANN 
+        DESCRIPTION "A Hopfield Artificial Neural Network implementation in C"      
+        LANGUAGES C
+        )
 
-set(C_MAKE_C_STANDARD 99)
-add_compile_options(-Wall -Wextra)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
-include_directories(src)
-set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
+if (MSVC)
+    add_compile_options(/W4)  # MSVC equivalent of -Wall -Wextra
+else()
+    add_compile_options(
+        -Wall
+        -Wextra
+        -Wconversion
+        -Werror=implicit-function-declaration
+    )
+endif()
 
 file(
     GLOB_RECURSE HOPFIELDANN_SOURCES
@@ -16,6 +27,10 @@ file(
 )
 
 add_executable(hopfieldann ${HOPFIELDANN_SOURCES})
+
+target_include_directories(hopfieldann PRIVATE src)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 install(
     TARGETS hopfieldann

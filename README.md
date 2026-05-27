@@ -1,14 +1,9 @@
 # Hopfield Artificial Neural Network
 
-The Hopfield ANN application is a text console application implemented in C99 showing the recovery
+The Hopfield ANN application is a text console application implemented in C11 showing the recovery
 of noisy (damaged) learned images.
 
 [![CodeFactor](https://www.codefactor.io/repository/github/josokw/hopfieldann/badge)](https://www.codefactor.io/repository/github/josokw/hopfieldann)
-
-##### Updates by OpenCode (May 2026)
-
-By May 2026, the adoption of AI technologies had accelerated significantly. This small C project
-serves as a practical case study for applying AI-guided improvements.
 
 ## Hopfield recurrent artificial neural network
 
@@ -230,3 +225,8 @@ Using file redirection for generating test data:
 ## License
 
 See the [License](./License) file.
+
+## Updates guided by OpenCode (May 2026)
+
+By May 2026, the adoption of AI technologies had accelerated significantly. This small C project
+serves as a practical case study for applying AI-guided improvements.
