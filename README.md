@@ -185,7 +185,7 @@ Not all associated output patterns will be in every detail the same as the learn
 Sometimes the associated output can be something it was never taught. "Hallucinations" is one of the
 main problems. A Hopfield network cannot tell you if the association is an "hallucination".
 
-## Building: using C99, CMake and make
+## Building: using C11, CMake and make
 
 The application does not use dynamic memory allocation. The maximum number of neurons and the
 maximum number of input learning patterns can be configured in the C file _HopfieldConfig.h_.
