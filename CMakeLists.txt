@@ -1,17 +1,37 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(HopfieldANN 
-        DESCRIPTION "A Hopfield Artificial Neural Network implementation in C"      
+project(HopfieldANN
+        DESCRIPTION "A Hopfield Artificial Neural Network implementation in C"
         LANGUAGES C
         )
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-if (MSVC)
-    add_compile_options(/W4)  # MSVC equivalent of -Wall -Wextra
+set(SOURCE_FILES
+    src/AppInfo.h
+    src/Hopfield.c
+    src/Hopfield.h
+    src/HopfieldCalc.c
+    src/HopfieldCalc.h
+    src/HopfieldConfig.h
+    src/HopfieldIO.c
+    src/HopfieldIO.h
+    src/main.c
+)
+
+add_executable(hopfieldann ${SOURCE_FILES})
+
+target_include_directories(hopfieldann PRIVATE src)
+
+set_target_properties(hopfieldann PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+)
+
+if(MSVC)
+    target_compile_options(hopfieldann PRIVATE /W4)
 else()
-    add_compile_options(
+    target_compile_options(hopfieldann PRIVATE
         -Wall
         -Wextra
         -Wconversion
@@ -19,25 +39,6 @@ else()
     )
 endif()
 
-file(
-    GLOB_RECURSE HOPFIELDANN_SOURCES
-    RELATIVE ${CMAKE_SOURCE_DIR}
-    src/*.c
-    src/*.h
-)
+install(TARGETS hopfieldann RUNTIME DESTINATION ".")
 
-add_executable(hopfieldann ${HOPFIELDANN_SOURCES})
-
-target_include_directories(hopfieldann PRIVATE src)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-
-install(
-    TARGETS hopfieldann
-    RUNTIME DESTINATION "."
-)
-
-install(
-    DIRECTORY "${CMAKE_SOURCE_DIR}/data"
-    DESTINATION "."
-)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/data" DESTINATION ".")
