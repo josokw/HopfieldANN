@@ -186,7 +186,7 @@ void showPatternAndDifference(const double pattern[],
             else {
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
-                       pattern[nR * nColumns + nC]);
+                       patternWithNoise[nR * nColumns + nC]);
                getchar();
                exit(EXIT_FAILURE);
             }
