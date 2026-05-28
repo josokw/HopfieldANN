@@ -3,7 +3,6 @@
 
 #include <assert.h>
 #include <math.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,11 +25,11 @@ bool equals(double d1, double d2)
 
 bool isSymmetric(const int patternSize, const double W[][NMAX_NEURONS])
 {
-   assert(patternSize < NMAX_NEURONS);
+   assert(patternSize <= NMAX_NEURONS);
 
    bool isSymmetric = true;
 
-   for (int i = 1; i < patternSize; i++) {
+   for (int i = 0; i < patternSize; i++) {
       for (int j = i; j < patternSize; j++) {
          if (!equals(W[i][j], W[j][i])) {
             isSymmetric = false;
@@ -46,7 +45,7 @@ bool isSymmetric(const int patternSize, const double W[][NMAX_NEURONS])
 
 bool hasZeroDiagonal(const int patternSize, const double W[][NMAX_NEURONS])
 {
-   assert(patternSize < NMAX_NEURONS);
+   assert(patternSize <= NMAX_NEURONS);
 
    bool hasZD = true;
 
@@ -61,12 +60,17 @@ bool hasZeroDiagonal(const int patternSize, const double W[][NMAX_NEURONS])
 
 int storageCapacity(const int patternSize)
 {
-   return 0.14 * patternSize;
+   return (int)(0.14 * patternSize);
 }
 
 void learnHebbian(const int nPatterns, const int patternSize,
                   double W[][NMAX_NEURONS])
 {
+   for (int row = 0; row < patternSize; row++) {
+      for (int col = 0; col < patternSize; col++) {
+         W[row][col] = 0.0;
+      }
+   }
    for (int row = 0; row < patternSize; row++) {
       for (int column = row; column < patternSize; column++) {
          if (row == column) {
@@ -99,7 +103,7 @@ int addNoiseToPattern(const int patternSize, int PatNumber,
    int NoiseArray[NMAX_NEURONS] = {0};
    int n = 0;
    while (n < Nnoise) {
-      NoiseIndex = Random(0, patternSize);
+      NoiseIndex = Random(0, patternSize - 1);
       if (NoiseArray[NoiseIndex] == 0) {
          NoiseArray[NoiseIndex] = 1;
          n++;
