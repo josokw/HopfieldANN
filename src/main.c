@@ -8,7 +8,7 @@
 #include <string.h>
 #include <time.h>
 
-#define MAXFILENAME 100
+#define MAXFILENAME_SIZE 100
 
 void usage(int argc);
 void clearInput(void);
@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
 
    int Noise = 0;
    int indexPattern;
-   char Menu = '\0';
-   char FileName[MAXFILENAME];
+   int Menu = 0;
+   char FileName[MAXFILENAME_SIZE] = {0};
    const char MenuChars[] = "ELNeln";
 
    usage(argc);
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
       if (argc == 2 && (Menu == 'L' || Menu == 'l')) {
          fgetc(stdin); /* remove /n previous input */
          printf("- Input patterns file name: ");
-         fgets(FileName, MAXFILENAME, stdin);
+         fgets(FileName, MAXFILENAME_SIZE, stdin);
          if (FileName[strlen(FileName) - 1] == '\n') {
             FileName[strlen(FileName) - 1] = '\0'; /* remove /n input */
          }
@@ -99,9 +99,12 @@ int main(int argc, char *argv[])
                   "\n- Choose pattern to disturb by noise, index "
                   "(1..%d): ",
                   nPatterns);
-               scanf(" %d", &indexPattern);
+               if (scanf(" %d", &indexPattern) != 1) {
+                  fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                  exit(EXIT_FAILURE);
+               }
                puts("");
-               if (indexPattern < 1 || indexPattern > nPatterns + 1) {
+               if (indexPattern < 1 || indexPattern > nPatterns) {
                   fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
                           indexPattern);
                   getchar();
@@ -115,7 +118,10 @@ int main(int argc, char *argv[])
                copyPattern(patternSize, Patterns[indexPattern],
                            InputPatternWithNoise);
                printf("- Noise level [%%]: ");
-               scanf(" %d", &Noise);
+               if (scanf(" %d", &Noise) != 1) {
+                  fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                  exit(EXIT_FAILURE);
+               }
 
                addNoiseToPattern(patternSize, indexPattern,
                                  InputPatternWithNoise, Noise);
@@ -132,9 +138,12 @@ int main(int argc, char *argv[])
             case 3:
                printf("\n- Choose noisy pattern, index (1..%d): ",
                       nNoisyPatterns);
-               scanf(" %d", &indexPattern);
+               if (scanf(" %d", &indexPattern) != 1) {
+                  fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                  exit(EXIT_FAILURE);
+               }
                puts("");
-               if (indexPattern < 1 || indexPattern > nNoisyPatterns + 1) {
+               if (indexPattern < 1 || indexPattern > nNoisyPatterns) {
                   fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
                           indexPattern);
                   getchar();
@@ -189,7 +198,7 @@ void usage(int argc)
 
 void clearInput(void)
 {
-   while (getchar() != '\n') {
-      // empty loop
+   int c;
+   while ((c = getchar()) != '\n' && c != EOF) {
    }
 }
