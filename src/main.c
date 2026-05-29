@@ -107,7 +107,6 @@ int main(int argc, char *argv[])
                if (indexPattern < 1 || indexPattern > nPatterns) {
                   fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
                           indexPattern);
-                  getchar();
                   exit(EXIT_FAILURE);
                }
                indexPattern--;
@@ -144,7 +143,6 @@ int main(int argc, char *argv[])
                if (indexPattern < 1 || indexPattern > nNoisyPatterns) {
                   fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
                           indexPattern);
-                  getchar();
                   exit(EXIT_FAILURE);
                }
                indexPattern--;

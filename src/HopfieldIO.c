@@ -65,7 +65,6 @@ void showIndexedPattern(int index)
 {
    if (index >= nPatterns || index < 0) {
       fprintf(stderr, "\n\tERROR: index %d out of range\n\n", index);
-      getchar();
       exit(EXIT_FAILURE);
    }
    showPatternAndDifference(patterns[index], patterns[index]);
@@ -152,7 +151,6 @@ void showPattern(const double pattern[])
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
                        pattern[nR * nColumns + nC]);
-               getchar();
                exit(EXIT_FAILURE);
             }
          }
