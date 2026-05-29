@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
    while (menu != 'E' && menu != 'e') {
       if (argc == 2 && (menu == 'L' || menu == 'l')) {
-         fgetc(stdin); /* remove /n previous input */
+         clearInput(); /* remove /n previous input */
          printf("- Input patterns file name: ");
          fgets(fileName, MAXFILENAME_SIZE, stdin);
          if (fileName[strlen(fileName) - 1] == '\n') {
