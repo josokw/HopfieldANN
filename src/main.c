@@ -15,15 +15,15 @@ void clearInput(void);
 
 int main(int argc, char *argv[])
 {
-   double InputPattern[NMAX_NEURONS] = {0};
-   double InputPatternWithNoise[NMAX_NEURONS] = {0};
-   double OutputPattern[NMAX_NEURONS] = {0};
+   double inputPattern[NMAX_NEURONS] = {0};
+   double inputPatternWithNoise[NMAX_NEURONS] = {0};
+   double outputPattern[NMAX_NEURONS] = {0};
 
-   int Noise = 0;
+   int noise = 0;
    int indexPattern;
-   int Menu = 0;
-   char FileName[MAXFILENAME_SIZE] = {0};
-   const char MenuChars[] = "ELNeln";
+   int menu = 0;
+   char fileName[MAXFILENAME_SIZE] = {0};
+   const char menuChars[] = "ELNeln";
 
    usage(argc);
    srand((unsigned int)time(NULL));
@@ -61,16 +61,16 @@ int main(int argc, char *argv[])
       printf("- Number of noisy patterns: %d\n\n", nNoisyPatterns);
    }
 
-   while (Menu != 'E' && Menu != 'e') {
-      if (argc == 2 && (Menu == 'L' || Menu == 'l')) {
+   while (menu != 'E' && menu != 'e') {
+      if (argc == 2 && (menu == 'L' || menu == 'l')) {
          fgetc(stdin); /* remove /n previous input */
          printf("- Input patterns file name: ");
-         fgets(FileName, MAXFILENAME_SIZE, stdin);
-         if (FileName[strlen(FileName) - 1] == '\n') {
-            FileName[strlen(FileName) - 1] = '\0'; /* remove /n input */
+         fgets(fileName, MAXFILENAME_SIZE, stdin);
+         if (fileName[strlen(fileName) - 1] == '\n') {
+            fileName[strlen(fileName) - 1] = '\0'; /* remove /n input */
          }
          printf("\n- Loading input patterns data .... ");
-         readFile(FileName);
+         readFile(fileName);
          printf(
             "ready\n\n"
             "- Number of neurons: %d * %d = %d, number of patterns: "
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
                 nRows * nColumns, nRows * nColumns);
       }
 
-      if (strchr(MenuChars, Menu) != NULL) {
+      if (strchr(menuChars, menu) != NULL) {
          switch (argc) {
             case 2:
                printf(
@@ -113,26 +113,24 @@ int main(int argc, char *argv[])
                indexPattern--;
                showIndexedPattern(indexPattern);
                puts("");
-               copyPattern(patternSize, Patterns[indexPattern],
-                           InputPattern);
-               copyPattern(patternSize, Patterns[indexPattern],
-                           InputPatternWithNoise);
+               copyPattern(patternSize, patterns[indexPattern],
+                           inputPattern);
+               copyPattern(patternSize, patterns[indexPattern],
+                           inputPatternWithNoise);
                printf("- Noise level [%%]: ");
-               if (scanf(" %d", &Noise) != 1) {
+               if (scanf(" %d", &noise) != 1) {
                   fprintf(stderr, "\n\tERROR: invalid input\n\n");
                   exit(EXIT_FAILURE);
                }
 
                addNoiseToPattern(patternSize, indexPattern,
-                                 InputPatternWithNoise, Noise);
-               /* printf("- Pattern as vector:\n\n"); */
-               /* showPatternAsVector(InputPatternWithNoise); */
+                                 inputPatternWithNoise, noise);
                printf(
                   "\n\n- Pattern %d as 2D image and %d%% noisy "
                   "pixels:\n\n",
-                  indexPattern + 1, Noise);
-               showAssociatedPattern(patternSize, W, InputPattern,
-                                     InputPatternWithNoise, OutputPattern);
+                  indexPattern + 1, noise);
+               showAssociatedPattern(patternSize, W, inputPattern,
+                                     inputPatternWithNoise, outputPattern);
                puts("");
                break;
             case 3:
@@ -153,13 +151,13 @@ int main(int argc, char *argv[])
                puts("");
                showIndexedNoisyPattern(indexPattern);
                puts("");
-               copyPattern(patternSize, NoisyPatterns[indexPattern],
-                           InputPattern);
+               copyPattern(patternSize, noisyPatterns[indexPattern],
+                           inputPattern);
                /* printf("- Pattern as vector:\n\n"); */
                /* showPatternAsVector(InputPattern); */
                printf("\n\n- Pattern as 2D image:\n\n");
-               showAssociatedPattern(patternSize, W, InputPattern,
-                                     InputPattern, OutputPattern);
+               showAssociatedPattern(patternSize, W, inputPattern,
+                                     inputPattern, outputPattern);
                puts("");
                break;
             default:
@@ -178,7 +176,7 @@ int main(int argc, char *argv[])
       else {
          printf("- E(xit), N(ext simulation) .... ");
       }
-      Menu = getchar();
+      menu = getchar();
    }
 
    return 0;

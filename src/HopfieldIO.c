@@ -1,5 +1,3 @@
-// Simulation Hopfield ANN
-
 #include "HopfieldIO.h"
 #include "Hopfield.h"
 #include "HopfieldCalc.h"
@@ -22,14 +20,12 @@ void readFile(const char fileName[])
    if (hfDataFile == NULL) {
       fprintf(stderr, "\n\n\tERROR: file '%s' can not be opened\n\n",
               fileName);
-      getchar();
       exit(EXIT_FAILURE);
    }
    if (fscanf(hfDataFile, "%d %d %d", &nRows, &nColumns, &nPatterns) !=
        3) {
       fprintf(stderr, "\n\n\tERROR: format error in file '%s'\n\n",
               fileName);
-      getchar();
       exit(EXIT_FAILURE);
    }
    patternSize = nColumns * nRows;
@@ -37,7 +33,6 @@ void readFile(const char fileName[])
    if (patternSize > NMAX_NEURONS) {
       fprintf(stderr, "\n\tERROR: size input vector must be < %d\n\n",
               NMAX_NEURONS);
-      getchar();
       exit(EXIT_FAILURE);
    }
 
@@ -50,10 +45,10 @@ void readFile(const char fileName[])
             if (line[0] != '\n' && line[0] != '\r') {
                for (int nC = 0; nC < nColumns; nC++) {
                   if (line[nC] == '*') {
-                     Patterns[nP][nR * nColumns + nC] = 1;
+                     patterns[nP][nR * nColumns + nC] = 1;
                   }
                   else {
-                     Patterns[nP][nR * nColumns + nC] = -1;
+                     patterns[nP][nR * nColumns + nC] = -1;
                   }
                }
             }
@@ -73,7 +68,7 @@ void showIndexedPattern(int index)
       getchar();
       exit(EXIT_FAILURE);
    }
-   showPatternAndDifference(Patterns[index], Patterns[index]);
+   showPatternAndDifference(patterns[index], patterns[index]);
 }
 
 void readNoisyFile(const char fileName[])
@@ -88,7 +83,6 @@ void readNoisyFile(const char fileName[])
    if (hfDataFile == NULL) {
       fprintf(stderr, "\n\n\tERROR: file '%s' can not be opened\n\n",
               fileName);
-      getchar();
       exit(EXIT_FAILURE);
    }
 
@@ -96,34 +90,31 @@ void readNoisyFile(const char fileName[])
               &nNoisyPatterns) != 3) {
       fprintf(stderr, "\n\n\tERROR: format error in file '%s'\n\n",
               fileName);
-      getchar();
       exit(EXIT_FAILURE);
    }
 
    if (nRows != nNoisyRows || nColumns != nNoisyColumns) {
       fprintf(stderr, "\n\n\tERROR: format error in file '%s'\n\n",
               fileName);
-      getchar();
       exit(EXIT_FAILURE);
    }
 
    if (patternSize > NMAX_NEURONS) {
       fprintf(stderr, "\n\tERROR: size input vector must be < %d\n\n",
               NMAX_NEURONS);
-      getchar();
       exit(EXIT_FAILURE);
    }
 
-   for (nP = 0; nP < nPatterns; nP++) {
+   for (nP = 0; nP < nNoisyPatterns; nP++) {
       for (nR = 0; nR < nRows; nR++) {
          if (fgets(line, NMAX_NEURONS, hfDataFile) != NULL) {
             if (line[0] != '\n' && line[0] != '\r') {
                for (nC = 0; nC < nColumns; nC++) {
                   if (line[nC] == '*') {
-                     NoisyPatterns[nP][nR * nColumns + nC] = 1.0;
+                     noisyPatterns[nP][nR * nColumns + nC] = 1.0;
                   }
                   else {
-                     NoisyPatterns[nP][nR * nColumns + nC] = -1.0;
+                     noisyPatterns[nP][nR * nColumns + nC] = -1.0;
                   }
                }
             }
@@ -141,10 +132,9 @@ void showIndexedNoisyPattern(int index)
 {
    if (index >= nNoisyPatterns || index < 0) {
       fprintf(stderr, "\n\tERROR: index %d out of range\n\n", index);
-      getchar();
       exit(EXIT_FAILURE);
    }
-   showPatternAndDifference(NoisyPatterns[index], NoisyPatterns[index]);
+   showPatternAndDifference(noisyPatterns[index], noisyPatterns[index]);
 }
 
 void showPattern(const double pattern[])
@@ -187,7 +177,6 @@ void showPatternAndDifference(const double pattern[],
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
                        patternWithNoise[nR * nColumns + nC]);
-               getchar();
                exit(EXIT_FAILURE);
             }
          }
@@ -222,7 +211,6 @@ void showPatternAsVector(const double pattern[])
             fprintf(stderr,
                     "\n\tERROR: pattern value %+f out of range\n\n",
                     pattern[n]);
-            getchar();
             exit(EXIT_FAILURE);
          }
       }

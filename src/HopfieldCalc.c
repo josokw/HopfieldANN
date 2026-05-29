@@ -78,8 +78,8 @@ void learnHebbian(const int nPatterns, const int patternSize,
          }
          else {
             for (int pat = 0; pat < nPatterns; pat++) {
-               W[row][column] += Patterns[pat][row] *
-                                 Patterns[pat][column] /
+               W[row][column] += patterns[pat][row] *
+                                 patterns[pat][column] /
                                  (double)patternSize;
                W[column][row] = W[row][column];
             }
@@ -111,10 +111,10 @@ int addNoiseToPattern(const int patternSize, int PatNumber,
    }
    for (int index = 0; index < patternSize; index++) {
       if (NoiseArray[index] == 1) {
-         pattern[index] = -Patterns[PatNumber][index];
+         pattern[index] = -patterns[PatNumber][index];
       }
       else {
-         pattern[index] = Patterns[PatNumber][index];
+         pattern[index] = patterns[PatNumber][index];
       }
    }
    return Nnoise;
