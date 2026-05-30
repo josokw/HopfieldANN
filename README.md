@@ -230,3 +230,15 @@ See the [License](./License) file.
 
 By May 2026, the adoption of AI technologies had accelerated significantly. This small C project
 serves as a practical case study for applying AI-guided improvements.
+
+Used **big-pickle (opencode/big-pickle)**, a large language model fine-tuned specifically for software
+engineering tasks within the opencode ecosystem.
+
+Decoder-only transformer with:
+
+- 120B parameters
+- 65+ layers
+- 8K+ context window (varies by deployment)
+- Sparse mixture-of-experts (MoE) feed-forward layers for compute efficiency
+- Grouped-query attention (GQA) with 8 key/value heads
+- Rotary position embeddings (RoPE)
