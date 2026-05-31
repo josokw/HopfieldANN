@@ -8,7 +8,7 @@ of noisy (damaged) learned images.
 ## Hopfield recurrent artificial neural network
 
 A Hopfield network is a recurrent artificial neural network (ANN) and was invented by John Hopfield
-in 1982. A Hopfield network is a single layered network. Every neuron is connected to every other
+in 1982. A Hopfield network is a single-layer network. Every neuron is connected to every other
 neuron except with itself. The neurons have a **binary output** taking the values –1 and 1.
 
 Every connection is represented by a **weight factor**. These weight factors are determined by the
@@ -27,6 +27,10 @@ Maximum associative memory capacity:
 
 Above this maximum the network is no longer capable of working as an associative memory. If 120
 neurons are available the Pmax equals 16 patterns that can be stored and retrieved.
+
+**Note**: Patterns should be chosen so that no pattern is a linear superposition (summation) of
+others. When patterns are strongly correlated, crosstalk during recall increases and the network
+is more likely to converge to spurious attractors instead of the correct stored pattern.
 
 More detailed information reference:
 [Hopfield Wikipedia](https://en.wikipedia.org/wiki/Hopfield_network).
@@ -100,7 +104,7 @@ the output as an input, will eventually converge to a state which is a local min
 function. The output shows # for changed pixels.
 
 ```text
-Hopfield's ANN associative memory: hopfieldann v1.4.6
+Hopfield's ANN associative memory: hopfieldann v1.5.0
 
 - Input patterns file name: data/hopf01.dat, loading .... ready
 - Number of neurons: 10 * 10 = 100, number of patterns = 7
@@ -183,7 +187,7 @@ Hopfield's ANN associative memory: hopfieldann v1.4.6
 
 Not all associated output patterns will be in every detail the same as the learned input patterns.
 Sometimes the associated output can be something it was never taught. "Hallucinations" is one of the
-main problems. A Hopfield network cannot tell you if the association is an "hallucination".
+main problems. A Hopfield network cannot tell you if the association is a "hallucination".
 
 ## Building: using C11, CMake and make
 
