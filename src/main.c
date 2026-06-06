@@ -13,12 +13,12 @@
 void usage(int argc);
 void clearInput(void);
 
+double inputPattern[NMAX_NEURONS] = {0};
+double inputPatternWithNoise[NMAX_NEURONS] = {0};
+double outputPattern[NMAX_NEURONS] = {0};
+
 int main(int argc, char *argv[])
 {
-   double inputPattern[NMAX_NEURONS] = {0};
-   double inputPatternWithNoise[NMAX_NEURONS] = {0};
-   double outputPattern[NMAX_NEURONS] = {0};
-
    int noise = 0;
    int indexPattern;
    int menu = 0;
@@ -65,9 +65,10 @@ int main(int argc, char *argv[])
       if (argc == 2 && (menu == 'L' || menu == 'l')) {
          clearInput(); /* remove /n previous input */
          printf("- Input patterns file name: ");
-         fgets(fileName, MAXFILENAME_SIZE, stdin);
-         if (fileName[strlen(fileName) - 1] == '\n') {
-            fileName[strlen(fileName) - 1] = '\0'; /* remove /n input */
+          fgets(fileName, MAXFILENAME_SIZE, stdin);
+          size_t fileNameLen = strlen(fileName);
+          if (fileNameLen > 0 && fileName[fileNameLen - 1] == '\n') {
+             fileName[fileNameLen - 1] = '\0'; /* remove /n input */
          }
          printf("\n- Loading input patterns data .... ");
          readFile(fileName);
@@ -151,8 +152,6 @@ int main(int argc, char *argv[])
                puts("");
                copyPattern(patternSize, noisyPatterns[indexPattern],
                            inputPattern);
-               /* printf("- Pattern as vector:\n\n"); */
-               /* showPatternAsVector(InputPattern); */
                printf("\n\n- Pattern as 2D image:\n\n");
                showAssociatedPattern(patternSize, W, inputPattern,
                                      inputPattern, outputPattern);
@@ -161,20 +160,19 @@ int main(int argc, char *argv[])
             default:
                fprintf(stderr,
                        "\n\tSYSTEM ERROR: this should never happen!\n\n");
-               getchar();
                exit(EXIT_FAILURE);
          }
       }
-      clearInput();
-      if (argc == 2) {
-         printf(
-            "- E(xit), L(oad new patterns data file), N(ext simulation) "
-            ".... ");
-      }
-      else {
-         printf("- E(xit), N(ext simulation) .... ");
-      }
-      menu = getchar();
+       if (argc == 2) {
+          printf(
+             "- E(xit), L(oad new patterns data file), N(ext simulation) "
+             ".... ");
+       }
+       else {
+          printf("- E(xit), N(ext simulation) .... ");
+       }
+       clearInput();
+       menu = getchar();
    }
 
    return 0;

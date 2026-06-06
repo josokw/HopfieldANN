@@ -6,4 +6,8 @@
 /* Max number of patterns */
 #define NMAX_PATTERNS 25
 
+#define MAX_ITERATIONS 1000
+#define MAX_NOISE_PERCENT 75
+#define STORAGE_CAPACITY_FACTOR 0.138
+
 #endif

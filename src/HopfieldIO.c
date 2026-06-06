@@ -41,20 +41,23 @@ void readFile(const char fileName[])
 
    for (int nP = 0; nP < nPatterns; nP++) {
       for (int nR = 0; nR < nRows; nR++) {
-         if (fgets(line, NMAX_NEURONS, hfDataFile) != NULL) {
-            if (line[0] != '\n' && line[0] != '\r') {
-               for (int nC = 0; nC < nColumns; nC++) {
-                  if (line[nC] == '*') {
-                     patterns[nP][nR * nColumns + nC] = 1;
-                  }
-                  else {
-                     patterns[nP][nR * nColumns + nC] = -1;
-                  }
+         if (fgets(line, NMAX_NEURONS, hfDataFile) == NULL) {
+            fprintf(stderr, "\n\n\tERROR: unexpected end of file '%s'\n\n",
+                    fileName);
+            exit(EXIT_FAILURE);
+         }
+         if (line[0] != '\n' && line[0] != '\r') {
+            for (int nC = 0; nC < nColumns; nC++) {
+               if (line[nC] == '*') {
+                  patterns[nP][nR * nColumns + nC] = 1;
+               }
+               else {
+                  patterns[nP][nR * nColumns + nC] = -1;
                }
             }
-            else {
-               nR--;
-            }
+         }
+         else {
+            nR--;
          }
       }
    }
@@ -72,7 +75,7 @@ void showIndexedPattern(int index)
 
 void readNoisyFile(const char fileName[])
 {
-   char line[NMAX_NEURONS] = {'\0'};
+   char line[NMAX_NEURONS + 1] = {'\0'};
    int nR = 0;
    int nC = 0;
    int nP = 0;
@@ -86,7 +89,7 @@ void readNoisyFile(const char fileName[])
    }
 
    if (fscanf(hfDataFile, "%d %d %d", &nNoisyRows, &nNoisyColumns,
-              &nNoisyPatterns) != 3) {
+               &nNoisyPatterns) != 3) {
       fprintf(stderr, "\n\n\tERROR: format error in file '%s'\n\n",
               fileName);
       exit(EXIT_FAILURE);
@@ -106,20 +109,23 @@ void readNoisyFile(const char fileName[])
 
    for (nP = 0; nP < nNoisyPatterns; nP++) {
       for (nR = 0; nR < nRows; nR++) {
-         if (fgets(line, NMAX_NEURONS, hfDataFile) != NULL) {
-            if (line[0] != '\n' && line[0] != '\r') {
-               for (nC = 0; nC < nColumns; nC++) {
-                  if (line[nC] == '*') {
-                     noisyPatterns[nP][nR * nColumns + nC] = 1.0;
-                  }
-                  else {
-                     noisyPatterns[nP][nR * nColumns + nC] = -1.0;
-                  }
+         if (fgets(line, NMAX_NEURONS, hfDataFile) == NULL) {
+            fprintf(stderr, "\n\n\tERROR: unexpected end of file '%s'\n\n",
+                    fileName);
+            exit(EXIT_FAILURE);
+         }
+         if (line[0] != '\n' && line[0] != '\r') {
+            for (nC = 0; nC < nColumns; nC++) {
+               if (line[nC] == '*') {
+                  noisyPatterns[nP][nR * nColumns + nC] = 1.0;
+               }
+               else {
+                  noisyPatterns[nP][nR * nColumns + nC] = -1.0;
                }
             }
-            else {
-               nR--;
-            }
+         }
+         else {
+            nR--;
          }
       }
    }
@@ -140,11 +146,11 @@ void showPattern(const double pattern[])
 {
    for (int nR = 0; nR < nRows; nR++) {
       for (int nC = 0; nC < nColumns; nC++) {
-         if (pattern[nR * nColumns + nC] > 0.0) {
+         if (equals(pattern[nR * nColumns + nC], 1.0)) {
             printf("*");
          }
          else {
-            if (pattern[nR * nColumns + nC] < 0.0) {
+            if (equals(pattern[nR * nColumns + nC], -1.0)) {
                printf(".");
             }
             else {
@@ -195,9 +201,7 @@ void showPatternAndDifference(const double pattern[],
 
 void showPatternAsVector(const double pattern[])
 {
-   int n;
-
-   for (n = 0; n < nRows * nColumns; n++) {
+   for (int n = 0; n < nRows * nColumns; n++) {
       if (equals(pattern[n], +1.0)) {
          printf("*");
       }

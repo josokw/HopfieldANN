@@ -246,3 +246,5 @@ Decoder-only transformer with:
 - Sparse mixture-of-experts (MoE) feed-forward layers for compute efficiency
 - Grouped-query attention (GQA) with 8 key/value heads
 - Rotary position embeddings (RoPE)
+
+In June 2026 Nemotron 3 Ultra Free was used.

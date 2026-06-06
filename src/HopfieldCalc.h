@@ -9,19 +9,19 @@ extern "C" {
 #endif
 
 bool equals(double d1, double d2);
-bool isSymmetric(const int patternSize, const double W[][NMAX_NEURONS]);
+bool isSymmetric(const int patternSize, const double w[][NMAX_NEURONS]);
 bool hasZeroDiagonal(const int patternSize,
-                     const double W[][NMAX_NEURONS]);
+                     const double w[][NMAX_NEURONS]);
 int storageCapacity(const int patternSize);
 
 void learnHebbian(const int nPatterns, const int patternSize,
-                  double W[][NMAX_NEURONS]);
+                  double w[][NMAX_NEURONS]);
 
-int addNoiseToPattern(const int patternSize, int PatNumber,
-                      double pattern[], int Chance);
+int addNoiseToPattern(const int patternSize, const int patNumber,
+                      double pattern[], int chance);
 
 void calcOutputPattern(const int patternSize,
-                       const double W[][NMAX_NEURONS],
+                       const double w[][NMAX_NEURONS],
                        const double inputPattern[],
                        double outputPattern[]);
 
@@ -29,15 +29,15 @@ void copyPattern(const int patternSize, const double sourcePattern[],
                  double targetPattern[]);
 
 double calcEnergy(const int patternSize, const double pattern[],
-                  const double W[][NMAX_NEURONS]);
+                  const double w[][NMAX_NEURONS]);
 
 double calcAssociatedPattern(const int patternSize,
-                             const double W[][NMAX_NEURONS],
+                             const double w[][NMAX_NEURONS],
                              const double inputPattern[],
                              double associatedPattern[]);
 
 void showAssociatedPattern(const int patternSize,
-                           const double W[][NMAX_NEURONS],
+                           const double w[][NMAX_NEURONS],
                            const double inputPattern[],
                            const double inputPatternWithNoise[],
                            double associatedPattern[]);
