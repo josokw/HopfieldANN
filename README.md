@@ -247,4 +247,4 @@ Decoder-only transformer with:
 - Grouped-query attention (GQA) with 8 key/value heads
 - Rotary position embeddings (RoPE)
 
-In June 2026 Nemotron 3 Ultra Free was used.
+In June 2026 **Nemotron 3 Ultra Free OpenCode Zen** and **Nemotron3 Super Nvidea** were used.
