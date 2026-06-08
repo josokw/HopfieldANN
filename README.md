@@ -43,7 +43,7 @@ Example input format plain ASCII input file for training the network: **supervis
 - . black pixel
 - \* white pixel
 
-The first line must be available and shows the size of each pattern and the number of patterns.
+The first ine must specify and shows the size of each pattern and the number of patterns.
 
         10 12 4
 
@@ -224,7 +224,7 @@ If the _build_ directory is the current directory:
 
 Using file redirection for generating test data:
 
-    ../bin/hopfieldann ../data/hopf01.dat < ../testScripts/test_1.txt > ../testScripts/result_test_1.txt
+    ../bin/hopfieldann ../data/hopf01.dat < ../testScripts/input_test_1.txt > ../testScripts/result_test_1.txt
 
 ## License
 
@@ -232,7 +232,7 @@ See the [License](./License) file.
 
 ## Updates guided by OpenCode (May 2026)
 
-By May 2026, the adoption of AI technologies had accelerated significantly. This small C project
+As of May 2026, the adoption of AI technologies had accelerated significantly. This small C project
 serves as a practical case study for applying AI-guided improvements.
 
 Used **big-pickle (opencode/big-pickle)**, a large language model fine-tuned specifically for software
@@ -247,4 +247,4 @@ Decoder-only transformer with:
 - Grouped-query attention (GQA) with 8 key/value heads
 - Rotary position embeddings (RoPE)
 
-In June 2026 **Nemotron 3 Ultra Free OpenCode Zen** and **Nemotron3 Super Nvidea** were used.
+In June 2026 **Nemotron 3 Ultra Free OpenCode Zen** and **Nemotron 3 Super Nvidia** were also used.

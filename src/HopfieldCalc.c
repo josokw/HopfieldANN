@@ -37,25 +37,25 @@ bool isSymmetric(const int patternSize, const double w[][NMAX_NEURONS])
 {
    assert(patternSize > 0 && patternSize <= NMAX_NEURONS);
 
-   bool isSymmetric = true;
+   bool symmetric = true;
 
    for (int i = 0; i < patternSize; i++) {
-      for (int j = i; j < patternSize; j++) {
+      for (int j = i + 1; j < patternSize; j++) {
          if (!equals(w[i][j], w[j][i])) {
-            isSymmetric = false;
+            symmetric = false;
             break;
          }
       }
-      if (!isSymmetric) {
+      if (!symmetric) {
          break;
       }
    }
-   return isSymmetric;
+   return symmetric;
 }
 
 bool hasZeroDiagonal(const int patternSize, const double w[][NMAX_NEURONS])
 {
-   assert(patternSize <= NMAX_NEURONS);
+   assert(patternSize > 0 && patternSize <= NMAX_NEURONS);
 
    bool hasZD = true;
 

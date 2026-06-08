@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
    while (menu != 'E' && menu != 'e') {
       if (argc == 2 && (menu == 'L' || menu == 'l')) {
-         clearInput(); /* remove /n previous input */
+         clearInput(); /* remove \n previous input */
          printf("- Input patterns file name: ");
           fgets(fileName, MAXFILENAME_SIZE, stdin);
           size_t fileNameLen = strlen(fileName);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
          switch (argc) {
             case 2:
                printf(
-                  "\n- Choose pattern to disturb by noise, index "
+                  "- Choose pattern to disturb by noise, index "
                   "(1..%d): ",
                   nPatterns);
                if (scanf(" %d", &indexPattern) != 1) {
@@ -117,7 +117,8 @@ int main(int argc, char *argv[])
                            inputPattern);
                copyPattern(patternSize, patterns[indexPattern],
                            inputPatternWithNoise);
-               printf("- Noise level [%%]: ");
+               printf("- Pattern %d noise level [%%]: ", indexPattern + 1);
+
                if (scanf(" %d", &noise) != 1) {
                   fprintf(stderr, "\n\tERROR: invalid input\n\n");
                   exit(EXIT_FAILURE);
@@ -152,7 +153,7 @@ int main(int argc, char *argv[])
                puts("");
                copyPattern(patternSize, noisyPatterns[indexPattern],
                            inputPattern);
-               printf("\n\n- Pattern as 2D image:\n\n");
+               printf("\n\n- Pattern %d as 2D image:\n\n", indexPattern + 1);
                showAssociatedPattern(patternSize, W, inputPattern,
                                      inputPattern, outputPattern);
                puts("");
