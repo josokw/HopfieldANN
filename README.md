@@ -43,7 +43,7 @@ Example input format plain ASCII input file for training the network: **supervis
 - . black pixel
 - \* white pixel
 
-The first ine must specify and shows the size of each pattern and the number of patterns.
+The first line must specify the size of each pattern and the number of patterns.
 
         10 12 4
 
