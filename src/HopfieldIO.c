@@ -4,15 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static FILE *hfDataFile = NULL;
-
 HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
 {
    if (ctx == NULL) {
       return HOPFIELD_ERR_INVALID_FORMAT;
    }
 
-   hfDataFile = fopen(fileName, "r");
+   FILE *hfDataFile = fopen(fileName, "r");
    if (hfDataFile == NULL) {
       return HOPFIELD_ERR_FILE_NOT_FOUND;
    }
@@ -24,6 +22,11 @@ HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
    ctx->patternSize = ctx->nColumns * ctx->nRows;
 
    if (ctx->patternSize > NMAX_NEURONS) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_SIZE_EXCEEDED;
+   }
+
+   if (ctx->nPatterns > NMAX_PATTERNS) {
       fclose(hfDataFile);
       return HOPFIELD_ERR_SIZE_EXCEEDED;
    }
@@ -78,7 +81,7 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
    int nNoisyRows = 0;
    int nNoisyColumns = 0;
 
-   hfDataFile = fopen(fileName, "r");
+   FILE *hfDataFile = fopen(fileName, "r");
 
    if (hfDataFile == NULL) {
       return HOPFIELD_ERR_FILE_NOT_FOUND;
@@ -96,6 +99,11 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
    }
 
    if (ctx->patternSize > NMAX_NEURONS) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_SIZE_EXCEEDED;
+   }
+
+   if (ctx->nNoisyPatterns > NMAX_PATTERNS) {
       fclose(hfDataFile);
       return HOPFIELD_ERR_SIZE_EXCEEDED;
    }

@@ -184,7 +184,7 @@ TEST_F(HopfieldCalcTest, AddNoiseToPattern) {
     EXPECT_GE(nNoise, 1);
     EXPECT_LE(nNoise, 3);
 
-    // Noisy pattern should be stored in ctx->noisyPatterns[0]
+    // Noisy pattern should be stored in ctx->noisyPatterns[patNumber]
     // Count differences
     int diffCount = 0;
     for (int i = 0; i < 4; i++) {

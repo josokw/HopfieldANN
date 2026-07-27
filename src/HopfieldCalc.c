@@ -136,11 +136,9 @@ int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
          noisyPattern[index] = ctx->patterns[patNumber][index];
       }
    }
-   /* Copy the noisy pattern to the output (caller must provide a buffer) */
-   /* For now, we'll store it in the first noisy pattern slot */
-   /* This is a temporary solution until Phase 2 separates concerns */
+   /* Copy the noisy pattern to the output slot for this pattern */
    for (int index = 0; index < ctx->patternSize; index++) {
-      ctx->noisyPatterns[0][index] = noisyPattern[index];
+      ctx->noisyPatterns[patNumber][index] = noisyPattern[index];
    }
    return nNoise;
 }

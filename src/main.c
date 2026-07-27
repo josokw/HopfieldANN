@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
                addNoiseToPattern(ctx, indexPattern, noise);
                /* Copy noisy pattern to local buffer */
-               copyPattern(ctx->patternSize, ctx->noisyPatterns[0],
+               copyPattern(ctx->patternSize, ctx->noisyPatterns[indexPattern],
                           inputPatternWithNoise);
                printf(
                   "\n\n- Pattern %d as 2D image and %d%% noisy "
