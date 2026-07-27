@@ -74,65 +74,73 @@ int storageCapacity(const int patternSize)
    return cap < 1 ? 1 : cap;
 }
 
-void learnHebbian(const int nPatterns, const int patternSize,
-                  double w[][NMAX_NEURONS])
+void learnHebbian(HopfieldContext *ctx)
 {
-   assert(nPatterns > 0 && nPatterns <= NMAX_PATTERNS);
-   assert(patternSize > 0 && patternSize <= NMAX_NEURONS);
+   assert(ctx != NULL);
+   assert(ctx->nPatterns > 0 && ctx->nPatterns <= NMAX_PATTERNS);
+   assert(ctx->patternSize > 0 && ctx->patternSize <= NMAX_NEURONS);
 
-   for (int row = 0; row < patternSize; row++) {
-      for (int column = 0; column < patternSize; column++) {
-         w[row][column] = 0.0;
+   for (int row = 0; row < ctx->patternSize; row++) {
+      for (int column = 0; column < ctx->patternSize; column++) {
+         ctx->W[row][column] = 0.0;
       }
    }
-   for (int row = 0; row < patternSize; row++) {
-      for (int column = row; column < patternSize; column++) {
+   for (int row = 0; row < ctx->patternSize; row++) {
+      for (int column = row; column < ctx->patternSize; column++) {
          if (row == column) {
-            w[row][column] = 0.0;
+            ctx->W[row][column] = 0.0;
          }
          else {
-            for (int pat = 0; pat < nPatterns; pat++) {
-               w[row][column] += patterns[pat][row] *
-                                 patterns[pat][column] /
-                                 (double)patternSize;
+            for (int pat = 0; pat < ctx->nPatterns; pat++) {
+               ctx->W[row][column] += ctx->patterns[pat][row] *
+                                 ctx->patterns[pat][column] /
+                                 (double)ctx->patternSize;
             }
-            w[column][row] = w[row][column];
+            ctx->W[column][row] = ctx->W[row][column];
          }
       }
    }
-   assert(hasZeroDiagonal(patternSize, w));
-   assert(isSymmetric(patternSize, w));
+   assert(hasZeroDiagonal(ctx->patternSize, ctx->W));
+   assert(isSymmetric(ctx->patternSize, ctx->W));
 }
 
-int addNoiseToPattern(const int patternSize, const int patNumber,
-                      double pattern[], int chance)
+int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
 {
-   assert(patNumber >= 0 && patNumber < nPatterns);
-   assert(patternSize > 0 && patternSize <= NMAX_NEURONS);
+   assert(ctx != NULL);
+   assert(patNumber >= 0 && patNumber < ctx->nPatterns);
+   assert(ctx->patternSize > 0 && ctx->patternSize <= NMAX_NEURONS);
 
    if (chance < 0)
       chance = 0;
    if (chance > MAX_NOISE_PERCENT)
       chance = MAX_NOISE_PERCENT;
 
-   int nNoise = patternSize * chance / 100;
+   int nNoise = ctx->patternSize * chance / 100;
    int noiseIndex = 0;
    int noiseArray[NMAX_NEURONS] = {0};
    int n = 0;
    while (n < nNoise) {
-      noiseIndex = Random(0, patternSize - 1);
+      noiseIndex = Random(0, ctx->patternSize - 1);
       if (noiseArray[noiseIndex] == 0) {
          noiseArray[noiseIndex] = 1;
          n++;
       }
    }
-   for (int index = 0; index < patternSize; index++) {
+   /* We need a temporary pattern to store the noisy version */
+   double noisyPattern[NMAX_NEURONS] = {0};
+   for (int index = 0; index < ctx->patternSize; index++) {
       if (noiseArray[index] == 1) {
-         pattern[index] = -patterns[patNumber][index];
+         noisyPattern[index] = -ctx->patterns[patNumber][index];
       }
       else {
-         pattern[index] = patterns[patNumber][index];
+         noisyPattern[index] = ctx->patterns[patNumber][index];
       }
+   }
+   /* Copy the noisy pattern to the output (caller must provide a buffer) */
+   /* For now, we'll store it in the first noisy pattern slot */
+   /* This is a temporary solution until Phase 2 separates concerns */
+   for (int index = 0; index < ctx->patternSize; index++) {
+      ctx->noisyPatterns[0][index] = noisyPattern[index];
    }
    return nNoise;
 }
@@ -172,57 +180,56 @@ double calcEnergy(const int patternSize, const double pattern[],
    return -0.5 * energy;
 }
 
-double calcAssociatedPattern(const int patternSize,
-                             const double w[][NMAX_NEURONS],
+double calcAssociatedPattern(HopfieldContext *ctx,
                              const double inputPattern[],
                              double associatedPattern[])
 {
-   double pattern[NMAX_NEURONS] = {0};
-   copyPattern(patternSize, inputPattern, pattern);
+   assert(ctx != NULL);
 
-   double energy = calcEnergy(patternSize, pattern, w);
+   double pattern[NMAX_NEURONS] = {0};
+   copyPattern(ctx->patternSize, inputPattern, pattern);
+
+   double energy = calcEnergy(ctx->patternSize, pattern, ctx->W);
    double energyPrevious = 0.0;
    int iter = 0;
 
    do {
       energyPrevious = energy;
-      calcOutputPattern(patternSize, w, pattern, associatedPattern);
-      energy = calcEnergy(patternSize, associatedPattern, w);
-      copyPattern(patternSize, associatedPattern, pattern);
-      printf("\n    Energy = %9.4f\n\n", energy);
+      calcOutputPattern(ctx->patternSize, ctx->W, pattern, associatedPattern);
+      energy = calcEnergy(ctx->patternSize, associatedPattern, ctx->W);
+      copyPattern(ctx->patternSize, associatedPattern, pattern);
       iter++;
    } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
-   showPattern(associatedPattern);
 
    return energy;
 }
 
-void showAssociatedPattern(const int patternSize,
-                           const double w[][NMAX_NEURONS],
+void showAssociatedPattern(HopfieldContext *ctx,
                            const double inputPattern[],
                            const double inputPatternWithNoise[],
                            double associatedPattern[])
 {
-   assert(patternSize > 0 && patternSize <= NMAX_NEURONS);
+   assert(ctx != NULL);
+   assert(ctx->patternSize > 0 && ctx->patternSize <= NMAX_NEURONS);
 
    double patternWithNoise[NMAX_NEURONS] = {0};
-   copyPattern(patternSize, inputPatternWithNoise, patternWithNoise);
+   copyPattern(ctx->patternSize, inputPatternWithNoise, patternWithNoise);
 
    double energy = 0.0;
    double energyPrevious = 0.0;
    int iter = 0;
 
-   showPatternAndDifference(inputPattern, patternWithNoise);
-   energy = calcEnergy(patternSize, patternWithNoise, w);
+   showPatternAndDifference(ctx, inputPattern, patternWithNoise);
+   energy = calcEnergy(ctx->patternSize, patternWithNoise, ctx->W);
    printf("\n    Energy = %9.4f\n\n", energy);
 
    do {
       energyPrevious = energy;
-      calcOutputPattern(patternSize, w, patternWithNoise,
+      calcOutputPattern(ctx->patternSize, ctx->W, patternWithNoise,
                         associatedPattern);
-      energy = calcEnergy(patternSize, associatedPattern, w);
-      copyPattern(patternSize, associatedPattern, patternWithNoise);
-      showPatternAndDifference(inputPattern, associatedPattern);
+      energy = calcEnergy(ctx->patternSize, associatedPattern, ctx->W);
+      copyPattern(ctx->patternSize, associatedPattern, patternWithNoise);
+      showPatternAndDifference(ctx, inputPattern, associatedPattern);
       printf("\n    Energy = %9.4f\n\n", energy);
       iter++;
    } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);

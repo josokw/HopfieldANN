@@ -1,58 +1,49 @@
 #include "HopfieldIO.h"
-#include "Hopfield.h"
 #include "HopfieldCalc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 static FILE *hfDataFile = NULL;
-int nRows = 0;
-int nColumns = 0;
-int nPatterns = 0;
-int patternSize = 0;
-int nNoisyRows = 0;
-int nNoisyColumns = 0;
-int nNoisyPatterns = 0;
 
-void readFile(const char fileName[])
+HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
 {
+   if (ctx == NULL) {
+      return HOPFIELD_ERR_INVALID_FORMAT;
+   }
+
    hfDataFile = fopen(fileName, "r");
    if (hfDataFile == NULL) {
-      fprintf(stderr, "\n\n\tERROR: file '%s' can not be opened\n\n",
-              fileName);
-      exit(EXIT_FAILURE);
+      return HOPFIELD_ERR_FILE_NOT_FOUND;
    }
-   if (fscanf(hfDataFile, "%d %d %d", &nRows, &nColumns, &nPatterns) !=
-       3) {
-      fprintf(stderr, "\n\n\tERROR: format error in file '%s'\n\n",
-              fileName);
-      exit(EXIT_FAILURE);
+   if (fscanf(hfDataFile, "%d %d %d", &ctx->nRows, &ctx->nColumns,
+              &ctx->nPatterns) != 3) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_INVALID_FORMAT;
    }
-   patternSize = nColumns * nRows;
+   ctx->patternSize = ctx->nColumns * ctx->nRows;
 
-   if (patternSize > NMAX_NEURONS) {
-      fprintf(stderr, "\n\tERROR: size input vector must be < %d\n\n",
-              NMAX_NEURONS);
-      exit(EXIT_FAILURE);
+   if (ctx->patternSize > NMAX_NEURONS) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_SIZE_EXCEEDED;
    }
 
    // Line has maximum size if pattern is flat: height = 1
    char line[NMAX_NEURONS + 1] = {'\0'};
 
-   for (int nP = 0; nP < nPatterns; nP++) {
-      for (int nR = 0; nR < nRows; nR++) {
+   for (int nP = 0; nP < ctx->nPatterns; nP++) {
+      for (int nR = 0; nR < ctx->nRows; nR++) {
          if (fgets(line, NMAX_NEURONS, hfDataFile) == NULL) {
-            fprintf(stderr, "\n\n\tERROR: unexpected end of file '%s'\n\n",
-                    fileName);
-            exit(EXIT_FAILURE);
+            fclose(hfDataFile);
+            return HOPFIELD_ERR_INVALID_FORMAT;
          }
          if (line[0] != '\n' && line[0] != '\r') {
-            for (int nC = 0; nC < nColumns; nC++) {
+            for (int nC = 0; nC < ctx->nColumns; nC++) {
                if (line[nC] == '*') {
-                  patterns[nP][nR * nColumns + nC] = 1;
+                  ctx->patterns[nP][nR * ctx->nColumns + nC] = 1;
                }
                else {
-                  patterns[nP][nR * nColumns + nC] = -1;
+                  ctx->patterns[nP][nR * ctx->nColumns + nC] = -1;
                }
             }
          }
@@ -62,65 +53,66 @@ void readFile(const char fileName[])
       }
    }
    fclose(hfDataFile);
+   return HOPFIELD_OK;
 }
 
-void showIndexedPattern(int index)
+void showIndexedPattern(const HopfieldContext *ctx, int index)
 {
-   if (index >= nPatterns || index < 0) {
+   if (ctx == NULL || index >= ctx->nPatterns || index < 0) {
       fprintf(stderr, "\n\tERROR: index %d out of range\n\n", index);
       exit(EXIT_FAILURE);
    }
-   showPatternAndDifference(patterns[index], patterns[index]);
+   showPatternAndDifference(ctx, ctx->patterns[index], ctx->patterns[index]);
 }
 
-void readNoisyFile(const char fileName[])
+HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
 {
+   if (ctx == NULL) {
+      return HOPFIELD_ERR_INVALID_FORMAT;
+   }
+
    char line[NMAX_NEURONS + 1] = {'\0'};
    int nR = 0;
    int nC = 0;
    int nP = 0;
+   int nNoisyRows = 0;
+   int nNoisyColumns = 0;
 
    hfDataFile = fopen(fileName, "r");
 
    if (hfDataFile == NULL) {
-      fprintf(stderr, "\n\n\tERROR: file '%s' can not be opened\n\n",
-              fileName);
-      exit(EXIT_FAILURE);
+      return HOPFIELD_ERR_FILE_NOT_FOUND;
    }
 
    if (fscanf(hfDataFile, "%d %d %d", &nNoisyRows, &nNoisyColumns,
-               &nNoisyPatterns) != 3) {
-      fprintf(stderr, "\n\n\tERROR: format error in file '%s'\n\n",
-              fileName);
-      exit(EXIT_FAILURE);
+               &ctx->nNoisyPatterns) != 3) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_INVALID_FORMAT;
    }
 
-   if (nRows != nNoisyRows || nColumns != nNoisyColumns) {
-      fprintf(stderr, "\n\n\tERROR: format error in file '%s'\n\n",
-              fileName);
-      exit(EXIT_FAILURE);
+   if (ctx->nRows != nNoisyRows || ctx->nColumns != nNoisyColumns) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_INVALID_FORMAT;
    }
 
-   if (patternSize > NMAX_NEURONS) {
-      fprintf(stderr, "\n\tERROR: size input vector must be < %d\n\n",
-              NMAX_NEURONS);
-      exit(EXIT_FAILURE);
+   if (ctx->patternSize > NMAX_NEURONS) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_SIZE_EXCEEDED;
    }
 
-   for (nP = 0; nP < nNoisyPatterns; nP++) {
-      for (nR = 0; nR < nRows; nR++) {
+   for (nP = 0; nP < ctx->nNoisyPatterns; nP++) {
+      for (nR = 0; nR < ctx->nRows; nR++) {
          if (fgets(line, NMAX_NEURONS, hfDataFile) == NULL) {
-            fprintf(stderr, "\n\n\tERROR: unexpected end of file '%s'\n\n",
-                    fileName);
-            exit(EXIT_FAILURE);
+            fclose(hfDataFile);
+            return HOPFIELD_ERR_INVALID_FORMAT;
          }
          if (line[0] != '\n' && line[0] != '\r') {
-            for (nC = 0; nC < nColumns; nC++) {
+            for (nC = 0; nC < ctx->nColumns; nC++) {
                if (line[nC] == '*') {
-                  noisyPatterns[nP][nR * nColumns + nC] = 1.0;
+                  ctx->noisyPatterns[nP][nR * ctx->nColumns + nC] = 1.0;
                }
                else {
-                  noisyPatterns[nP][nR * nColumns + nC] = -1.0;
+                  ctx->noisyPatterns[nP][nR * ctx->nColumns + nC] = -1.0;
                }
             }
          }
@@ -131,32 +123,38 @@ void readNoisyFile(const char fileName[])
    }
 
    fclose(hfDataFile);
+   return HOPFIELD_OK;
 }
 
-void showIndexedNoisyPattern(int index)
+void showIndexedNoisyPattern(const HopfieldContext *ctx, int index)
 {
-   if (index >= nNoisyPatterns || index < 0) {
+   if (ctx == NULL || index >= ctx->nNoisyPatterns || index < 0) {
       fprintf(stderr, "\n\tERROR: index %d out of range\n\n", index);
       exit(EXIT_FAILURE);
    }
-   showPatternAndDifference(noisyPatterns[index], noisyPatterns[index]);
+   showPatternAndDifference(ctx, ctx->noisyPatterns[index],
+                           ctx->noisyPatterns[index]);
 }
 
-void showPattern(const double pattern[])
+void showPattern(const HopfieldContext *ctx, const double pattern[])
 {
-   for (int nR = 0; nR < nRows; nR++) {
-      for (int nC = 0; nC < nColumns; nC++) {
-         if (equals(pattern[nR * nColumns + nC], 1.0)) {
+   if (ctx == NULL) {
+      return;
+   }
+
+   for (int nR = 0; nR < ctx->nRows; nR++) {
+      for (int nC = 0; nC < ctx->nColumns; nC++) {
+         if (equals(pattern[nR * ctx->nColumns + nC], 1.0)) {
             printf("*");
          }
          else {
-            if (equals(pattern[nR * nColumns + nC], -1.0)) {
+            if (equals(pattern[nR * ctx->nColumns + nC], -1.0)) {
                printf(".");
             }
             else {
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
-                       pattern[nR * nColumns + nC]);
+                       pattern[nR * ctx->nColumns + nC]);
                exit(EXIT_FAILURE);
             }
          }
@@ -165,30 +163,35 @@ void showPattern(const double pattern[])
    }
 }
 
-void showPatternAndDifference(const double pattern[],
+void showPatternAndDifference(const HopfieldContext *ctx,
+                              const double pattern[],
                               const double patternWithNoise[])
 {
-   for (int nR = 0; nR < nRows; nR++) {
-      for (int nC = 0; nC < nColumns; nC++) {
-         if (equals(patternWithNoise[nR * nColumns + nC], +1.0)) {
+   if (ctx == NULL) {
+      return;
+   }
+
+   for (int nR = 0; nR < ctx->nRows; nR++) {
+      for (int nC = 0; nC < ctx->nColumns; nC++) {
+         if (equals(patternWithNoise[nR * ctx->nColumns + nC], +1.0)) {
             printf("*");
          }
          else {
-            if (equals(patternWithNoise[nR * nColumns + nC], -1.0)) {
+            if (equals(patternWithNoise[nR * ctx->nColumns + nC], -1.0)) {
                printf(".");
             }
             else {
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
-                       patternWithNoise[nR * nColumns + nC]);
+                       patternWithNoise[nR * ctx->nColumns + nC]);
                exit(EXIT_FAILURE);
             }
          }
       }
       printf("    ");
-      for (int nC = 0; nC < nColumns; nC++) {
-         if (equals(patternWithNoise[nR * nColumns + nC],
-                    pattern[nR * nColumns + nC])) {
+      for (int nC = 0; nC < ctx->nColumns; nC++) {
+         if (equals(patternWithNoise[nR * ctx->nColumns + nC],
+                    pattern[nR * ctx->nColumns + nC])) {
             printf(" ");
          }
          else {
@@ -199,9 +202,13 @@ void showPatternAndDifference(const double pattern[],
    }
 }
 
-void showPatternAsVector(const double pattern[])
+void showPatternAsVector(const HopfieldContext *ctx, const double pattern[])
 {
-   for (int n = 0; n < nRows * nColumns; n++) {
+   if (ctx == NULL) {
+      return;
+   }
+
+   for (int n = 0; n < ctx->nRows * ctx->nColumns; n++) {
       if (equals(pattern[n], +1.0)) {
          printf("*");
       }

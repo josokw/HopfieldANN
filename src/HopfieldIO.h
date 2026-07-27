@@ -5,26 +5,23 @@
 #ifndef HOPFIELDIO_H
 #define HOPFIELDIO_H
 
-extern int nRows;
-extern int nColumns;
-extern int nPatterns;
-extern int patternSize;
-extern int nNoisyPatterns;
+#include "HopfieldContext.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void readFile(const char fileName[]);
-void readNoisyFile(const char fileName[]);
+HopfieldError readFile(HopfieldContext *ctx, const char fileName[]);
+HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[]);
 
-void showIndexedPattern(int index);
-void showIndexedNoisyPattern(int index);
+void showIndexedPattern(const HopfieldContext *ctx, int index);
+void showIndexedNoisyPattern(const HopfieldContext *ctx, int index);
 
-void showPattern(const double pattern[]);
-void showPatternAndDifference(const double pattern[],
+void showPattern(const HopfieldContext *ctx, const double pattern[]);
+void showPatternAndDifference(const HopfieldContext *ctx,
+                              const double pattern[],
                               const double patternWithNoise[]);
-void showPatternAsVector(const double pattern[]);
+void showPatternAsVector(const HopfieldContext *ctx, const double pattern[]);
 
 #ifdef __cplusplus
 }
