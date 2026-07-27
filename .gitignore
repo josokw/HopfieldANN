@@ -23,6 +23,9 @@ hopfieldann
 *.x86_64
 *.hex
 
+# Bin directory
+bin/
+
 # CMake
 CMakeCache.txt
 CMakeFiles
@@ -40,3 +43,13 @@ build
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Graphify output
+graphify-out/
+
+# Session logs (large files)
+session-ses_*.md
+
+# Tool configurations
+.opencode/
+.qodo/
