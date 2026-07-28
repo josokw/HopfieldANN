@@ -24,6 +24,11 @@ bool showPatternAndDifference(const HopfieldContext *ctx,
                               const double patternWithNoise[]);
 bool showPatternAsVector(const HopfieldContext *ctx, const double pattern[]);
 
+void showAssociatedPattern(HopfieldContext *ctx,
+                           const double inputPattern[],
+                           const double inputPatternWithNoise[],
+                           double associatedPattern[]);
+
 #ifdef __cplusplus
 }
 #endif

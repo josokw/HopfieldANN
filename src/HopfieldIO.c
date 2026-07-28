@@ -242,3 +242,47 @@ bool showPatternAsVector(const HopfieldContext *ctx, const double pattern[])
    }
    return true;
 }
+
+void showAssociatedPattern(HopfieldContext *ctx,
+                            const double inputPattern[],
+                            const double inputPatternWithNoise[],
+                            double associatedPattern[])
+{
+   if (ctx == NULL || ctx->patternSize <= 0 ||
+       ctx->patternSize > NMAX_NEURONS) {
+      return;
+   }
+
+   double patternWithNoise[NMAX_NEURONS] = {0};
+   copyPattern(ctx->patternSize, inputPatternWithNoise, patternWithNoise);
+
+   double energy = 0.0;
+   double energyPrevious = 0.0;
+   int iter = 0;
+
+   showPatternAndDifference(ctx, inputPattern, patternWithNoise);
+   energy = calcEnergy(ctx->patternSize, patternWithNoise,
+                        (const double (*)[NMAX_NEURONS])ctx->W);
+   printf("\n    Energy = %9.4f\n\n", energy);
+
+   do {
+      energyPrevious = energy;
+      calcOutputPatternAsync(ctx->patternSize,
+                            (const double (*)[NMAX_NEURONS])ctx->W,
+                            patternWithNoise);
+      energy = calcEnergy(ctx->patternSize, patternWithNoise,
+                          (const double (*)[NMAX_NEURONS])ctx->W);
+      showPatternAndDifference(ctx, inputPattern, patternWithNoise);
+      printf("\n    Energy = %9.4f\n\n", energy);
+      iter++;
+   } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
+
+   copyPattern(ctx->patternSize, patternWithNoise, associatedPattern);
+   double overlap = calcOverlap(ctx->patternSize, inputPattern,
+                                associatedPattern);
+   int hamming = calcHammingDistance(ctx->patternSize, inputPattern,
+                                     associatedPattern);
+   printf("\n    Recall quality: overlap = %7.4f, "
+          "Hamming distance = %d / %d\n",
+          overlap, hamming, ctx->patternSize);
+}

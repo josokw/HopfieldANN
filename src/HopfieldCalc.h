@@ -41,10 +41,6 @@ double calcAssociatedPattern(HopfieldContext *ctx,
                              const double inputPattern[],
                              double associatedPattern[]);
 
-void showAssociatedPattern(HopfieldContext *ctx,
-                           const double inputPattern[],
-                           const double inputPatternWithNoise[],
-                           double associatedPattern[]);
 
 #ifdef __cplusplus
 }
