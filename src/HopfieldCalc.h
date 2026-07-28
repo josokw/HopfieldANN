@@ -26,6 +26,10 @@ void calcOutputPattern(const int patternSize,
                        const double inputPattern[],
                        double outputPattern[]);
 
+void calcOutputPatternAsync(const int patternSize,
+                            const double w[][NMAX_NEURONS],
+                            double pattern[]);
+
 double calcEnergy(const int patternSize, const double pattern[],
                   const double w[][NMAX_NEURONS]);
 

@@ -109,6 +109,22 @@ Not all associated output patterns will be in every detail the same as the learn
 Sometimes the associated output can be something it was never taught. "Hallucinations" is one of the
 main problems. A Hopfield network cannot tell you if the association is a "hallucination".
 
+### Asynchronous updates
+
+The network uses **asynchronous (random sequential) updates** instead of synchronous (parallel)
+updates. In each sweep, one neuron is randomly selected, its local field is computed from the
+current state of all other neurons, and it is updated immediately before the next neuron is chosen.
+
+This reduces **spurious attractors** — stable states that were never learned. Synchronous updates
+can cause neurons to overshoot, leading to oscillations between non-learned states. Asynchronous
+updates eliminate oscillations entirely because each neuron uses the most recent values of its
+inputs. The energy is guaranteed to decrease (or stay the same) after every single-neuron flip,
+so the network always converges to a fixed point rather than cycling.
+
+Note that some spurious attractors can still exist as fixed points (e.g., inverted patterns or
+mixtures of stored patterns), but their number is significantly reduced compared to synchronous
+updates.
+
 ## Building: using C17, CMake and make
 
 **Prerequisites:** CMake >= 3.15, a C17-compatible compiler, and Google Test

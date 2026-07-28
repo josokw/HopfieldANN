@@ -161,6 +161,20 @@ void calcOutputPattern(const int patternSize,
    }
 }
 
+void calcOutputPatternAsync(const int patternSize,
+                           const double w[][NMAX_NEURONS],
+                           double pattern[])
+{
+   for (int i = 0; i < patternSize; i++) {
+      int idx = randomInt(0, patternSize - 1);
+      double delta = 0.0;
+      for (int j = 0; j < patternSize; j++) {
+         delta += pattern[j] * w[idx][j];
+      }
+      pattern[idx] = sign(delta);
+   }
+}
+
 void copyPattern(const int patternSize, const double sourcePattern[],
                  double targetPattern[])
 {
@@ -202,15 +216,15 @@ double calcAssociatedPattern(HopfieldContext *ctx,
 
    do {
       energyPrevious = energy;
-      calcOutputPattern(ctx->patternSize,
-                        (const double (*)[NMAX_NEURONS])ctx->W,
-                        pattern, associatedPattern);
-      energy = calcEnergy(ctx->patternSize, associatedPattern,
+      calcOutputPatternAsync(ctx->patternSize,
+                            (const double (*)[NMAX_NEURONS])ctx->W,
+                            pattern);
+      energy = calcEnergy(ctx->patternSize, pattern,
                           (const double (*)[NMAX_NEURONS])ctx->W);
-      copyPattern(ctx->patternSize, associatedPattern, pattern);
       iter++;
    } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
 
+   copyPattern(ctx->patternSize, pattern, associatedPattern);
    return energy;
 }
 
@@ -238,14 +252,15 @@ void showAssociatedPattern(HopfieldContext *ctx,
 
    do {
       energyPrevious = energy;
-      calcOutputPattern(ctx->patternSize,
-                        (const double (*)[NMAX_NEURONS])ctx->W,
-                        patternWithNoise, associatedPattern);
-      energy = calcEnergy(ctx->patternSize, associatedPattern,
+      calcOutputPatternAsync(ctx->patternSize,
+                            (const double (*)[NMAX_NEURONS])ctx->W,
+                            patternWithNoise);
+      energy = calcEnergy(ctx->patternSize, patternWithNoise,
                           (const double (*)[NMAX_NEURONS])ctx->W);
-      copyPattern(ctx->patternSize, associatedPattern, patternWithNoise);
-      showPatternAndDifference(ctx, inputPattern, associatedPattern);
+      showPatternAndDifference(ctx, inputPattern, patternWithNoise);
       printf("\n    Energy = %9.4f\n\n", energy);
       iter++;
    } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
+
+   copyPattern(ctx->patternSize, patternWithNoise, associatedPattern);
 }

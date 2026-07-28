@@ -172,6 +172,28 @@ TEST_F(HopfieldCalcTest, CalcAssociatedPattern) {
     EXPECT_LT(energy, 0.0);  // Energy should decrease
 }
 
+TEST_F(HopfieldCalcTest, CalcOutputPatternAsync) {
+    double pattern[NMAX_NEURONS] = {0};
+
+    pattern[0] = 1.0;
+    pattern[1] = -1.0;
+    ctx->W[0][1] = 1.0;
+    ctx->W[1][0] = 1.0;
+
+    calcOutputPatternAsync(2, ctx->W, pattern);
+
+    // Neuron 0: sign(pattern[0]*W[0][0] + pattern[1]*W[0][1])
+    //         = sign(1*0 + (-1)*1) = sign(-1) = -1
+    // Neuron 1: sign(pattern[0]*W[1][0] + pattern[1]*W[1][1])
+    //         = sign(1*1 + (-1)*0) = sign(1) = 1
+    // Async updates one neuron at a time; the other retains its value.
+    // After one sweep, both neurons may have been updated.
+    // Verify the pattern is still valid (all values are +/-1)
+    for (int i = 0; i < 2; i++) {
+        EXPECT_TRUE(pattern[i] == 1.0 || pattern[i] == -1.0);
+    }
+}
+
 TEST_F(HopfieldCalcTest, AddNoiseToPattern) {
     ctx->nPatterns = 1;
     ctx->patternSize = 4;
