@@ -6,6 +6,7 @@
 #define HOPFIELDIO_H
 
 #include "HopfieldContext.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,14 +15,14 @@ extern "C" {
 HopfieldError readFile(HopfieldContext *ctx, const char fileName[]);
 HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[]);
 
-void showIndexedPattern(const HopfieldContext *ctx, int index);
-void showIndexedNoisyPattern(const HopfieldContext *ctx, int index);
+bool showIndexedPattern(const HopfieldContext *ctx, int index);
+bool showIndexedNoisyPattern(const HopfieldContext *ctx, int index);
 
-void showPattern(const HopfieldContext *ctx, const double pattern[]);
-void showPatternAndDifference(const HopfieldContext *ctx,
+bool showPattern(const HopfieldContext *ctx, const double pattern[]);
+bool showPatternAndDifference(const HopfieldContext *ctx,
                               const double pattern[],
                               const double patternWithNoise[]);
-void showPatternAsVector(const HopfieldContext *ctx, const double pattern[]);
+bool showPatternAsVector(const HopfieldContext *ctx, const double pattern[]);
 
 #ifdef __cplusplus
 }

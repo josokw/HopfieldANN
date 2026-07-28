@@ -2,7 +2,6 @@
 #include "HopfieldCalc.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 
 HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
 {
@@ -65,13 +64,14 @@ HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
    return HOPFIELD_OK;
 }
 
-void showIndexedPattern(const HopfieldContext *ctx, int index)
+bool showIndexedPattern(const HopfieldContext *ctx, int index)
 {
    if (ctx == NULL || index >= ctx->nPatterns || index < 0) {
       fprintf(stderr, "\n\tERROR: index %d out of range\n\n", index);
-      exit(EXIT_FAILURE);
+      return false;
    }
-   showPatternAndDifference(ctx, ctx->patterns[index], ctx->patterns[index]);
+   return showPatternAndDifference(ctx, ctx->patterns[index],
+                                   ctx->patterns[index]);
 }
 
 HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
@@ -140,20 +140,20 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
    return HOPFIELD_OK;
 }
 
-void showIndexedNoisyPattern(const HopfieldContext *ctx, int index)
+bool showIndexedNoisyPattern(const HopfieldContext *ctx, int index)
 {
    if (ctx == NULL || index >= ctx->nNoisyPatterns || index < 0) {
       fprintf(stderr, "\n\tERROR: index %d out of range\n\n", index);
-      exit(EXIT_FAILURE);
+      return false;
    }
-   showPatternAndDifference(ctx, ctx->noisyPatterns[index],
-                           ctx->noisyPatterns[index]);
+   return showPatternAndDifference(ctx, ctx->noisyPatterns[index],
+                                   ctx->noisyPatterns[index]);
 }
 
-void showPattern(const HopfieldContext *ctx, const double pattern[])
+bool showPattern(const HopfieldContext *ctx, const double pattern[])
 {
    if (ctx == NULL) {
-      return;
+      return false;
    }
 
    for (int nR = 0; nR < ctx->nRows; nR++) {
@@ -169,20 +169,21 @@ void showPattern(const HopfieldContext *ctx, const double pattern[])
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
                        pattern[nR * ctx->nColumns + nC]);
-               exit(EXIT_FAILURE);
+               return false;
             }
          }
       }
       puts("");
    }
+   return true;
 }
 
-void showPatternAndDifference(const HopfieldContext *ctx,
+bool showPatternAndDifference(const HopfieldContext *ctx,
                               const double pattern[],
                               const double patternWithNoise[])
 {
    if (ctx == NULL) {
-      return;
+      return false;
    }
 
    for (int nR = 0; nR < ctx->nRows; nR++) {
@@ -198,7 +199,7 @@ void showPatternAndDifference(const HopfieldContext *ctx,
                fprintf(stderr,
                        "\n\tERROR: pattern value %+f out of range\n\n",
                        patternWithNoise[nR * ctx->nColumns + nC]);
-               exit(EXIT_FAILURE);
+               return false;
             }
          }
       }
@@ -214,12 +215,13 @@ void showPatternAndDifference(const HopfieldContext *ctx,
       }
       printf("\n");
    }
+   return true;
 }
 
-void showPatternAsVector(const HopfieldContext *ctx, const double pattern[])
+bool showPatternAsVector(const HopfieldContext *ctx, const double pattern[])
 {
    if (ctx == NULL) {
-      return;
+      return false;
    }
 
    for (int n = 0; n < ctx->nRows * ctx->nColumns; n++) {
@@ -234,8 +236,9 @@ void showPatternAsVector(const HopfieldContext *ctx, const double pattern[])
             fprintf(stderr,
                     "\n\tERROR: pattern value %+f out of range\n\n",
                     pattern[n]);
-            exit(EXIT_FAILURE);
+            return false;
          }
       }
    }
+   return true;
 }

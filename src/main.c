@@ -136,17 +136,17 @@ int main(int argc, char *argv[])
                   "(1..%d): ",
                   ctx->nPatterns);
                if (scanf(" %d", &indexPattern) != 1) {
-                  fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                  hopfield_context_destroy(ctx);
-                  exit(EXIT_FAILURE);
-               }
-               puts("");
-               if (indexPattern < 1 || indexPattern > ctx->nPatterns) {
-                  fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
-                          indexPattern);
-                  hopfield_context_destroy(ctx);
-                  exit(EXIT_FAILURE);
-               }
+                   fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                   hopfield_context_destroy(ctx);
+                   return EXIT_FAILURE;
+                }
+                puts("");
+                if (indexPattern < 1 || indexPattern > ctx->nPatterns) {
+                   fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
+                           indexPattern);
+                   hopfield_context_destroy(ctx);
+                   return EXIT_FAILURE;
+                }
                indexPattern--;
                showIndexedPattern(ctx, indexPattern);
                puts("");
@@ -156,11 +156,11 @@ int main(int argc, char *argv[])
                            inputPatternWithNoise);
                printf("- Pattern %d noise level [%%]: ", indexPattern + 1);
 
-               if (scanf(" %d", &noise) != 1) {
-                  fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                  hopfield_context_destroy(ctx);
-                  exit(EXIT_FAILURE);
-               }
+                if (scanf(" %d", &noise) != 1) {
+                   fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                   hopfield_context_destroy(ctx);
+                   return EXIT_FAILURE;
+                }
 
                addNoiseToPattern(ctx, indexPattern, noise);
                /* Copy noisy pattern to local buffer */
@@ -178,17 +178,17 @@ int main(int argc, char *argv[])
                printf("\n- Choose noisy pattern, index (1..%d): ",
                       ctx->nNoisyPatterns);
                if (scanf(" %d", &indexPattern) != 1) {
-                  fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                  hopfield_context_destroy(ctx);
-                  exit(EXIT_FAILURE);
-               }
-               puts("");
-               if (indexPattern < 1 || indexPattern > ctx->nNoisyPatterns) {
-                  fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
-                          indexPattern);
-                  hopfield_context_destroy(ctx);
-                  exit(EXIT_FAILURE);
-               }
+                   fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                   hopfield_context_destroy(ctx);
+                   return EXIT_FAILURE;
+                }
+                puts("");
+                if (indexPattern < 1 || indexPattern > ctx->nNoisyPatterns) {
+                   fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
+                           indexPattern);
+                   hopfield_context_destroy(ctx);
+                   return EXIT_FAILURE;
+                }
                indexPattern--;
                puts("");
                showIndexedNoisyPattern(ctx, indexPattern);
@@ -200,11 +200,11 @@ int main(int argc, char *argv[])
                                      inputPattern, outputPattern);
                puts("");
                break;
-            default:
-               fprintf(stderr,
-                       "\n\tSYSTEM ERROR: this should never happen!\n\n");
-               hopfield_context_destroy(ctx);
-               exit(EXIT_FAILURE);
+             default:
+                fprintf(stderr,
+                        "\n\tSYSTEM ERROR: this should never happen!\n\n");
+                hopfield_context_destroy(ctx);
+                return EXIT_FAILURE;
          }
       }
        if (argc == 2) {
