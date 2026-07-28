@@ -2,36 +2,8 @@
 #include "HopfieldIO.h"
 
 #include <assert.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-static const double EPSILON = 1e-6;
-
-static int sign(double value)
-{
-   return (value >= 0.0) ? 1 : -1;
-}
-
-static int randomInt(int min, int max)
-{
-   assert(max >= min);
-   // Avoid modulo bias by using a rejection sampling method.
-   // Force statistical rigor.
-   int range = max - min + 1;
-   int limit = RAND_MAX - (RAND_MAX % range);
-   int r;
-
-   do {
-      r = rand();
-   } while (r >= limit);
-   return min + (r % range);
-}
-
-bool equals(double d1, double d2)
-{
-   return fabs(d1 - d2) < EPSILON;
-}
 
 bool isSymmetric(const int patternSize, const double w[][NMAX_NEURONS])
 {
@@ -172,14 +144,6 @@ void calcOutputPatternAsync(const int patternSize,
          delta += pattern[j] * w[idx][j];
       }
       pattern[idx] = sign(delta);
-   }
-}
-
-void copyPattern(const int patternSize, const double sourcePattern[],
-                 double targetPattern[])
-{
-   for (int i = 0; i < patternSize; i++) {
-      targetPattern[i] = sourcePattern[i];
    }
 }
 

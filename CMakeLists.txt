@@ -16,6 +16,7 @@ set(LIB_SOURCE_FILES
     src/HopfieldContext.c
     src/HopfieldCalc.c
     src/HopfieldIO.c
+    src/HopfieldUtil.c
 )
 
 add_library(hopfield_lib STATIC ${LIB_SOURCE_FILES})

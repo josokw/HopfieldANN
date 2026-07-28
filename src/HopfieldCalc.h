@@ -2,6 +2,7 @@
 #define HOPFIELDCALC_H
 
 #include "HopfieldContext.h"
+#include "HopfieldUtil.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -9,13 +10,10 @@ extern "C" {
 #endif
 
 /* Pure functions - no context needed */
-bool equals(double d1, double d2);
 bool isSymmetric(const int patternSize, const double w[][NMAX_NEURONS]);
 bool hasZeroDiagonal(const int patternSize,
                      const double w[][NMAX_NEURONS]);
 int storageCapacity(const int patternSize);
-void copyPattern(const int patternSize, const double sourcePattern[],
-                 double targetPattern[]);
 
 double calcOverlap(const int patternSize, const double pattern1[],
                    const double pattern2[]);
