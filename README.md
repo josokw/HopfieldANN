@@ -125,6 +125,19 @@ Note that some spurious attractors can still exist as fixed points (e.g., invert
 mixtures of stored patterns), but their number is significantly reduced compared to synchronous
 updates.
 
+### Recall quality: overlap and Hamming distance
+
+After retrieval, the application reports **overlap** and **Hamming distance** between the
+converged pattern and the original learned pattern:
+
+- **Overlap** `∈ [-1, 1]`: the normalized dot product `(1/N) Σ xᵢ·yᵢ`. `+1` = identical,
+  `0` = orthogonal, `-1` = inverted.
+- **Hamming distance** `∈ [0, N]`: the number of mismatching bits. `0` = perfect recall.
+
+The two metrics are related by `overlap = 1 − 2 × Hamming / N`. A small Hamming distance
+(e.g., `1 / 100`) means the converged pattern is nearly identical to the stored one, while
+a large distance indicates convergence to a spurious attractor or the wrong learned pattern.
+
 ## Building: using C17, CMake and make
 
 **Prerequisites:** CMake >= 3.15, a C17-compatible compiler, and Google Test

@@ -183,6 +183,28 @@ void copyPattern(const int patternSize, const double sourcePattern[],
    }
 }
 
+double calcOverlap(const int patternSize, const double pattern1[],
+                   const double pattern2[])
+{
+   double sum = 0.0;
+   for (int i = 0; i < patternSize; i++) {
+      sum += pattern1[i] * pattern2[i];
+   }
+   return sum / (double)patternSize;
+}
+
+int calcHammingDistance(const int patternSize, const double pattern1[],
+                        const double pattern2[])
+{
+   int dist = 0;
+   for (int i = 0; i < patternSize; i++) {
+      if (!equals(pattern1[i], pattern2[i])) {
+         dist++;
+      }
+   }
+   return dist;
+}
+
 double calcEnergy(const int patternSize, const double pattern[],
                   const double w[][NMAX_NEURONS])
 {
@@ -263,4 +285,11 @@ void showAssociatedPattern(HopfieldContext *ctx,
    } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
 
    copyPattern(ctx->patternSize, patternWithNoise, associatedPattern);
+   double overlap = calcOverlap(ctx->patternSize, inputPattern,
+                                associatedPattern);
+   int hamming = calcHammingDistance(ctx->patternSize, inputPattern,
+                                     associatedPattern);
+   printf("\n    Recall quality: overlap = %7.4f, "
+          "Hamming distance = %d / %d\n",
+          overlap, hamming, ctx->patternSize);
 }

@@ -217,6 +217,48 @@ TEST_F(HopfieldCalcTest, AddNoiseToPattern) {
     EXPECT_EQ(diffCount, nNoise);
 }
 
+TEST_F(HopfieldCalcTest, OverlapIdentical) {
+    double p1[4] = {1, -1, 1, -1};
+    double p2[4] = {1, -1, 1, -1};
+    EXPECT_DOUBLE_EQ(calcOverlap(4, p1, p2), 1.0);
+}
+
+TEST_F(HopfieldCalcTest, OverlapInverted) {
+    double p1[4] = {1, -1, 1, -1};
+    double p2[4] = {-1, 1, -1, 1};
+    EXPECT_DOUBLE_EQ(calcOverlap(4, p1, p2), -1.0);
+}
+
+TEST_F(HopfieldCalcTest, OverlapOrthogonal) {
+    double p1[2] = {1, -1};
+    double p2[2] = {1, 1};
+    EXPECT_DOUBLE_EQ(calcOverlap(2, p1, p2), 0.0);
+}
+
+TEST_F(HopfieldCalcTest, OverlapPartial) {
+    double p1[4] = {1, -1, 1, -1};
+    double p2[4] = {1, 1, -1, -1};  // 2 of 4 match
+    EXPECT_DOUBLE_EQ(calcOverlap(4, p1, p2), 0.0);
+}
+
+TEST_F(HopfieldCalcTest, HammingIdentical) {
+    double p1[4] = {1, -1, 1, -1};
+    double p2[4] = {1, -1, 1, -1};
+    EXPECT_EQ(calcHammingDistance(4, p1, p2), 0);
+}
+
+TEST_F(HopfieldCalcTest, HammingInverted) {
+    double p1[4] = {1, -1, 1, -1};
+    double p2[4] = {-1, 1, -1, 1};
+    EXPECT_EQ(calcHammingDistance(4, p1, p2), 4);
+}
+
+TEST_F(HopfieldCalcTest, HammingPartial) {
+    double p1[4] = {1, -1, 1, -1};
+    double p2[4] = {1, 1, -1, -1};  // 2 match, 2 differ
+    EXPECT_EQ(calcHammingDistance(4, p1, p2), 2);
+}
+
 class HopfieldIOTest : public ::testing::Test {
 protected:
     HopfieldContext *ctx;

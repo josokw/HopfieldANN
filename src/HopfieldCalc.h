@@ -17,6 +17,12 @@ int storageCapacity(const int patternSize);
 void copyPattern(const int patternSize, const double sourcePattern[],
                  double targetPattern[]);
 
+double calcOverlap(const int patternSize, const double pattern1[],
+                   const double pattern2[]);
+
+int calcHammingDistance(const int patternSize, const double pattern1[],
+                        const double pattern2[]);
+
 /* Context-dependent functions */
 bool learnHebbian(HopfieldContext *ctx);
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance);
