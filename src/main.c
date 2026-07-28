@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
             "%d\n\n",
             ctx->nRows, ctx->nColumns, ctx->patternSize, ctx->nPatterns);
 
-         int stCapacity = storageCapacity(ctx->patternSize);
+         stCapacity = storageCapacity(ctx->patternSize);
          if (stCapacity < ctx->nPatterns) {
             fprintf(
                stderr,
@@ -245,8 +245,6 @@ static void clearInput(void)
 static void handle_error(HopfieldError err)
 {
    switch (err) {
-      case HOPFIELD_OK:
-         break;
       case HOPFIELD_ERR_FILE_NOT_FOUND:
          fprintf(stderr, "Error: File not found\n");
          break;

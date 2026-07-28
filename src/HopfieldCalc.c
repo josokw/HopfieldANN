@@ -13,7 +13,7 @@ static int sign(double value)
    return (value >= 0.0) ? 1 : -1;
 }
 
-static int Random(int min, int max)
+static int randomInt(int min, int max)
 {
    assert(max >= min);
    // Avoid modulo bias by using a rejection sampling method.
@@ -101,8 +101,10 @@ bool learnHebbian(HopfieldContext *ctx)
          }
       }
    }
-   assert(hasZeroDiagonal(ctx->patternSize, ctx->W));
-   assert(isSymmetric(ctx->patternSize, ctx->W));
+   assert(hasZeroDiagonal(ctx->patternSize,
+                          (const double (*)[NMAX_NEURONS])ctx->W));
+   assert(isSymmetric(ctx->patternSize,
+                       (const double (*)[NMAX_NEURONS])ctx->W));
    return true;
 }
 
@@ -123,7 +125,7 @@ int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
    int noiseArray[NMAX_NEURONS] = {0};
    int n = 0;
    while (n < nNoise) {
-      noiseIndex = Random(0, ctx->patternSize - 1);
+      noiseIndex = randomInt(0, ctx->patternSize - 1);
       if (noiseArray[noiseIndex] == 0) {
          noiseArray[noiseIndex] = 1;
          n++;
@@ -193,14 +195,18 @@ double calcAssociatedPattern(HopfieldContext *ctx,
    double pattern[NMAX_NEURONS] = {0};
    copyPattern(ctx->patternSize, inputPattern, pattern);
 
-   double energy = calcEnergy(ctx->patternSize, pattern, ctx->W);
+   double energy = calcEnergy(ctx->patternSize, pattern,
+                             (const double (*)[NMAX_NEURONS])ctx->W);
    double energyPrevious = 0.0;
    int iter = 0;
 
    do {
       energyPrevious = energy;
-      calcOutputPattern(ctx->patternSize, ctx->W, pattern, associatedPattern);
-      energy = calcEnergy(ctx->patternSize, associatedPattern, ctx->W);
+      calcOutputPattern(ctx->patternSize,
+                        (const double (*)[NMAX_NEURONS])ctx->W,
+                        pattern, associatedPattern);
+      energy = calcEnergy(ctx->patternSize, associatedPattern,
+                          (const double (*)[NMAX_NEURONS])ctx->W);
       copyPattern(ctx->patternSize, associatedPattern, pattern);
       iter++;
    } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
@@ -226,14 +232,17 @@ void showAssociatedPattern(HopfieldContext *ctx,
    int iter = 0;
 
    showPatternAndDifference(ctx, inputPattern, patternWithNoise);
-   energy = calcEnergy(ctx->patternSize, patternWithNoise, ctx->W);
+   energy = calcEnergy(ctx->patternSize, patternWithNoise,
+                       (const double (*)[NMAX_NEURONS])ctx->W);
    printf("\n    Energy = %9.4f\n\n", energy);
 
    do {
       energyPrevious = energy;
-      calcOutputPattern(ctx->patternSize, ctx->W, patternWithNoise,
-                        associatedPattern);
-      energy = calcEnergy(ctx->patternSize, associatedPattern, ctx->W);
+      calcOutputPattern(ctx->patternSize,
+                        (const double (*)[NMAX_NEURONS])ctx->W,
+                        patternWithNoise, associatedPattern);
+      energy = calcEnergy(ctx->patternSize, associatedPattern,
+                          (const double (*)[NMAX_NEURONS])ctx->W);
       copyPattern(ctx->patternSize, associatedPattern, patternWithNoise);
       showPatternAndDifference(ctx, inputPattern, associatedPattern);
       printf("\n    Energy = %9.4f\n\n", energy);
