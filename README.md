@@ -1,6 +1,6 @@
 # Hopfield Artificial Neural Network
 
-The Hopfield ANN application is a text console application implemented in C11 showing the recovery
+The Hopfield ANN application is a text console application implemented in C17 showing the recovery
 of noisy (damaged) learned images.
 
 [![CodeFactor](https://www.codefactor.io/repository/github/josokw/hopfieldann/badge)](https://www.codefactor.io/repository/github/josokw/hopfieldann)
@@ -109,10 +109,13 @@ Not all associated output patterns will be in every detail the same as the learn
 Sometimes the associated output can be something it was never taught. "Hallucinations" is one of the
 main problems. A Hopfield network cannot tell you if the association is a "hallucination".
 
-## Building: using C11, CMake and make
+## Building: using C17, CMake and make
 
-The application does not use dynamic memory allocation. The maximum number of neurons and the
-maximum number of input learning patterns can be configured in the C file _HopfieldConfig.h_.
+**Prerequisites:** CMake >= 3.15, a C17-compatible compiler, and Google Test
+(`libgtest-dev` on Debian/Ubuntu, `gtest` on macOS via Homebrew).
+
+The maximum number of neurons and the maximum number of input learning patterns
+can be configured in the C file _HopfieldConfig.h_.
 
 Go to the **HopfieldANN** directory. Use _CMake_ and _make_ to build the application:
 
@@ -146,25 +149,20 @@ Using file redirection for generating test data:
 
     ../bin/hopfieldann ../data/hopf01.dat < ../testScripts/input_test_1.txt > ../testScripts/result_test_1.txt
 
+## Running tests
+
+The project includes a Google Test suite. From the build directory:
+
+    cmake ..
+    make -j
+    ctest --output-on-failure
+
 ## License
 
 See the [License](./License) file.
 
-## Updates guided by OpenCode (May 2026)
+## Updates guided by OpenCode (2026)
 
-As of May 2026, the adoption of AI technologies had accelerated significantly. This small C project
-serves as a practical case study for applying AI-guided improvements.
-
-Used **big-pickle (opencode/big-pickle)**, a large language model fine-tuned specifically for software
-engineering tasks within the opencode ecosystem.
-
-Decoder-only transformer with:
-
-- 120B parameters
-- 65+ layers
-- 8K+ context window (varies by deployment)
-- Sparse mixture-of-experts (MoE) feed-forward layers for compute efficiency
-- Grouped-query attention (GQA) with 8 key/value heads
-- Rotary position embeddings (RoPE)
-
-In June 2026 **Nemotron 3 Ultra Free OpenCode Zen** and **Nemotron 3 Super Nvidia** were also used.
+Code quality improvements were performed using AI-assisted review with
+**big-pickle (opencode/big-pickle)**. In June 2026, **Nemotron 3 Ultra Free
+OpenCode Zen** and **Nemotron 3 Super Nvidia** were also used.
