@@ -18,7 +18,7 @@ void copyPattern(const int patternSize, const double sourcePattern[],
                  double targetPattern[]);
 
 /* Context-dependent functions */
-void learnHebbian(HopfieldContext *ctx);
+bool learnHebbian(HopfieldContext *ctx);
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance);
 
 void calcOutputPattern(const int patternSize,

@@ -89,7 +89,7 @@ TEST_F(HopfieldCalcTest, LearnHebbianSymmetric) {
     ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
     ctx->patterns[1][2] = -1; ctx->patterns[1][3] = 1;
 
-    learnHebbian(ctx);
+    EXPECT_TRUE(learnHebbian(ctx));
 
     EXPECT_TRUE(isSymmetric(ctx->patternSize, ctx->W));
     EXPECT_TRUE(hasZeroDiagonal(ctx->patternSize, ctx->W));
@@ -102,7 +102,7 @@ TEST_F(HopfieldCalcTest, LearnHebbianCorrectWeights) {
     ctx->patterns[0][0] = 1;
     ctx->patterns[0][1] = 1;
 
-    learnHebbian(ctx);
+    EXPECT_TRUE(learnHebbian(ctx));
 
     // W[0][1] = W[1][0] = (1*1)/2 = 0.5
     EXPECT_DOUBLE_EQ(ctx->W[0][1], 0.5);
@@ -154,7 +154,7 @@ TEST_F(HopfieldCalcTest, CalcAssociatedPattern) {
     ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
     ctx->patterns[1][2] = -1; ctx->patterns[1][3] = 1;
 
-    learnHebbian(ctx);
+    EXPECT_TRUE(learnHebbian(ctx));
 
     // Try to recall pattern 0 from a slightly noisy version
     double input[NMAX_NEURONS] = {0};

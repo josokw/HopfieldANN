@@ -64,7 +64,11 @@ int main(int argc, char *argv[])
    printf(
       "- Learning patterns by Hebbian learning rule, "
       "training starts .... ");
-   learnHebbian(ctx);
+   if (!learnHebbian(ctx)) {
+      fprintf(stderr, "Error: Failed to learn patterns\n");
+      hopfield_context_destroy(ctx);
+      return EXIT_FAILURE;
+   }
    printf("ready\n");
    printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
           ctx->nRows * ctx->nColumns, ctx->nRows * ctx->nColumns);
@@ -113,7 +117,11 @@ int main(int argc, char *argv[])
          }
 
          printf("- Learning patterns by Hebbian learning rule .... ");
-         learnHebbian(ctx);
+         if (!learnHebbian(ctx)) {
+            fprintf(stderr, "Error: Failed to learn patterns\n");
+            hopfield_context_destroy(ctx);
+            return EXIT_FAILURE;
+         }
          printf("ready\n\n");
          printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
                 ctx->nRows * ctx->nColumns, ctx->nRows * ctx->nColumns);

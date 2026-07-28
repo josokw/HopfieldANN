@@ -74,11 +74,12 @@ int storageCapacity(const int patternSize)
    return cap < 1 ? 1 : cap;
 }
 
-void learnHebbian(HopfieldContext *ctx)
+bool learnHebbian(HopfieldContext *ctx)
 {
-   assert(ctx != NULL);
-   assert(ctx->nPatterns > 0 && ctx->nPatterns <= NMAX_PATTERNS);
-   assert(ctx->patternSize > 0 && ctx->patternSize <= NMAX_NEURONS);
+   if (ctx == NULL || ctx->nPatterns <= 0 || ctx->nPatterns > NMAX_PATTERNS ||
+       ctx->patternSize <= 0 || ctx->patternSize > NMAX_NEURONS) {
+      return false;
+   }
 
    for (int row = 0; row < ctx->patternSize; row++) {
       for (int column = 0; column < ctx->patternSize; column++) {
@@ -102,13 +103,15 @@ void learnHebbian(HopfieldContext *ctx)
    }
    assert(hasZeroDiagonal(ctx->patternSize, ctx->W));
    assert(isSymmetric(ctx->patternSize, ctx->W));
+   return true;
 }
 
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
 {
-   assert(ctx != NULL);
-   assert(patNumber >= 0 && patNumber < ctx->nPatterns);
-   assert(ctx->patternSize > 0 && ctx->patternSize <= NMAX_NEURONS);
+   if (ctx == NULL || patNumber < 0 || patNumber >= ctx->nPatterns ||
+       ctx->patternSize <= 0 || ctx->patternSize > NMAX_NEURONS) {
+      return -1;
+   }
 
    if (chance < 0)
       chance = 0;
@@ -182,7 +185,10 @@ double calcAssociatedPattern(HopfieldContext *ctx,
                              const double inputPattern[],
                              double associatedPattern[])
 {
-   assert(ctx != NULL);
+   if (ctx == NULL || ctx->patternSize <= 0 ||
+       ctx->patternSize > NMAX_NEURONS) {
+      return 0.0;
+   }
 
    double pattern[NMAX_NEURONS] = {0};
    copyPattern(ctx->patternSize, inputPattern, pattern);
@@ -207,8 +213,10 @@ void showAssociatedPattern(HopfieldContext *ctx,
                            const double inputPatternWithNoise[],
                            double associatedPattern[])
 {
-   assert(ctx != NULL);
-   assert(ctx->patternSize > 0 && ctx->patternSize <= NMAX_NEURONS);
+   if (ctx == NULL || ctx->patternSize <= 0 ||
+       ctx->patternSize > NMAX_NEURONS) {
+      return;
+   }
 
    double patternWithNoise[NMAX_NEURONS] = {0};
    copyPattern(ctx->patternSize, inputPatternWithNoise, patternWithNoise);
