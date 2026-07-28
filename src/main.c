@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <time.h>
 
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
    int noise = 0;
    int indexPattern;
    int menu = 0;
+   bool firstRun = true;
    char fileName[MAXFILENAME_SIZE] = {0};
    const char menuChars[] = "ELNeln";
 
@@ -117,7 +119,8 @@ int main(int argc, char *argv[])
                 ctx->nRows * ctx->nColumns, ctx->nRows * ctx->nColumns);
       }
 
-      if (strchr(menuChars, menu) != NULL) {
+      if (firstRun || strchr(menuChars, menu) != NULL) {
+         firstRun = false;
          switch (argc) {
             case 2:
                printf(

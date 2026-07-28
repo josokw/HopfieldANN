@@ -19,17 +19,23 @@ HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
       fclose(hfDataFile);
       return HOPFIELD_ERR_INVALID_FORMAT;
    }
+
+   if (ctx->nRows <= 0 || ctx->nColumns <= 0) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_INVALID_FORMAT;
+   }
+
+   if (ctx->nPatterns <= 0 || ctx->nPatterns > NMAX_PATTERNS) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_SIZE_EXCEEDED;
+   }
+
+   if (ctx->nRows > NMAX_NEURONS || ctx->nColumns > NMAX_NEURONS ||
+       ctx->nRows > NMAX_NEURONS / ctx->nColumns) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_SIZE_EXCEEDED;
+   }
    ctx->patternSize = ctx->nColumns * ctx->nRows;
-
-   if (ctx->patternSize > NMAX_NEURONS) {
-      fclose(hfDataFile);
-      return HOPFIELD_ERR_SIZE_EXCEEDED;
-   }
-
-   if (ctx->nPatterns > NMAX_PATTERNS) {
-      fclose(hfDataFile);
-      return HOPFIELD_ERR_SIZE_EXCEEDED;
-   }
 
    // Line has maximum size if pattern is flat: height = 1
    char line[NMAX_NEURONS + 1] = {'\0'};
@@ -93,17 +99,17 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
       return HOPFIELD_ERR_INVALID_FORMAT;
    }
 
+   if (nNoisyRows <= 0 || nNoisyColumns <= 0) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_INVALID_FORMAT;
+   }
+
    if (ctx->nRows != nNoisyRows || ctx->nColumns != nNoisyColumns) {
       fclose(hfDataFile);
       return HOPFIELD_ERR_INVALID_FORMAT;
    }
 
-   if (ctx->patternSize > NMAX_NEURONS) {
-      fclose(hfDataFile);
-      return HOPFIELD_ERR_SIZE_EXCEEDED;
-   }
-
-   if (ctx->nNoisyPatterns > NMAX_PATTERNS) {
+   if (ctx->nNoisyPatterns <= 0 || ctx->nNoisyPatterns > NMAX_PATTERNS) {
       fclose(hfDataFile);
       return HOPFIELD_ERR_SIZE_EXCEEDED;
    }
