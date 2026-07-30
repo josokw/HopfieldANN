@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
    int indexPattern;
    int menu = 0;
    bool firstRun = true;
+   bool useStorkey = false;
+   const char *ruleName = "Hebbian";
    char fileName[MAXFILENAME_SIZE] = {0};
    const char menuChars[] = "ELNelnRr";
 
@@ -61,10 +63,20 @@ int main(int argc, char *argv[])
               stCapacity);
    }
 
-   printf(
-      "- Learning patterns by Hebbian learning rule, "
-      "training starts .... ");
-   if (!learnHebbian(ctx)) {
+   int ruleChoice = 0;
+   printf("- Learning rule: (H)ebbian or (S)torkey? [H]: ");
+   ruleChoice = getchar();
+   if (ruleChoice == 'S' || ruleChoice == 's') {
+      useStorkey = true;
+      ruleName = "Storkey";
+   }
+   clearInput();
+   puts("");
+
+   printf("- Learning patterns by %s learning rule, "
+          "training starts .... ", ruleName);
+   bool learned = useStorkey ? learnStorkey(ctx) : learnHebbian(ctx);
+   if (!learned) {
       fprintf(stderr, "Error: Failed to learn patterns\n");
       hopfield_context_destroy(ctx);
       return EXIT_FAILURE;
@@ -120,8 +132,8 @@ int main(int argc, char *argv[])
                stCapacity);
          }
 
-         printf("- Learning patterns by Hebbian learning rule .... ");
-         if (!learnHebbian(ctx)) {
+          printf("- Learning patterns by %s learning rule .... ", ruleName);
+          if (!(useStorkey ? learnStorkey(ctx) : learnHebbian(ctx))) {
             fprintf(stderr, "Error: Failed to learn patterns\n");
             hopfield_context_destroy(ctx);
             return EXIT_FAILURE;

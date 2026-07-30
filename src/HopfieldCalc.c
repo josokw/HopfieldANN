@@ -79,6 +79,52 @@ bool learnHebbian(HopfieldContext *ctx)
    return true;
 }
 
+bool learnStorkey(HopfieldContext *ctx)
+{
+   if (ctx == NULL || ctx->nPatterns <= 0 || ctx->nPatterns > NMAX_PATTERNS ||
+       ctx->patternSize <= 0 || ctx->patternSize > NMAX_NEURONS) {
+      return false;
+   }
+
+   int N = ctx->patternSize;
+
+   for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
+         ctx->W[i][j] = 0.0;
+      }
+   }
+
+   for (int pat = 0; pat < ctx->nPatterns; pat++) {
+      double *xi = ctx->patterns[pat];
+
+      double field[NMAX_NEURONS];
+      for (int i = 0; i < N; i++) {
+         field[i] = 0.0;
+         for (int k = 0; k < N; k++) {
+            field[i] += ctx->W[i][k] * xi[k];
+         }
+      }
+
+      for (int i = 0; i < N; i++) {
+         for (int j = i + 1; j < N; j++) {
+            double h_ij = field[i] - ctx->W[i][j] * xi[j];
+            double h_ji = field[j] - ctx->W[i][j] * xi[i];
+            double delta = (xi[i] * xi[j] - xi[i] * h_ji - h_ij * xi[j]) /
+                           (double)N;
+            ctx->W[i][j] += delta;
+            ctx->W[j][i] = ctx->W[i][j];
+         }
+         ctx->W[i][i] = 0.0;
+      }
+   }
+
+   assert(hasZeroDiagonal(ctx->patternSize,
+                           (const double (*)[NMAX_NEURONS])ctx->W));
+   assert(isSymmetric(ctx->patternSize,
+                        (const double (*)[NMAX_NEURONS])ctx->W));
+   return true;
+}
+
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
 {
    if (ctx == NULL || patNumber < 0 || patNumber >= ctx->nPatterns ||

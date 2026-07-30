@@ -111,6 +111,73 @@ TEST_F(HopfieldCalcTest, LearnHebbianCorrectWeights) {
     EXPECT_DOUBLE_EQ(ctx->W[1][1], 0.0);
 }
 
+TEST_F(HopfieldCalcTest, LearnStorkeySymmetric) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 4;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
+   ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = 1;
+
+   EXPECT_TRUE(learnStorkey(ctx));
+
+   EXPECT_TRUE(isSymmetric(ctx->patternSize, ctx->W));
+   EXPECT_TRUE(hasZeroDiagonal(ctx->patternSize, ctx->W));
+}
+
+TEST_F(HopfieldCalcTest, LearnStorkeyCorrectWeights) {
+   ctx->nPatterns = 1;
+   ctx->patternSize = 2;
+   ctx->patterns[0][0] = 1;
+   ctx->patterns[0][1] = 1;
+
+   EXPECT_TRUE(learnStorkey(ctx));
+
+   EXPECT_DOUBLE_EQ(ctx->W[0][1], 0.5);
+   EXPECT_DOUBLE_EQ(ctx->W[1][0], 0.5);
+   EXPECT_DOUBLE_EQ(ctx->W[0][0], 0.0);
+   EXPECT_DOUBLE_EQ(ctx->W[1][1], 0.0);
+}
+
+TEST_F(HopfieldCalcTest, LearnStorkeyTwoPatterns) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 4;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
+   ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = -1;
+
+   EXPECT_TRUE(learnStorkey(ctx));
+
+   EXPECT_DOUBLE_EQ(ctx->W[0][1], 0.75);
+   EXPECT_DOUBLE_EQ(ctx->W[0][2], 0.0);
+   EXPECT_DOUBLE_EQ(ctx->W[2][3], 0.75);
+}
+
+TEST_F(HopfieldCalcTest, LearnStorkeyRecall) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 4;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
+   ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = 1;
+
+   EXPECT_TRUE(learnStorkey(ctx));
+
+   double input[NMAX_NEURONS] = {0};
+   double associated[NMAX_NEURONS] = {0};
+
+   input[0] = 1.0; input[1] = -1.0;
+   input[2] = 1.0; input[3] = -1.0;
+
+   double energy = calcAssociatedPattern(ctx, input, associated);
+
+   for (int i = 0; i < 4; i++) {
+      EXPECT_DOUBLE_EQ(associated[i], ctx->patterns[0][i]);
+   }
+   EXPECT_LT(energy, 0.0);
+}
+
 TEST_F(HopfieldCalcTest, CalcEnergy) {
     double pattern[NMAX_NEURONS] = {0};
 
