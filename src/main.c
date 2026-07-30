@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
    int menu = 0;
    bool firstRun = true;
    char fileName[MAXFILENAME_SIZE] = {0};
-   const char menuChars[] = "ELNeln";
+   const char menuChars[] = "ELNelnRr";
 
    /* Local pattern buffers */
    double inputPattern[NMAX_NEURONS] = {0};
@@ -87,6 +87,10 @@ int main(int argc, char *argv[])
    }
 
    while (menu != 'E' && menu != 'e') {
+      bool enterPressed = (menu == '\n');
+      if (enterPressed) {
+         menu = 'R';
+      }
       if (argc == 2 && (menu == 'L' || menu == 'l')) {
          clearInput(); /* remove \n previous input */
          printf("- Input patterns file name: ");
@@ -129,38 +133,42 @@ int main(int argc, char *argv[])
 
       if (firstRun || strchr(menuChars, menu) != NULL) {
          firstRun = false;
+         bool repeat = (menu == 'R' || menu == 'r');
          switch (argc) {
             case 2:
-               printf(
-                  "- Choose pattern to disturb by noise, index "
-                  "(1..%d): ",
-                  ctx->nPatterns);
-               if (scanf(" %d", &indexPattern) != 1) {
-                   fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                   hopfield_context_destroy(ctx);
-                   return EXIT_FAILURE;
-                }
-                puts("");
-                if (indexPattern < 1 || indexPattern > ctx->nPatterns) {
-                   fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
-                           indexPattern);
-                   hopfield_context_destroy(ctx);
-                   return EXIT_FAILURE;
-                }
-               indexPattern--;
-               showIndexedPattern(ctx, indexPattern);
-               puts("");
-               copyPattern(ctx->patternSize, ctx->patterns[indexPattern],
-                           inputPattern);
-               copyPattern(ctx->patternSize, ctx->patterns[indexPattern],
-                           inputPatternWithNoise);
-               printf("- Pattern %d noise level [%%]: ", indexPattern + 1);
+               if (!repeat) {
+                  printf(
+                     "- Choose pattern to disturb by noise, index "
+                     "(1..%d): ",
+                     ctx->nPatterns);
+                  if (scanf(" %d", &indexPattern) != 1) {
+                      fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                      hopfield_context_destroy(ctx);
+                      return EXIT_FAILURE;
+                   }
+                   puts("");
+                   if (indexPattern < 1 || indexPattern > ctx->nPatterns) {
+                      fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
+                              indexPattern);
+                      hopfield_context_destroy(ctx);
+                      return EXIT_FAILURE;
+                   }
+                  indexPattern--;
+                  showIndexedPattern(ctx, indexPattern);
+                  puts("");
+                  copyPattern(ctx->patternSize, ctx->patterns[indexPattern],
+                              inputPattern);
+                  copyPattern(ctx->patternSize, ctx->patterns[indexPattern],
+                              inputPatternWithNoise);
+                  printf("- Pattern %d noise level [%%]: ",
+                         indexPattern + 1);
 
-                if (scanf(" %d", &noise) != 1) {
-                   fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                   hopfield_context_destroy(ctx);
-                   return EXIT_FAILURE;
-                }
+                   if (scanf(" %d", &noise) != 1) {
+                      fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                      hopfield_context_destroy(ctx);
+                      return EXIT_FAILURE;
+                   }
+               }
 
                addNoiseToPattern(ctx, indexPattern, noise);
                /* Copy noisy pattern to local buffer */
@@ -175,27 +183,31 @@ int main(int argc, char *argv[])
                puts("");
                break;
             case 3:
-               printf("\n- Choose noisy pattern, index (1..%d): ",
-                      ctx->nNoisyPatterns);
-               if (scanf(" %d", &indexPattern) != 1) {
-                   fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                   hopfield_context_destroy(ctx);
-                   return EXIT_FAILURE;
-                }
-                puts("");
-                if (indexPattern < 1 || indexPattern > ctx->nNoisyPatterns) {
-                   fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
-                           indexPattern);
-                   hopfield_context_destroy(ctx);
-                   return EXIT_FAILURE;
-                }
-               indexPattern--;
-               puts("");
-               showIndexedNoisyPattern(ctx, indexPattern);
-               puts("");
-               copyPattern(ctx->patternSize, ctx->noisyPatterns[indexPattern],
-                           inputPattern);
-               printf("\n\n- Pattern %d as 2D image:\n\n", indexPattern + 1);
+               if (!repeat) {
+                  printf("\n- Choose noisy pattern, index (1..%d): ",
+                         ctx->nNoisyPatterns);
+                  if (scanf(" %d", &indexPattern) != 1) {
+                      fprintf(stderr, "\n\tERROR: invalid input\n\n");
+                      hopfield_context_destroy(ctx);
+                      return EXIT_FAILURE;
+                   }
+                   puts("");
+                   if (indexPattern < 1 ||
+                       indexPattern > ctx->nNoisyPatterns) {
+                      fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
+                              indexPattern);
+                      hopfield_context_destroy(ctx);
+                      return EXIT_FAILURE;
+                   }
+                  indexPattern--;
+                  puts("");
+                  showIndexedNoisyPattern(ctx, indexPattern);
+                  puts("");
+                  copyPattern(ctx->patternSize,
+                              ctx->noisyPatterns[indexPattern], inputPattern);
+               }
+               printf("\n\n- Pattern %d as 2D image:\n\n",
+                      indexPattern + 1);
                showAssociatedPattern(ctx, inputPattern,
                                      inputPattern, outputPattern);
                puts("");
@@ -209,13 +221,16 @@ int main(int argc, char *argv[])
       }
        if (argc == 2) {
           printf(
-             "- E(xit), L(oad new patterns data file), N(ext simulation) "
-             ".... ");
+             "- E(xit), L(oad new patterns data file), N(ext simulation),\n"
+             "  R(un again), <Enter>(repeat) .... ");
        }
        else {
-          printf("- E(xit), N(ext simulation) .... ");
+          printf("- E(xit), N(ext simulation), R(un again), <Enter>(repeat)"
+                 " .... ");
        }
-       clearInput();
+       if (!enterPressed) {
+          clearInput();
+       }
        menu = getchar();
    }
 
