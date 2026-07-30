@@ -32,6 +32,37 @@ neurons are available the Pmax equals 16 patterns that can be stored and retriev
 others. When patterns are strongly correlated, crosstalk during recall increases and the network
 is more likely to converge to spurious attractors instead of the correct stored pattern.
 
+## Learning rules
+
+At startup, the program prompts the user to choose a learning rule.
+
+### Hebbian learning rule
+
+The default learning rule. Weight updates follow Hebb's rule — neurons that fire together,
+wire together. The weight matrix is updated for each pattern using the outer product
+normalized by pattern size:
+
+    W_ij = (1/N) Σ_μ x_i^μ · x_j^μ    (i ≠ j),   W_ii = 0
+
+This rule is simple and biologically plausible, but crosstalk between correlated patterns
+can reduce recall accuracy.
+
+### Storkey learning rule
+
+The Storkey learning rule (also known as the Storkey–Palmer rule) reduces crosstalk between
+stored patterns by incorporating a local-field correction during training. For each pattern,
+the weight update is computed using the pre-synaptic local field, which subtracts the
+influence of existing weights before adding the new pattern:
+
+    h_j = Σ_k W_ik · x_k^μ    (k ≠ i,j)
+    ΔW_ij = (1/N) (x_i^μ · x_j^μ − x_i^μ · h_j − h_i · x_j^μ)
+
+This results in a weight matrix with reduced interference, higher practical storage capacity,
+and fewer spurious attractors compared to the Hebbian rule. The interactive prompt defaults
+to Hebbian if only Enter is pressed:
+
+    Learning rule: (H)ebbian or (S)torkey? [H]:
+
 More detailed information reference:
 [Hopfield Wikipedia](https://en.wikipedia.org/wiki/Hopfield_network).
 
@@ -158,7 +189,13 @@ The executable can be found in the _bin_ directory.
 
 ## Executing: using an input file containing patterns to learn
 
-Some input file examples can be found in the _data_ directory.
+Input file examples can be found in the _data_ directory:
+
+- `hopf01.dat` — 10×10, 7 patterns (letters and shapes)
+- `hopf01noisy.dat` — 10×10, 4 noisy variants of hopf01
+- `hopf02.dat` — 10×12, 4 patterns (letters and shapes)
+- `hopf03.dat` — 16×16, 6 patterns (geometric shapes)
+- `hopf04.dat` — 10×10, 5 patterns (diverse symbols)
 
 Starting the program without parameters will show the usage help:
 
@@ -171,6 +208,50 @@ If the _build_ directory is the current directory:
     ../bin/hopfieldann ../data/hopf01.dat
 
     ../bin/hopfieldann ../data/hopf01.dat ../data/hopf01noisy.dat
+
+## Interactive menu
+
+After training, the program presents a menu loop. The available options depend on the
+invocation mode:
+
+**Mode 1** (`hopfieldann <patterns>`):
+
+    E(xit), L(oad new patterns data file), N(ext simulation), R(un again)
+
+**Mode 2** (`hopfieldann <patterns> <noisy>`):
+
+    E(xit), N(ext simulation), R(un again)
+
+| Key    | Action                           |
+|--------|----------------------------------|
+| `E`/`e`| Exit the program                 |
+| `L`/`l`| Load a new pattern file (mode 1) |
+| `N`/`n`| Start a new simulation           |
+| `R`/`r`| Re-run the last simulation       |
+| Enter  | Alias for `R`                    |
+
+In Mode 1, `N` prompts for a pattern index and noise percentage, corrupts the chosen
+pattern on the fly, and runs recall. In Mode 2, `N` prompts for one of the pre-made
+noisy patterns from the second input file.
+
+The `R` and Enter options repeat the previous simulation with the exact same parameters
+without re-prompting.
+
+### Simulation output
+
+Each iteration displays the current pattern state, a difference column (showing `#` for
+neurons that differ from the target), and the current energy:
+
+    <pattern grid>    <difference grid>
+        Energy = -30.9200
+
+After convergence the program reports recall quality:
+
+    Recall quality: overlap =  1.0000, Hamming distance = 0 / 100
+
+A warning is shown if the number of stored patterns exceeds the theoretical capacity:
+
+    Warning: associative storage capacity 13 exceeded
 
 ## Test scripts
 
@@ -190,8 +271,22 @@ The project includes a Google Test suite. From the build directory:
 
 See the [License](./License) file.
 
-## Updates guided by OpenCode (2026)
+## Updates guided by opencode (2026)
 
 Code quality improvements were performed using AI-assisted review with
-**big-pickle (opencode/big-pickle)**. In June 2026, **Nemotron 3 Ultra Free
-OpenCode Zen** and **Nemotron 3 Super Nvidia** were also used.
+**big-pickle (opencode/big-pickle)**.
+
+Features added during this review:
+
+- **Storkey learning rule** — alternative learning rule with local-field correction
+  for reduced crosstalk between stored patterns
+- **`convergePattern()`** — callback-based convergence engine that separates
+  iteration logic from display, enabling reuse and testing
+- **Overlap and Hamming distance** — quantitative recall quality metrics reported
+  after each simulation
+- **`R`(un again) and Enter(repeat)** — menu options to re-run the last simulation
+  without re-entering parameters
+- **Google Test suite** — 17 unit tests across two test suites for algorithmic
+  correctness and I/O error handling
+- **VS Code launch/tasks configuration** — integrated single-key build and debug
+  support
