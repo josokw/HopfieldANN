@@ -182,9 +182,11 @@ double calcEnergy(const int patternSize, const double pattern[],
    return -0.5 * energy;
 }
 
-double calcAssociatedPattern(HopfieldContext *ctx,
-                             const double inputPattern[],
-                             double associatedPattern[])
+double convergePattern(HopfieldContext *ctx,
+                       const double inputPattern[],
+                       double outputPattern[],
+                       ConvergenceCallback callback,
+                       void *user_data)
 {
    if (ctx == NULL || ctx->patternSize <= 0 ||
        ctx->patternSize > NMAX_NEURONS) {
@@ -207,10 +209,18 @@ double calcAssociatedPattern(HopfieldContext *ctx,
       energy = calcEnergy(ctx->patternSize, pattern,
                           (const double (*)[NMAX_NEURONS])ctx->W);
       iter++;
+      if (callback) callback(iter, energy, pattern, user_data);
    } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
 
-   copyPattern(ctx->patternSize, pattern, associatedPattern);
+   copyPattern(ctx->patternSize, pattern, outputPattern);
    return energy;
+}
+
+double calcAssociatedPattern(HopfieldContext *ctx,
+                             const double inputPattern[],
+                             double associatedPattern[])
+{
+   return convergePattern(ctx, inputPattern, associatedPattern, NULL, NULL);
 }
 
 

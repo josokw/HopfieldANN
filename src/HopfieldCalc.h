@@ -5,6 +5,9 @@
 #include "HopfieldUtil.h"
 #include <stdbool.h>
 
+typedef void (*ConvergenceCallback)(int iteration, double energy,
+                                    const double pattern[], void *user_data);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,6 +39,12 @@ void calcOutputPatternAsync(const int patternSize,
 
 double calcEnergy(const int patternSize, const double pattern[],
                   const double w[][NMAX_NEURONS]);
+
+double convergePattern(HopfieldContext *ctx,
+                       const double inputPattern[],
+                       double outputPattern[],
+                       ConvergenceCallback callback,
+                       void *user_data);
 
 double calcAssociatedPattern(HopfieldContext *ctx,
                              const double inputPattern[],

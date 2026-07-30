@@ -243,6 +243,20 @@ bool showPatternAsVector(const HopfieldContext *ctx, const double pattern[])
    return true;
 }
 
+struct ShowIterationData {
+   const HopfieldContext *ctx;
+   const double *inputPattern;
+};
+
+static void show_iteration(int iteration, double energy,
+                            const double pattern[], void *user_data)
+{
+   (void)iteration;
+   const struct ShowIterationData *data = user_data;
+   showPatternAndDifference(data->ctx, data->inputPattern, pattern);
+   printf("\n    Energy = %9.4f\n\n", energy);
+}
+
 void showAssociatedPattern(HopfieldContext *ctx,
                             const double inputPattern[],
                             const double inputPatternWithNoise[],
@@ -253,31 +267,16 @@ void showAssociatedPattern(HopfieldContext *ctx,
       return;
    }
 
-   double patternWithNoise[NMAX_NEURONS] = {0};
-   copyPattern(ctx->patternSize, inputPatternWithNoise, patternWithNoise);
+   struct ShowIterationData cb_data = {ctx, inputPattern};
 
-   double energy = 0.0;
-   double energyPrevious = 0.0;
-   int iter = 0;
+   showPatternAndDifference(ctx, inputPattern, inputPatternWithNoise);
+   double initialEnergy = calcEnergy(ctx->patternSize, inputPatternWithNoise,
+                                     (const double (*)[NMAX_NEURONS])ctx->W);
+   printf("\n    Energy = %9.4f\n\n", initialEnergy);
 
-   showPatternAndDifference(ctx, inputPattern, patternWithNoise);
-   energy = calcEnergy(ctx->patternSize, patternWithNoise,
-                        (const double (*)[NMAX_NEURONS])ctx->W);
-   printf("\n    Energy = %9.4f\n\n", energy);
+   convergePattern(ctx, inputPatternWithNoise, associatedPattern,
+                   show_iteration, &cb_data);
 
-   do {
-      energyPrevious = energy;
-      calcOutputPatternAsync(ctx->patternSize,
-                            (const double (*)[NMAX_NEURONS])ctx->W,
-                            patternWithNoise);
-      energy = calcEnergy(ctx->patternSize, patternWithNoise,
-                          (const double (*)[NMAX_NEURONS])ctx->W);
-      showPatternAndDifference(ctx, inputPattern, patternWithNoise);
-      printf("\n    Energy = %9.4f\n\n", energy);
-      iter++;
-   } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
-
-   copyPattern(ctx->patternSize, patternWithNoise, associatedPattern);
    double overlap = calcOverlap(ctx->patternSize, inputPattern,
                                 associatedPattern);
    int hamming = calcHammingDistance(ctx->patternSize, inputPattern,
