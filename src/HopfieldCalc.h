@@ -41,15 +41,17 @@ void calcOutputPatternAsync(const int patternSize,
 double calcEnergy(const int patternSize, const double pattern[],
                   const double w[][NMAX_NEURONS]);
 
-double convergePattern(HopfieldContext *ctx,
-                       const double inputPattern[],
-                       double outputPattern[],
-                       ConvergenceCallback callback,
-                       void *user_data);
+bool convergePattern(HopfieldContext *ctx,
+                     const double inputPattern[],
+                     double outputPattern[],
+                     ConvergenceCallback callback,
+                     void *user_data,
+                     double *finalEnergy);
 
-double calcAssociatedPattern(HopfieldContext *ctx,
-                             const double inputPattern[],
-                             double associatedPattern[]);
+bool calcAssociatedPattern(HopfieldContext *ctx,
+                           const double inputPattern[],
+                           double associatedPattern[],
+                           double *finalEnergy);
 
 
 #ifdef __cplusplus

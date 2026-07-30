@@ -170,12 +170,14 @@ TEST_F(HopfieldCalcTest, LearnStorkeyRecall) {
    input[0] = 1.0; input[1] = -1.0;
    input[2] = 1.0; input[3] = -1.0;
 
-   double energy = calcAssociatedPattern(ctx, input, associated);
+    double energy;
+    bool converged = calcAssociatedPattern(ctx, input, associated, &energy);
 
-   for (int i = 0; i < 4; i++) {
-      EXPECT_DOUBLE_EQ(associated[i], ctx->patterns[0][i]);
-   }
-   EXPECT_LT(energy, 0.0);
+    for (int i = 0; i < 4; i++) {
+       EXPECT_DOUBLE_EQ(associated[i], ctx->patterns[0][i]);
+    }
+    EXPECT_TRUE(converged);
+    EXPECT_LT(energy, 0.0);
 }
 
 TEST_F(HopfieldCalcTest, CalcEnergy) {
@@ -230,12 +232,14 @@ TEST_F(HopfieldCalcTest, CalcAssociatedPattern) {
     input[0] = 1.0; input[1] = -1.0;
     input[2] = 1.0; input[3] = -1.0;  // exact pattern 0
 
-    double energy = calcAssociatedPattern(ctx, input, associated);
+    double energy;
+    bool converged = calcAssociatedPattern(ctx, input, associated, &energy);
 
     // Should converge to the same pattern
     for (int i = 0; i < 4; i++) {
         EXPECT_DOUBLE_EQ(associated[i], ctx->patterns[0][i]);
     }
+    EXPECT_TRUE(converged);
     EXPECT_LT(energy, 0.0);  // Energy should decrease
 }
 

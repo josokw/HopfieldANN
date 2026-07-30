@@ -274,8 +274,9 @@ void showAssociatedPattern(HopfieldContext *ctx,
                                      (const double (*)[NMAX_NEURONS])ctx->W);
    printf("\n    Energy = %9.4f\n\n", initialEnergy);
 
+   double finalEnergy;
    convergePattern(ctx, inputPatternWithNoise, associatedPattern,
-                   show_iteration, &cb_data);
+                   show_iteration, &cb_data, &finalEnergy);
 
    double overlap = calcOverlap(ctx->patternSize, inputPattern,
                                 associatedPattern);
