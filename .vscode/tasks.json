@@ -1,0 +1,32 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "CMake build",
+            "command": "/usr/bin/cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Build the full project using CMake."
+        },
+        {
+            "type": "shell",
+            "label": "CMake configure",
+            "command": "/usr/bin/cmake",
+            "args": [
+                "-S",
+                "${workspaceFolder}",
+                "-B",
+                "${workspaceFolder}/build"
+            ],
+            "group": "build",
+            "detail": "Configure the project with CMake."
+        }
+    ],
+    "version": "2.0.0"
+}
