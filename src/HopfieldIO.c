@@ -3,6 +3,38 @@
 
 #include <stdio.h>
 
+static HopfieldError read_pattern_rows(FILE *fh, int nRows, int nColumns,
+                                        double storage[][NMAX_NEURONS],
+                                        int patternIndex)
+{
+   char line[NMAX_NEURONS + 1];
+
+   for (int nR = 0; nR < nRows; nR++) {
+      if (fgets(line, sizeof(line), fh) == NULL) {
+         if (ferror(fh)) {
+            return HOPFIELD_ERR_INVALID_FORMAT;
+         }
+         return HOPFIELD_ERR_INVALID_FORMAT;
+      }
+      if (line[0] == '\n' || line[0] == '\r') {
+         nR--;
+         continue;
+      }
+      if (line[0] == '\0') {
+         return HOPFIELD_ERR_INVALID_FORMAT;
+      }
+      for (int nC = 0; nC < nColumns; nC++) {
+         if (line[nC] == '*') {
+            storage[patternIndex][nR * nColumns + nC] = 1.0;
+         }
+         else {
+            storage[patternIndex][nR * nColumns + nC] = -1.0;
+         }
+      }
+   }
+   return HOPFIELD_OK;
+}
+
 HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
 {
    if (ctx == NULL) {
@@ -36,28 +68,12 @@ HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
    }
    ctx->patternSize = ctx->nColumns * ctx->nRows;
 
-   // Line has maximum size if pattern is flat: height = 1
-   char line[NMAX_NEURONS + 1] = {'\0'};
-
    for (int nP = 0; nP < ctx->nPatterns; nP++) {
-      for (int nR = 0; nR < ctx->nRows; nR++) {
-         if (fgets(line, NMAX_NEURONS, hfDataFile) == NULL) {
-            fclose(hfDataFile);
-            return HOPFIELD_ERR_INVALID_FORMAT;
-         }
-         if (line[0] != '\n' && line[0] != '\r') {
-            for (int nC = 0; nC < ctx->nColumns; nC++) {
-               if (line[nC] == '*') {
-                  ctx->patterns[nP][nR * ctx->nColumns + nC] = 1;
-               }
-               else {
-                  ctx->patterns[nP][nR * ctx->nColumns + nC] = -1;
-               }
-            }
-         }
-         else {
-            nR--;
-         }
+      HopfieldError err = read_pattern_rows(hfDataFile, ctx->nRows,
+                                             ctx->nColumns, ctx->patterns, nP);
+      if (err != HOPFIELD_OK) {
+         fclose(hfDataFile);
+         return err;
       }
    }
    fclose(hfDataFile);
@@ -80,10 +96,6 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
       return HOPFIELD_ERR_INVALID_FORMAT;
    }
 
-   char line[NMAX_NEURONS + 1] = {'\0'};
-   int nR = 0;
-   int nC = 0;
-   int nP = 0;
    int nNoisyRows = 0;
    int nNoisyColumns = 0;
 
@@ -114,25 +126,13 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
       return HOPFIELD_ERR_SIZE_EXCEEDED;
    }
 
-   for (nP = 0; nP < ctx->nNoisyPatterns; nP++) {
-      for (nR = 0; nR < ctx->nRows; nR++) {
-         if (fgets(line, NMAX_NEURONS, hfDataFile) == NULL) {
-            fclose(hfDataFile);
-            return HOPFIELD_ERR_INVALID_FORMAT;
-         }
-         if (line[0] != '\n' && line[0] != '\r') {
-            for (nC = 0; nC < ctx->nColumns; nC++) {
-               if (line[nC] == '*') {
-                  ctx->noisyPatterns[nP][nR * ctx->nColumns + nC] = 1.0;
-               }
-               else {
-                  ctx->noisyPatterns[nP][nR * ctx->nColumns + nC] = -1.0;
-               }
-            }
-         }
-         else {
-            nR--;
-         }
+   for (int nP = 0; nP < ctx->nNoisyPatterns; nP++) {
+      HopfieldError err = read_pattern_rows(hfDataFile, ctx->nRows,
+                                             ctx->nColumns,
+                                             ctx->noisyPatterns, nP);
+      if (err != HOPFIELD_OK) {
+         fclose(hfDataFile);
+         return err;
       }
    }
 
