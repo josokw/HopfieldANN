@@ -138,30 +138,27 @@ int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
       chance = MAX_NOISE_PERCENT;
 
    int nNoise = ctx->patternSize * chance / 100;
-   int noiseIndex = 0;
-   int noiseArray[NMAX_NEURONS] = {0};
-   int n = 0;
-   while (n < nNoise) {
-      noiseIndex = randomInt(0, ctx->patternSize - 1);
-      if (noiseArray[noiseIndex] == 0) {
-         noiseArray[noiseIndex] = 1;
-         n++;
-      }
+
+   /* Fisher-Yates partial shuffle: pick nNoise distinct indices in O(nNoise) */
+   int indices[NMAX_NEURONS];
+   for (int i = 0; i < ctx->patternSize; i++) {
+      indices[i] = i;
    }
-   /* We need a temporary pattern to store the noisy version */
-   double noisyPattern[NMAX_NEURONS] = {0};
-   for (int index = 0; index < ctx->patternSize; index++) {
-      if (noiseArray[index] == 1) {
-         noisyPattern[index] = -ctx->patterns[patNumber][index];
-      }
-      else {
-         noisyPattern[index] = ctx->patterns[patNumber][index];
-      }
+   for (int i = 0; i < nNoise; i++) {
+      int j = i + randomInt(0, ctx->patternSize - i - 1);
+      int tmp = indices[i];
+      indices[i] = indices[j];
+      indices[j] = tmp;
    }
-   /* Copy the noisy pattern to the output slot for this pattern */
-   for (int index = 0; index < ctx->patternSize; index++) {
-      ctx->noisyPatterns[patNumber][index] = noisyPattern[index];
+
+   /* Build noisy pattern in a temp buffer, flip selected indices */
+   double noisyPattern[NMAX_NEURONS];
+   copyPattern(ctx->patternSize, ctx->patterns[patNumber], noisyPattern);
+   for (int i = 0; i < nNoise; i++) {
+      noisyPattern[indices[i]] = -noisyPattern[indices[i]];
    }
+   copyPattern(ctx->patternSize, noisyPattern,
+               ctx->noisyPatterns[patNumber]);
    return nNoise;
 }
 
