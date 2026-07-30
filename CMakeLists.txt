@@ -34,7 +34,7 @@ else()
 endif()
 
 # Main executable
-add_executable(hopfieldann src/main.c)
+add_executable(hopfieldann src/main.c src/cli.c)
 target_link_libraries(hopfieldann PRIVATE hopfield_lib)
 target_include_directories(hopfieldann PRIVATE src)
 
