@@ -66,11 +66,13 @@ int main(int argc, char *argv[])
    int ruleChoice = 0;
    printf("- Learning rule: (H)ebbian or (S)torkey? [H]: ");
    ruleChoice = getchar();
-   if (ruleChoice == 'S' || ruleChoice == 's') {
-      useStorkey = true;
-      ruleName = "Storkey";
-   }
-   clearInput();
+    if (ruleChoice == 'S' || ruleChoice == 's') {
+       useStorkey = true;
+       ruleName = "Storkey";
+    }
+    if (ruleChoice != '\n') {
+       clearInput();
+    }
    puts("");
 
    printf("- Learning patterns by %s learning rule, "
