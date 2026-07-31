@@ -27,7 +27,7 @@ check() {
     local name="$1" exp_exit="$2" input="$3" args="$4"
     local must="$5" mustnot="$6" countpat="$7" countmin="$8" countmax="$9"
 
-    printf '%b' "$input" | "$BIN" $args >"$OUT" 2>&1
+    printf '%b' "$input" | timeout 10 "$BIN" $args >"$OUT" 2>&1
     local got_exit=$?
 
     local ok=1 reason=""
@@ -55,6 +55,7 @@ check() {
         FAIL=$((FAIL + 1))
         FAILED+=("$name")
         printf '  [FAIL] %s - %s\n' "$name" "$reason"
+        sed 's/^/    | /' "$OUT"
     fi
 }
 
@@ -78,7 +79,9 @@ check "banner-version"         0 "\n1\n10\nE\n" "$F" "hopfieldann v[0-9]" "" "Nu
 
 # --- noise-level validation ------------------------------------------------
 check "noise-too-high"         1 "P\n1\n150\nE\n" "$F" "out of range (0..100)" "" "" 0 -1
-check "noise-negative"         1 "P\n1\n-5\nE\n" "$F" "out of range" "" "" 0 -1
+check "noise-negative"         1 "P\n1\n-5\nE\n" "$F" "out of range (0..100)" "" "" 0 -1
+# noise-non-numeric and index-non-numeric both print "ERROR: invalid input";
+# they are distinguished only by the input position that fails.
 check "noise-non-numeric"      1 "P\n1\nabc\nE\n" "$F" "invalid input" "" "" 0 -1
 check "noise-zero"             0 "P\n1\n0\nE\n" "$F" "0% noisy pixels" "anti-correlated" "" 0 -1
 check "noise-50"               0 "P\n1\n50\nE\n" "$F" "50% noisy pixels" "anti-correlated" "" 0 -1
@@ -86,6 +89,7 @@ check "noise-75-note"          0 "P\n1\n75\nE\n" "$F" "75% noisy pixels" "" "ant
 check "noise-100-note"         0 "P\n1\n100\nE\n" "$F" "100% noisy pixels" "" "anti-correlated" 1 -1
 
 # --- pattern-index validation ------------------------------------------------
+# Depends on hopf01.dat holding fewer than 100 patterns and at least 1.
 check "index-too-low"          1 "P\n0\nE\n" "$F" "index 0 out of range" "" "" 0 -1
 check "index-too-high"         1 "P\n99\nE\n" "$F" "index 99 out of range" "" "" 0 -1
 check "index-non-numeric"      1 "P\nabc\nE\n" "$F" "invalid input" "" "" 0 -1
@@ -97,13 +101,24 @@ check "repeat-enter"           0 "P\n1\n15\n\nE\n" "$F" "Recall quality" "" "15%
 check "repeat-enter-prompts-once" 0 "P\n1\n15\n\nE\n" "$F" "" "" "Choose pattern to disturb" 1 1
 
 # --- L reload ---------------------------------------------------------------
+# reload-L asserts "= 256", which depends on hopf03.dat staying a 16x16 grid.
 check "reload-L"               0 "P\n1\n15\nL\ndata/hopf03.dat\n1\n15\nE\n" "$F" "= 256" "" "Recall quality" 1 -1
 check "reload-nonexistent"     1 "P\n1\n15\nL\ndata/nope.dat\nE\n" "$F" "File not found" "" "" 0 -1
 
+# --- storage-capacity warning -------------------------------------------------
+# Fixture: 2x2 grid (4 neurons) -> capacity 1 < 2 patterns, so the warning fires.
+CAP="$TMP/capacity_warn.dat"
+printf '2 2 2\n\n. *\n* .\n\n* .\n. *\n' >"$CAP"
+check "capacity-warning"       0 "P\n1\n50\nE\n" "$CAP" "associative storage capacity" "" "" 0 -1
+check "capacity-warning-learns" 0 "P\n1\n50\nE\n" "$CAP" "Recall quality" "" "" 0 -1
+
 # --- mode 2 ----------------------------------------------------------------
+# Index bounds below depend on hopf01noisy.dat holding exactly 4 noisy patterns.
 check "mode2-happy"            0 "\n1\nE\n" "$F $FN" "Recall quality" "" "2D image" 1 -1
 check "mode2-noisy-count"      0 "\n1\nE\n" "$F $FN" "Number of noisy patterns" "" "" 0 -1
 check "mode2-index-out-of-range" 1 "\n9\nE\n" "$F $FN" "index 9 out of range" "" "" 0 -1
+check "mode2-repeat-enter"     0 "\n1\n\nE\n" "$F $FN" "Recall quality" "" "2D image" 2 -1
+check "mode2-repeat-prompts-once" 0 "\n1\n\nE\n" "$F $FN" "" "" "Choose noisy pattern" 1 1
 
 # ---------------------------------------------------------------------------
 rm -f "$OUT"

@@ -59,7 +59,10 @@ target_include_directories(hopfield_test PRIVATE src)
 
 add_test(NAME HopfieldTest COMMAND hopfield_test WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
-add_test(NAME CliContract
-         COMMAND bash ${PROJECT_SOURCE_DIR}/testScripts/cli_contract_test.sh
-                     $<TARGET_FILE:hopfieldann>
-         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+# CLI contract tests drive the binary through a bash harness (needs a Unix shell)
+if(NOT WIN32)
+    add_test(NAME CliContract
+             COMMAND bash ${PROJECT_SOURCE_DIR}/testScripts/cli_contract_test.sh
+                         $<TARGET_FILE:hopfieldann>
+             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endif()
