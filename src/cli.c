@@ -13,7 +13,7 @@
 
 #define MAXFILENAME_SIZE 100
 
-static void usage(int argc);
+static bool usage(int argc);
 static void clearInput(void);
 static void handle_error(HopfieldError err);
 
@@ -32,7 +32,9 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    double inputPatternWithNoise[NMAX_NEURONS] = {0};
    double outputPattern[NMAX_NEURONS] = {0};
 
-   usage(argc);
+   if (!usage(argc)) {
+      return 1;
+   }
    srand((unsigned int)time(NULL));
 
    printf("Hopfield's ANN associative memory: " APPNAME_VERSION
@@ -236,16 +238,17 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    return 0;
 }
 
-static void usage(int argc)
+static bool usage(int argc)
 {
-   if (!((argc == 2) || (argc == 3))) {
-      fprintf(stderr,
-              "\n\tUSAGE: hopfieldann <input patterns filename>\n");
-      fprintf(stderr,
-              "\n\tUSAGE: hopfieldann <input patterns filename> "
-              "<noisy patterns filename>\n\n");
-      exit(EXIT_FAILURE);
+   if ((argc == 2) || (argc == 3)) {
+      return true;
    }
+   fprintf(stderr,
+           "\n\tUSAGE: hopfieldann <input patterns filename>\n");
+   fprintf(stderr,
+           "\n\tUSAGE: hopfieldann <input patterns filename> "
+           "<noisy patterns filename>\n\n");
+   return false;
 }
 
 static void clearInput(void)
