@@ -59,12 +59,38 @@ influence of existing weights before adding the new pattern:
 
 This results in a weight matrix with reduced interference, higher practical storage capacity,
 and fewer spurious attractors compared to the Hebbian rule. The interactive prompt defaults
-to Hebbian if only Enter is pressed:
-
-    Learning rule: (H)ebbian or (S)torkey? [H]:
+to Hebbian if only Enter is pressed.
 
 More detailed information reference:
 [Hopfield Wikipedia](https://en.wikipedia.org/wiki/Hopfield_network).
+
+### Pseudo-inverse (Moore–Penrose) learning rule
+
+The pseudo-inverse learning rule (Personnaz, Guyon & Toulouse, 1986) computes the weight
+matrix directly from the Gram matrix of the stored patterns instead of accumulating weight
+updates pattern by pattern:
+
+    G[μ][ν] = (1/N) Σ_i ξ^μ_i · ξ^ν_i
+    W = (1/N) Ξ · G⁻¹ · Ξᵀ
+
+Every stored pattern is then an **exact eigenvector of W with eigenvalue 1**, so each learned
+pattern is a true fixed point of the recall dynamics. This gives the network near-perfect
+recall and a practical storage capacity approaching N − 1 (far above the ~0.14·N limit of the
+Hebbian rule), provided the patterns are linearly independent.
+
+Note that, unlike the Hebbian and Storkey rules, the pseudo-inverse rule produces a **non-zero
+diagonal** in the weight matrix. The diagonal is intentionally kept: zeroing it would turn the
+exact fixed points into only approximate ones. The recall and energy machinery does not require
+a zero diagonal, only symmetry.
+
+Caveat: the Gram matrix G must be invertible, so patterns that are linearly dependent (e.g.,
+duplicate patterns or a pattern equal to the negative of another) are rejected at training time
+with a "Failed to learn patterns" error. Strongly correlated patterns remain problematic as with
+any learning rule.
+
+The interactive prompt accepts `P` for this rule:
+
+    Learning rule: (H)ebbian, (S)torkey or (P)seudo-inverse? [H]:
 
 ## Input example for learning (training) 4 patterns
 
@@ -280,6 +306,9 @@ Features added during this review:
 
 - **Storkey learning rule** — alternative learning rule with local-field correction
   for reduced crosstalk between stored patterns
+- **Pseudo-inverse (Moore–Penrose) learning rule** — weight matrix built from the inverse
+  Gram matrix, making every stored pattern an exact fixed point (capacity up to N − 1,
+  provided patterns are linearly independent)
 - **`convergePattern()`** — callback-based convergence engine that separates
   iteration logic from display, enabling reuse and testing
 - **Overlap and Hamming distance** — quantitative recall quality metrics reported
@@ -290,3 +319,7 @@ Features added during this review:
   correctness and I/O error handling
 - **VS Code launch/tasks configuration** — integrated single-key build and debug
   support
+
+Note: the Google Test suite has grown since; the convergence engine now terminates only when
+a full asynchronous sweep produces no neuron flips, guaranteeing convergence to a true fixed
+point.

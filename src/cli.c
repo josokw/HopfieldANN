@@ -13,9 +13,17 @@
 
 #define MAXFILENAME_SIZE 100
 
+typedef enum {
+   RULE_HEBBIAN,
+   RULE_STORKEY,
+   RULE_PSEUDO_INVERSE
+} LearningRule;
+
 static bool usage(int argc);
 static void clearInput(void);
 static void handle_error(HopfieldError err);
+static bool learnPatterns(HopfieldContext *ctx, LearningRule rule);
+static const char *ruleNameOf(LearningRule rule);
 
 int run_cli(HopfieldContext *ctx, int argc, char *argv[])
 {
@@ -23,8 +31,8 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    int indexPattern;
    int menu = 0;
    bool firstRun = true;
-   bool useStorkey = false;
-   const char *ruleName = "Hebbian";
+   LearningRule rule = RULE_HEBBIAN;
+   const char *ruleName = ruleNameOf(rule);
    char fileName[MAXFILENAME_SIZE] = {0};
    const char menuChars[] = "ELNelnRr";
 
@@ -59,15 +67,18 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    }
 
    int ruleChoice = 0;
-   printf("- Learning rule: (H)ebbian or (S)torkey? [H]: ");
+   printf("- Learning rule: (H)ebbian, (S)torkey or (P)seudo-inverse? [H]: ");
    ruleChoice = getchar();
    if (ruleChoice == EOF) {
       printf("\n- No input, using Hebbian learning rule\n");
    }
    else if (ruleChoice == 'S' || ruleChoice == 's') {
-      useStorkey = true;
-      ruleName = "Storkey";
+      rule = RULE_STORKEY;
    }
+   else if (ruleChoice == 'P' || ruleChoice == 'p') {
+      rule = RULE_PSEUDO_INVERSE;
+   }
+   ruleName = ruleNameOf(rule);
    if (ruleChoice != '\n' && ruleChoice != EOF) {
       clearInput();
    }
@@ -75,7 +86,7 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
 
    printf("- Learning patterns by %s learning rule, "
           "training starts .... ", ruleName);
-   bool learned = useStorkey ? learnStorkey(ctx) : learnHebbian(ctx);
+   bool learned = learnPatterns(ctx, rule);
    if (!learned) {
       fprintf(stderr, "Error: Failed to learn patterns\n");
       return 1;
@@ -130,7 +141,7 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
          }
 
           printf("- Learning patterns by %s learning rule .... ", ruleName);
-          if (!(useStorkey ? learnStorkey(ctx) : learnHebbian(ctx))) {
+          if (!learnPatterns(ctx, rule)) {
             fprintf(stderr, "Error: Failed to learn patterns\n");
             return 1;
          }
@@ -255,6 +266,30 @@ static void clearInput(void)
 {
    int c;
    while ((c = getchar()) != '\n' && c != EOF) {
+   }
+}
+
+static const char *ruleNameOf(LearningRule rule)
+{
+   switch (rule) {
+      case RULE_STORKEY:
+         return "Storkey";
+      case RULE_PSEUDO_INVERSE:
+         return "pseudo-inverse";
+      default:
+         return "Hebbian";
+   }
+}
+
+static bool learnPatterns(HopfieldContext *ctx, LearningRule rule)
+{
+   switch (rule) {
+      case RULE_STORKEY:
+         return learnStorkey(ctx);
+      case RULE_PSEUDO_INVERSE:
+         return learnPseudoInverse(ctx);
+      default:
+         return learnHebbian(ctx);
    }
 }
 

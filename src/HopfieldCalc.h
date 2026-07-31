@@ -27,6 +27,7 @@ int calcHammingDistance(const int patternSize, const double pattern1[],
 /* Context-dependent functions */
 bool learnHebbian(HopfieldContext *ctx);
 bool learnStorkey(HopfieldContext *ctx);
+bool learnPseudoInverse(HopfieldContext *ctx);
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance);
 
 void calcOutputPattern(const int patternSize,

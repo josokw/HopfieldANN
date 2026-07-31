@@ -1,6 +1,7 @@
 #include "HopfieldCalc.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -119,9 +120,107 @@ bool learnStorkey(HopfieldContext *ctx)
    }
 
    assert(hasZeroDiagonal(ctx->patternSize,
-                           (const double (*)[NMAX_NEURONS])ctx->W));
+                            (const double (*)[NMAX_NEURONS])ctx->W));
    assert(isSymmetric(ctx->patternSize,
                         (const double (*)[NMAX_NEURONS])ctx->W));
+   return true;
+}
+
+bool learnPseudoInverse(HopfieldContext *ctx)
+{
+   if (ctx == NULL || ctx->nPatterns <= 0 || ctx->nPatterns > NMAX_PATTERNS ||
+       ctx->patternSize <= 0 || ctx->patternSize > NMAX_NEURONS) {
+      return false;
+   }
+
+   const int N = ctx->patternSize;
+   const int P = ctx->nPatterns;
+
+   /* Gram matrix G[mu][nu] = (1/N) sum_i xi^mu_i * xi^nu_i */
+   double G[NMAX_PATTERNS][NMAX_PATTERNS] = {{0}};
+   for (int mu = 0; mu < P; mu++) {
+      for (int nu = 0; nu < P; nu++) {
+         double sum = 0.0;
+         for (int i = 0; i < N; i++) {
+            sum += ctx->patterns[mu][i] * ctx->patterns[nu][i];
+         }
+         G[mu][nu] = sum / (double)N;
+      }
+   }
+
+   /* Invert G using Gauss-Jordan elimination with partial pivoting */
+   double inv[NMAX_PATTERNS][NMAX_PATTERNS] = {{0}};
+   for (int mu = 0; mu < P; mu++) {
+      inv[mu][mu] = 1.0;
+   }
+   for (int col = 0; col < P; col++) {
+      int pivot = col;
+      for (int row = col + 1; row < P; row++) {
+         if (fabs(G[row][col]) > fabs(G[pivot][col])) {
+            pivot = row;
+         }
+      }
+      if (fabs(G[pivot][col]) < 1e-12) {
+         return false; /* singular: patterns are linearly dependent */
+      }
+      if (pivot != col) {
+         for (int k = 0; k < P; k++) {
+            double tmp = G[col][k];
+            G[col][k] = G[pivot][k];
+            G[pivot][k] = tmp;
+            tmp = inv[col][k];
+            inv[col][k] = inv[pivot][k];
+            inv[pivot][k] = tmp;
+         }
+      }
+      double pivotValue = G[col][col];
+      for (int k = 0; k < P; k++) {
+         G[col][k] /= pivotValue;
+         inv[col][k] /= pivotValue;
+      }
+      for (int row = 0; row < P; row++) {
+         if (row == col) {
+            continue;
+         }
+         double factor = G[row][col];
+         for (int k = 0; k < P; k++) {
+            G[row][k] -= factor * G[col][k];
+            inv[row][k] -= factor * inv[col][k];
+         }
+      }
+   }
+
+   /* M[mu][i] = sum_nu inv[mu][nu] * xi^nu_i */
+   double M[NMAX_PATTERNS][NMAX_NEURONS];
+   for (int mu = 0; mu < P; mu++) {
+      for (int i = 0; i < N; i++) {
+         double sum = 0.0;
+         for (int nu = 0; nu < P; nu++) {
+            sum += inv[mu][nu] * ctx->patterns[nu][i];
+         }
+         M[mu][i] = sum;
+      }
+   }
+
+   /* W[i][j] = (1/N) sum_mu xi^mu_i * M[mu][j] */
+   for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
+         double sum = 0.0;
+         for (int mu = 0; mu < P; mu++) {
+            sum += ctx->patterns[mu][i] * M[mu][j];
+         }
+         ctx->W[i][j] = sum / (double)N;
+      }
+   }
+
+   /* Enforce exact symmetry to cancel floating-point rounding */
+   for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
+         ctx->W[j][i] = ctx->W[i][j];
+      }
+   }
+
+   assert(isSymmetric(N, (const double (*)[NMAX_NEURONS])ctx->W));
    return true;
 }
 
@@ -179,8 +278,18 @@ void calcOutputPatternAsync(const int patternSize,
                            const double w[][NMAX_NEURONS],
                            double pattern[])
 {
+   int order[NMAX_NEURONS];
    for (int i = 0; i < patternSize; i++) {
-      int idx = randomInt(0, patternSize - 1);
+      order[i] = i;
+   }
+   for (int i = 0; i < patternSize; i++) {
+      int j = i + randomInt(0, patternSize - i - 1);
+      int tmp = order[i];
+      order[i] = order[j];
+      order[j] = tmp;
+   }
+   for (int k = 0; k < patternSize; k++) {
+      int idx = order[k];
       double delta = 0.0;
       for (int j = 0; j < patternSize; j++) {
          delta += pattern[j] * w[idx][j];
@@ -243,23 +352,34 @@ bool convergePattern(HopfieldContext *ctx,
 
    double energy = calcEnergy(ctx->patternSize, pattern,
                              (const double (*)[NMAX_NEURONS])ctx->W);
-   double energyPrevious = 0.0;
+   bool converged = false;
    int iter = 0;
 
    do {
-      energyPrevious = energy;
+      double previousPattern[NMAX_NEURONS];
+      copyPattern(ctx->patternSize, pattern, previousPattern);
       calcOutputPatternAsync(ctx->patternSize,
                             (const double (*)[NMAX_NEURONS])ctx->W,
                             pattern);
+      int flips = 0;
+      for (int i = 0; i < ctx->patternSize; i++) {
+         if (!equals(previousPattern[i], pattern[i])) {
+            flips++;
+         }
+      }
       energy = calcEnergy(ctx->patternSize, pattern,
                           (const double (*)[NMAX_NEURONS])ctx->W);
       iter++;
       if (callback) callback(iter, energy, pattern, user_data);
-   } while (!equals(energyPrevious, energy) && iter < MAX_ITERATIONS);
+      if (flips == 0) {
+         converged = true;
+         break;
+      }
+   } while (iter < MAX_ITERATIONS);
 
    copyPattern(ctx->patternSize, pattern, outputPattern);
    if (finalEnergy) *finalEnergy = energy;
-   return equals(energyPrevious, energy);
+   return converged;
 }
 
 bool calcAssociatedPattern(HopfieldContext *ctx,

@@ -180,6 +180,125 @@ TEST_F(HopfieldCalcTest, LearnStorkeyRecall) {
     EXPECT_LT(energy, 0.0);
 }
 
+TEST_F(HopfieldCalcTest, LearnPseudoInverseSymmetric) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 4;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
+   ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = -1;
+
+   EXPECT_TRUE(learnPseudoInverse(ctx));
+
+   EXPECT_TRUE(isSymmetric(ctx->patternSize, ctx->W));
+   EXPECT_FALSE(hasZeroDiagonal(ctx->patternSize, ctx->W));
+}
+
+TEST_F(HopfieldCalcTest, LearnPseudoInverseCorrectWeights) {
+   ctx->nPatterns = 1;
+   ctx->patternSize = 2;
+   ctx->patterns[0][0] = 1;
+   ctx->patterns[0][1] = 1;
+
+   EXPECT_TRUE(learnPseudoInverse(ctx));
+
+   EXPECT_DOUBLE_EQ(ctx->W[0][1], 0.5);
+   EXPECT_DOUBLE_EQ(ctx->W[1][0], 0.5);
+   EXPECT_DOUBLE_EQ(ctx->W[0][0], 0.5);
+   EXPECT_DOUBLE_EQ(ctx->W[1][1], 0.5);
+}
+
+TEST_F(HopfieldCalcTest, LearnPseudoInverseTwoPatterns) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 4;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
+   ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = -1;
+
+   EXPECT_TRUE(learnPseudoInverse(ctx));
+
+   EXPECT_DOUBLE_EQ(ctx->W[0][1], 0.5);
+   EXPECT_DOUBLE_EQ(ctx->W[0][2], 0.0);
+   EXPECT_DOUBLE_EQ(ctx->W[2][3], 0.5);
+   EXPECT_DOUBLE_EQ(ctx->W[0][0], 0.5);
+}
+
+TEST_F(HopfieldCalcTest, LearnPseudoInverseExactFixedPoints) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 4;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
+   ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = -1;
+
+   EXPECT_TRUE(learnPseudoInverse(ctx));
+
+   for (int mu = 0; mu < ctx->nPatterns; mu++) {
+      for (int i = 0; i < ctx->patternSize; i++) {
+         double field = 0.0;
+         for (int j = 0; j < ctx->patternSize; j++) {
+            field += ctx->W[i][j] * ctx->patterns[mu][j];
+         }
+         EXPECT_DOUBLE_EQ(field, ctx->patterns[mu][i]);
+      }
+   }
+}
+
+TEST_F(HopfieldCalcTest, LearnPseudoInverseRecall) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 8;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
+   ctx->patterns[0][4] = -1; ctx->patterns[0][5] = -1;
+   ctx->patterns[0][6] = -1; ctx->patterns[0][7] = -1;
+   ctx->patterns[1][0] = 1; ctx->patterns[1][1] = -1;
+   ctx->patterns[1][2] = 1; ctx->patterns[1][3] = -1;
+   ctx->patterns[1][4] = 1; ctx->patterns[1][5] = -1;
+   ctx->patterns[1][6] = 1; ctx->patterns[1][7] = -1;
+
+   EXPECT_TRUE(learnPseudoInverse(ctx));
+
+   double input[NMAX_NEURONS] = {0};
+   double associated[NMAX_NEURONS] = {0};
+
+   input[0] = -1.0;
+   for (int i = 1; i < 8; i++) {
+      input[i] = ctx->patterns[0][i];
+   }
+
+   double energy;
+   bool converged = calcAssociatedPattern(ctx, input, associated, &energy);
+
+   for (int i = 0; i < 8; i++) {
+      EXPECT_DOUBLE_EQ(associated[i], ctx->patterns[0][i]);
+   }
+   EXPECT_TRUE(converged);
+   EXPECT_LT(energy, 0.0);
+}
+
+TEST_F(HopfieldCalcTest, LearnPseudoInverseRejectsDependent) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 4;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
+   ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = 1; ctx->patterns[1][3] = 1;
+
+   EXPECT_FALSE(learnPseudoInverse(ctx));
+}
+
+TEST_F(HopfieldCalcTest, LearnPseudoInverseRejectsInvertedDependent) {
+   ctx->nPatterns = 2;
+   ctx->patternSize = 4;
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
+   ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = 1;
+
+   EXPECT_FALSE(learnPseudoInverse(ctx));
+}
+
 TEST_F(HopfieldCalcTest, CalcEnergy) {
     double pattern[NMAX_NEURONS] = {0};
 
