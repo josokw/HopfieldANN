@@ -27,11 +27,16 @@ static const char *ruleNameOf(LearningRule rule);
 static bool ensurePatternBuffers(HopfieldContext *ctx, double **inputPattern,
                                  double **inputPatternWithNoise,
                                  double **outputPattern);
+static bool run_simulation(HopfieldContext *ctx, int argc, bool repeat,
+                           int *indexPattern, int *noise,
+                           double *inputPattern,
+                           double *inputPatternWithNoise,
+                           double *outputPattern);
 
 int run_cli(HopfieldContext *ctx, int argc, char *argv[])
 {
    int noise = 0;
-   int indexPattern;
+   int indexPattern = 0;
    int menu = 0;
    bool firstRun = true;
    LearningRule rule = RULE_HEBBIAN;
@@ -173,93 +178,16 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
                 ctx->nRows * ctx->nColumns, ctx->nRows * ctx->nColumns);
       }
 
-      if (firstRun || strchr(menuChars, menu) != NULL) {
-         firstRun = false;
-         bool repeat = (menu == 'R' || menu == 'r');
-         switch (argc) {
-            case 2:
-               if (!repeat) {
-                  printf(
-                     "- Choose pattern to disturb by noise, index "
-                     "(1..%d): ",
-                     ctx->nPatterns);
-                  if (scanf(" %d", &indexPattern) != 1) {
-                      fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                      result = 1;
-                      goto cleanup;
-                   }
-                   puts("");
-                   if (indexPattern < 1 || indexPattern > ctx->nPatterns) {
-                      fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
-                              indexPattern);
-                      result = 1;
-                      goto cleanup;
-                   }
-                  indexPattern--;
-                  showIndexedPattern(ctx, indexPattern);
-                  puts("");
-                  copyPattern(ctx->patternSize, ctx->patterns[indexPattern],
-                              inputPattern);
-                  copyPattern(ctx->patternSize, ctx->patterns[indexPattern],
-                              inputPatternWithNoise);
-                  printf("- Pattern %d noise level [%%]: ",
-                         indexPattern + 1);
-
-                   if (scanf(" %d", &noise) != 1) {
-                      fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                      result = 1;
-                      goto cleanup;
-                   }
-               }
-
-               addNoiseToPattern(ctx, indexPattern, noise);
-               copyPattern(ctx->patternSize, ctx->noisyPatterns[indexPattern],
-                          inputPatternWithNoise);
-               printf(
-                  "\n\n- Pattern %d as 2D image and %d%% noisy "
-                  "pixels:\n\n",
-                  indexPattern + 1, noise);
-               showAssociatedPattern(ctx, inputPattern,
-                                     inputPatternWithNoise, outputPattern);
-               puts("");
-               break;
-            case 3:
-               if (!repeat) {
-                  printf("\n- Choose noisy pattern, index (1..%d): ",
-                         ctx->nNoisyPatterns);
-                  if (scanf(" %d", &indexPattern) != 1) {
-                      fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                      result = 1;
-                      goto cleanup;
-                   }
-                   puts("");
-                   if (indexPattern < 1 ||
-                       indexPattern > ctx->nNoisyPatterns) {
-                      fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
-                              indexPattern);
-                      result = 1;
-                      goto cleanup;
-                   }
-                  indexPattern--;
-                  puts("");
-                  showIndexedNoisyPattern(ctx, indexPattern);
-                  puts("");
-                  copyPattern(ctx->patternSize,
-                              ctx->noisyPatterns[indexPattern], inputPattern);
-               }
-               printf("\n\n- Pattern %d as 2D image:\n\n",
-                      indexPattern + 1);
-               showAssociatedPattern(ctx, inputPattern,
-                                     inputPattern, outputPattern);
-               puts("");
-               break;
-             default:
-                fprintf(stderr,
-                        "\n\tSYSTEM ERROR: this should never happen!\n\n");
-                result = 1;
-                goto cleanup;
-         }
-      }
+       if (firstRun || strchr(menuChars, menu) != NULL) {
+          firstRun = false;
+          bool repeat = (menu == 'R' || menu == 'r');
+          if (!run_simulation(ctx, argc, repeat, &indexPattern, &noise,
+                              inputPattern, inputPatternWithNoise,
+                              outputPattern)) {
+             result = 1;
+             goto cleanup;
+          }
+       }
        if (argc == 2) {
           printf(
              "- E(xit), L(oad new patterns data file), N(ext simulation),\n"
@@ -280,6 +208,85 @@ cleanup:
    free(inputPatternWithNoise);
    free(outputPattern);
    return result;
+}
+
+/* Run one recall simulation. In mode 1 (argc == 2) the stored pattern is
+   corrupted on the fly; in mode 2 (argc == 3) a pre-made noisy pattern is
+   recalled. On repeat the previous index/noise parameters are reused. */
+static bool run_simulation(HopfieldContext *ctx, int argc, bool repeat,
+                           int *indexPattern, int *noise,
+                           double *inputPattern,
+                           double *inputPatternWithNoise,
+                           double *outputPattern)
+{
+   if (argc == 2) {
+      if (!repeat) {
+         printf("- Choose pattern to disturb by noise, index (1..%d): ",
+                ctx->nPatterns);
+         if (scanf(" %d", indexPattern) != 1) {
+            fprintf(stderr, "\n\tERROR: invalid input\n\n");
+            return false;
+         }
+         puts("");
+         if (*indexPattern < 1 || *indexPattern > ctx->nPatterns) {
+            fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
+                    *indexPattern);
+            return false;
+         }
+         (*indexPattern)--;
+         showIndexedPattern(ctx, *indexPattern);
+         puts("");
+         copyPattern(ctx->patternSize, ctx->patterns[*indexPattern],
+                     inputPattern);
+         copyPattern(ctx->patternSize, ctx->patterns[*indexPattern],
+                     inputPatternWithNoise);
+         printf("- Pattern %d noise level [%%]: ", *indexPattern + 1);
+         if (scanf(" %d", noise) != 1) {
+            fprintf(stderr, "\n\tERROR: invalid input\n\n");
+            return false;
+         }
+      }
+
+      addNoiseToPattern(ctx, *indexPattern, *noise);
+      copyPattern(ctx->patternSize, ctx->noisyPatterns[*indexPattern],
+                  inputPatternWithNoise);
+      printf("\n\n- Pattern %d as 2D image and %d%% noisy pixels:\n\n",
+             *indexPattern + 1, *noise);
+      showAssociatedPattern(ctx, inputPattern, inputPatternWithNoise,
+                            outputPattern);
+      puts("");
+      return true;
+   }
+
+   if (argc == 3) {
+      if (!repeat) {
+         printf("\n- Choose noisy pattern, index (1..%d): ",
+                ctx->nNoisyPatterns);
+         if (scanf(" %d", indexPattern) != 1) {
+            fprintf(stderr, "\n\tERROR: invalid input\n\n");
+            return false;
+         }
+         puts("");
+         if (*indexPattern < 1 || *indexPattern > ctx->nNoisyPatterns) {
+            fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
+                    *indexPattern);
+            return false;
+         }
+         (*indexPattern)--;
+         puts("");
+         showIndexedNoisyPattern(ctx, *indexPattern);
+         puts("");
+         copyPattern(ctx->patternSize, ctx->noisyPatterns[*indexPattern],
+                     inputPattern);
+      }
+      printf("\n\n- Pattern %d as 2D image:\n\n", *indexPattern + 1);
+      showAssociatedPattern(ctx, inputPattern, inputPattern, outputPattern);
+      puts("");
+      return true;
+   }
+
+   fprintf(stderr, "\n\tSYSTEM ERROR: this should never happen!\n\n");
+   return false;
 }
 
 static bool usage(int argc)
