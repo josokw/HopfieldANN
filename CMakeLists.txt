@@ -58,3 +58,8 @@ target_link_libraries(hopfield_test GTest::gtest_main hopfield_lib)
 target_include_directories(hopfield_test PRIVATE src)
 
 add_test(NAME HopfieldTest COMMAND hopfield_test WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+
+add_test(NAME CliContract
+         COMMAND bash ${PROJECT_SOURCE_DIR}/testScripts/cli_contract_test.sh
+                     $<TARGET_FILE:hopfieldann>
+         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
