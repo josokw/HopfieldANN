@@ -245,6 +245,17 @@ static bool run_simulation(HopfieldContext *ctx, int argc, bool repeat,
             fprintf(stderr, "\n\tERROR: invalid input\n\n");
             return false;
          }
+         if (*noise < 0 || *noise > MAX_NOISE_PERCENT) {
+            fprintf(stderr, "\n\tERROR: noise level %d out of range (0..%d)\n\n",
+                    *noise, MAX_NOISE_PERCENT);
+            return false;
+         }
+         if (*noise > MAX_INFORMATIVE_NOISE_PERCENT) {
+            printf("- Note: above %d%% noise the input is anti-correlated "
+                   "with the stored pattern; the network converges to the "
+                   "inverted pattern.\n",
+                   MAX_INFORMATIVE_NOISE_PERCENT);
+         }
       }
 
       addNoiseToPattern(ctx, *indexPattern, *noise);

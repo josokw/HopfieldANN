@@ -261,6 +261,11 @@ In Mode 1, `N` prompts for a pattern index and noise percentage, corrupts the ch
 pattern on the fly, and runs recall. In Mode 2, `N` prompts for one of the pre-made
 noisy patterns from the second input file.
 
+Noise is expressed as a percentage in the range 0–100. Up to 50% the noisy input is still
+correlated with the stored pattern and recall into its basin is expected. Above 50% the
+input is anti-correlated (the network converges to the inverted pattern, since `W(-x) = -Wx`);
+an informational note is printed and the value is accepted.
+
 The `R` and Enter options repeat the previous simulation with the exact same parameters
 without re-prompting.
 

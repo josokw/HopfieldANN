@@ -405,6 +405,42 @@ TEST_F(HopfieldCalcTest, AddNoiseToPattern) {
     EXPECT_EQ(diffCount, nNoise);
 }
 
+TEST_F(HopfieldCalcTest, AddNoiseToPatternClampsAt100) {
+    allocate(4, 1);
+    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
+    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
+
+    // Above MAX_NOISE_PERCENT (100) clamps to 100%: every pixel flipped
+    int nNoise = addNoiseToPattern(ctx, 0, 150);
+
+    EXPECT_EQ(nNoise, 4);
+    int diffCount = 0;
+    for (int i = 0; i < 4; i++) {
+        if (ctx->noisyPatterns[0][i] != ctx->patterns[0][i]) {
+            diffCount++;
+        }
+    }
+    EXPECT_EQ(diffCount, 4);
+}
+
+TEST_F(HopfieldCalcTest, AddNoiseToPatternClampsNegative) {
+    allocate(4, 1);
+    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
+    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
+
+    // Negative noise clamps to 0%: no pixels flipped
+    int nNoise = addNoiseToPattern(ctx, 0, -50);
+
+    EXPECT_EQ(nNoise, 0);
+    int diffCount = 0;
+    for (int i = 0; i < 4; i++) {
+        if (ctx->noisyPatterns[0][i] != ctx->patterns[0][i]) {
+            diffCount++;
+        }
+    }
+    EXPECT_EQ(diffCount, 0);
+}
+
 TEST_F(HopfieldCalcTest, ContextResizeReallocates) {
     allocate(4, 2);
     ctx->patterns[0][0] = 1.0;
