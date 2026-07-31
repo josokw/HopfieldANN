@@ -1,10 +1,15 @@
 #include <gtest/gtest.h>
 
+#include <filesystem>
+#include <fstream>
+
 extern "C" {
     #include "HopfieldContext.h"
     #include "HopfieldCalc.h"
     #include "HopfieldIO.h"
 }
+
+enum { TEST_MAX_NEURONS = 1024 };
 
 class HopfieldCalcTest : public ::testing::Test {
 protected:
@@ -17,6 +22,11 @@ protected:
 
     void TearDown() override {
         hopfield_context_destroy(ctx);
+    }
+
+    void allocate(int patternSize, int nPatterns, int nNoisyPatterns = 0) {
+        ASSERT_TRUE(hopfield_context_resize(ctx, patternSize, 1, nPatterns,
+                                            nNoisyPatterns));
     }
 };
 
@@ -36,8 +46,8 @@ TEST_F(HopfieldCalcTest, Equals) {
 }
 
 TEST_F(HopfieldCalcTest, CopyPattern) {
-    double source[NMAX_NEURONS] = {0};
-    double target[NMAX_NEURONS] = {0};
+    double source[TEST_MAX_NEURONS] = {0};
+    double target[TEST_MAX_NEURONS] = {0};
 
     // Initialize source
     source[0] = 1.0;
@@ -54,7 +64,7 @@ TEST_F(HopfieldCalcTest, CopyPattern) {
 
 TEST_F(HopfieldCalcTest, IsSymmetric) {
     // Use context's W matrix instead of local array to avoid stack overflow
-    ctx->patternSize = 3;
+    allocate(3, 0);
     ctx->W[0][1] = 0.5; ctx->W[0][2] = 0.3;
     ctx->W[1][0] = 0.5; ctx->W[1][2] = 0.7;
     ctx->W[2][0] = 0.3; ctx->W[2][1] = 0.7;
@@ -68,7 +78,7 @@ TEST_F(HopfieldCalcTest, IsSymmetric) {
 
 TEST_F(HopfieldCalcTest, HasZeroDiagonal) {
     // Use context's W matrix
-    ctx->patternSize = 3;
+    allocate(3, 0);
     ctx->W[0][1] = 0.5; ctx->W[0][2] = 0.3;
     ctx->W[1][0] = 0.5; ctx->W[1][2] = 0.7;
     ctx->W[2][0] = 0.3; ctx->W[2][1] = 0.7;
@@ -82,8 +92,7 @@ TEST_F(HopfieldCalcTest, HasZeroDiagonal) {
 
 TEST_F(HopfieldCalcTest, LearnHebbianSymmetric) {
     // Setup: 2 patterns with 4 neurons
-    ctx->nPatterns = 2;
-    ctx->patternSize = 4;
+    allocate(4, 2);
     ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
     ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
     ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
@@ -97,8 +106,7 @@ TEST_F(HopfieldCalcTest, LearnHebbianSymmetric) {
 
 TEST_F(HopfieldCalcTest, LearnHebbianCorrectWeights) {
     // Simple case: 1 pattern with 2 neurons
-    ctx->nPatterns = 1;
-    ctx->patternSize = 2;
+    allocate(2, 1);
     ctx->patterns[0][0] = 1;
     ctx->patterns[0][1] = 1;
 
@@ -112,8 +120,7 @@ TEST_F(HopfieldCalcTest, LearnHebbianCorrectWeights) {
 }
 
 TEST_F(HopfieldCalcTest, LearnStorkeySymmetric) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 4;
+   allocate(4, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
    ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
@@ -126,8 +133,7 @@ TEST_F(HopfieldCalcTest, LearnStorkeySymmetric) {
 }
 
 TEST_F(HopfieldCalcTest, LearnStorkeyCorrectWeights) {
-   ctx->nPatterns = 1;
-   ctx->patternSize = 2;
+   allocate(2, 1);
    ctx->patterns[0][0] = 1;
    ctx->patterns[0][1] = 1;
 
@@ -140,8 +146,7 @@ TEST_F(HopfieldCalcTest, LearnStorkeyCorrectWeights) {
 }
 
 TEST_F(HopfieldCalcTest, LearnStorkeyTwoPatterns) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 4;
+   allocate(4, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
    ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
@@ -155,8 +160,7 @@ TEST_F(HopfieldCalcTest, LearnStorkeyTwoPatterns) {
 }
 
 TEST_F(HopfieldCalcTest, LearnStorkeyRecall) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 4;
+   allocate(4, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
    ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
@@ -164,8 +168,8 @@ TEST_F(HopfieldCalcTest, LearnStorkeyRecall) {
 
    EXPECT_TRUE(learnStorkey(ctx));
 
-   double input[NMAX_NEURONS] = {0};
-   double associated[NMAX_NEURONS] = {0};
+   double input[TEST_MAX_NEURONS] = {0};
+   double associated[TEST_MAX_NEURONS] = {0};
 
    input[0] = 1.0; input[1] = -1.0;
    input[2] = 1.0; input[3] = -1.0;
@@ -181,8 +185,7 @@ TEST_F(HopfieldCalcTest, LearnStorkeyRecall) {
 }
 
 TEST_F(HopfieldCalcTest, LearnPseudoInverseSymmetric) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 4;
+   allocate(4, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
    ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
@@ -195,8 +198,7 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseSymmetric) {
 }
 
 TEST_F(HopfieldCalcTest, LearnPseudoInverseCorrectWeights) {
-   ctx->nPatterns = 1;
-   ctx->patternSize = 2;
+   allocate(2, 1);
    ctx->patterns[0][0] = 1;
    ctx->patterns[0][1] = 1;
 
@@ -209,8 +211,7 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseCorrectWeights) {
 }
 
 TEST_F(HopfieldCalcTest, LearnPseudoInverseTwoPatterns) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 4;
+   allocate(4, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
    ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
@@ -225,8 +226,7 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseTwoPatterns) {
 }
 
 TEST_F(HopfieldCalcTest, LearnPseudoInverseExactFixedPoints) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 4;
+   allocate(4, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
    ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
@@ -246,8 +246,7 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseExactFixedPoints) {
 }
 
 TEST_F(HopfieldCalcTest, LearnPseudoInverseRecall) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 8;
+   allocate(8, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
    ctx->patterns[0][4] = -1; ctx->patterns[0][5] = -1;
@@ -259,8 +258,8 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseRecall) {
 
    EXPECT_TRUE(learnPseudoInverse(ctx));
 
-   double input[NMAX_NEURONS] = {0};
-   double associated[NMAX_NEURONS] = {0};
+   double input[TEST_MAX_NEURONS] = {0};
+   double associated[TEST_MAX_NEURONS] = {0};
 
    input[0] = -1.0;
    for (int i = 1; i < 8; i++) {
@@ -278,8 +277,7 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseRecall) {
 }
 
 TEST_F(HopfieldCalcTest, LearnPseudoInverseRejectsDependent) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 4;
+   allocate(4, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = 1;
    ctx->patterns[1][0] = 1; ctx->patterns[1][1] = 1;
@@ -289,8 +287,7 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseRejectsDependent) {
 }
 
 TEST_F(HopfieldCalcTest, LearnPseudoInverseRejectsInvertedDependent) {
-   ctx->nPatterns = 2;
-   ctx->patternSize = 4;
+   allocate(4, 2);
    ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
    ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
    ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
@@ -300,7 +297,8 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseRejectsInvertedDependent) {
 }
 
 TEST_F(HopfieldCalcTest, CalcEnergy) {
-    double pattern[NMAX_NEURONS] = {0};
+    allocate(2, 0);
+    double pattern[TEST_MAX_NEURONS] = {0};
 
     pattern[0] = 1.0;
     pattern[1] = -1.0;
@@ -315,8 +313,9 @@ TEST_F(HopfieldCalcTest, CalcEnergy) {
 }
 
 TEST_F(HopfieldCalcTest, CalcOutputPattern) {
-    double input[NMAX_NEURONS] = {0};
-    double output[NMAX_NEURONS] = {0};
+    allocate(2, 0);
+    double input[TEST_MAX_NEURONS] = {0};
+    double output[TEST_MAX_NEURONS] = {0};
 
     input[0] = 1.0;
     input[1] = -1.0;
@@ -335,8 +334,7 @@ TEST_F(HopfieldCalcTest, CalcOutputPattern) {
 
 TEST_F(HopfieldCalcTest, CalcAssociatedPattern) {
     // Setup: 2 patterns with 4 neurons
-    ctx->nPatterns = 2;
-    ctx->patternSize = 4;
+    allocate(4, 2);
     ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
     ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
     ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
@@ -345,8 +343,8 @@ TEST_F(HopfieldCalcTest, CalcAssociatedPattern) {
     EXPECT_TRUE(learnHebbian(ctx));
 
     // Try to recall pattern 0 from a slightly noisy version
-    double input[NMAX_NEURONS] = {0};
-    double associated[NMAX_NEURONS] = {0};
+    double input[TEST_MAX_NEURONS] = {0};
+    double associated[TEST_MAX_NEURONS] = {0};
 
     input[0] = 1.0; input[1] = -1.0;
     input[2] = 1.0; input[3] = -1.0;  // exact pattern 0
@@ -363,7 +361,8 @@ TEST_F(HopfieldCalcTest, CalcAssociatedPattern) {
 }
 
 TEST_F(HopfieldCalcTest, CalcOutputPatternAsync) {
-    double pattern[NMAX_NEURONS] = {0};
+    allocate(2, 0);
+    double pattern[TEST_MAX_NEURONS] = {0};
 
     pattern[0] = 1.0;
     pattern[1] = -1.0;
@@ -385,8 +384,7 @@ TEST_F(HopfieldCalcTest, CalcOutputPatternAsync) {
 }
 
 TEST_F(HopfieldCalcTest, AddNoiseToPattern) {
-    ctx->nPatterns = 1;
-    ctx->patternSize = 4;
+    allocate(4, 1, 1);
     ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
     ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
 
@@ -405,6 +403,29 @@ TEST_F(HopfieldCalcTest, AddNoiseToPattern) {
         }
     }
     EXPECT_EQ(diffCount, nNoise);
+}
+
+TEST_F(HopfieldCalcTest, ContextResizeReallocates) {
+    allocate(4, 2);
+    ctx->patterns[0][0] = 1.0;
+
+    // Re-size to a different shape: storage must be re-allocated
+    ASSERT_TRUE(hopfield_context_resize(ctx, 8, 1, 2, 0));
+    EXPECT_EQ(ctx->patternSize, 8);
+    EXPECT_EQ(ctx->nRows, 8);
+    EXPECT_EQ(ctx->nColumns, 1);
+
+    ctx->patterns[0][7] = 1.0;
+    ctx->W[7][7] = 0.25;
+    EXPECT_DOUBLE_EQ(ctx->W[7][7], 0.25);
+    EXPECT_TRUE(isSymmetric(8, ctx->W));
+}
+
+TEST_F(HopfieldCalcTest, ContextResizeRejectsImpossibleSizes) {
+    EXPECT_FALSE(hopfield_context_resize(ctx, 0, 1, 1, 0));
+    EXPECT_FALSE(hopfield_context_resize(ctx, 1, 1, -1, 0));
+    // Product overflows int range
+    EXPECT_FALSE(hopfield_context_resize(ctx, 1000000000, 1000000000, 1, 0));
 }
 
 TEST_F(HopfieldCalcTest, OverlapIdentical) {
@@ -484,6 +505,46 @@ TEST_F(HopfieldIOTest, ReadNoisyFileSuccess) {
     HopfieldError err = readNoisyFile(ctx, "data/hopf01noisy.dat");
     EXPECT_EQ(err, HOPFIELD_OK);
     EXPECT_GT(ctx->nNoisyPatterns, 0);
+}
+
+TEST_F(HopfieldIOTest, ReadNoisyFilePreservesLearnedWeights) {
+    // Loading noisy patterns must not reallocate (and thus wipe) W.
+    readFile(ctx, "data/hopf01.dat");
+    ASSERT_TRUE(learnHebbian(ctx));
+
+    double savedWeight = ctx->W[0][1];
+    HopfieldError err = readNoisyFile(ctx, "data/hopf01noisy.dat");
+    EXPECT_EQ(err, HOPFIELD_OK);
+    EXPECT_DOUBLE_EQ(ctx->W[0][1], savedWeight);
+}
+
+TEST_F(HopfieldIOTest, ReadFileBeyondOldLimits) {
+    // 32x32 = 1024 neurons (> 1000) and 30 patterns (> 25) exercise the
+    // dynamic allocation path that replaced the fixed-size limits.
+    std::filesystem::path path =
+        std::filesystem::temp_directory_path() / "hopfield_large_test.dat";
+    {
+        std::ofstream out(path);
+        out << "32 32 30\n";
+        for (int p = 0; p < 30; p++) {
+            for (int r = 0; r < 32; r++) {
+                for (int c = 0; c < 32; c++) {
+                    out << (r == c ? '*' : '.');
+                }
+                out << '\n';
+            }
+        }
+    }
+
+    HopfieldError err = readFile(ctx, path.string().c_str());
+    EXPECT_EQ(err, HOPFIELD_OK);
+    EXPECT_EQ(ctx->nPatterns, 30);
+    EXPECT_EQ(ctx->patternSize, 1024);
+    EXPECT_DOUBLE_EQ(ctx->patterns[0][0], 1.0);
+    EXPECT_DOUBLE_EQ(ctx->patterns[0][1], -1.0);
+    EXPECT_DOUBLE_EQ(ctx->patterns[29][31], -1.0);
+
+    std::filesystem::remove(path);
 }
 
 int main(int argc, char **argv) {

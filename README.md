@@ -200,8 +200,9 @@ a large distance indicates convergence to a spurious attractor or the wrong lear
 **Prerequisites:** CMake >= 3.15, a C17-compatible compiler, and Google Test
 (`libgtest-dev` on Debian/Ubuntu, `gtest` on macOS via Homebrew).
 
-The maximum number of neurons and the maximum number of input learning patterns
-can be configured in the C file _HopfieldConfig.h_.
+All storage (patterns, noisy patterns and the weight matrix) is allocated
+dynamically at load time based on the input file header, so there is no fixed
+maximum for the number of neurons or the number of learning patterns.
 
 Go to the **HopfieldANN** directory. Use _CMake_ and _make_ to build the application:
 
@@ -315,11 +316,12 @@ Features added during this review:
   after each simulation
 - **`R`(un again) and Enter(repeat)** — menu options to re-run the last simulation
   without re-entering parameters
-- **Google Test suite** — 17 unit tests across two test suites for algorithmic
+- **Google Test suite** — 37 unit tests across two test suites for algorithmic
   correctness and I/O error handling
 - **VS Code launch/tasks configuration** — integrated single-key build and debug
   support
 
 Note: the Google Test suite has grown since; the convergence engine now terminates only when
 a full asynchronous sweep produces no neuron flips, guaranteeing convergence to a true fixed
-point.
+point. Since the 1.12.1 refactor all pattern and weight storage is dynamically sized from the
+input file header, removing the previous hard-coded limits.

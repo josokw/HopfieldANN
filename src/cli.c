@@ -24,6 +24,9 @@ static void clearInput(void);
 static void handle_error(HopfieldError err);
 static bool learnPatterns(HopfieldContext *ctx, LearningRule rule);
 static const char *ruleNameOf(LearningRule rule);
+static bool ensurePatternBuffers(HopfieldContext *ctx, double **inputPattern,
+                                 double **inputPatternWithNoise,
+                                 double **outputPattern);
 
 int run_cli(HopfieldContext *ctx, int argc, char *argv[])
 {
@@ -36,9 +39,10 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    char fileName[MAXFILENAME_SIZE] = {0};
    const char menuChars[] = "ELNelnRr";
 
-   double inputPattern[NMAX_NEURONS] = {0};
-   double inputPatternWithNoise[NMAX_NEURONS] = {0};
-   double outputPattern[NMAX_NEURONS] = {0};
+   double *inputPattern = NULL;
+   double *inputPatternWithNoise = NULL;
+   double *outputPattern = NULL;
+   int result = 0;
 
    if (!usage(argc)) {
       return 1;
@@ -52,12 +56,20 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    HopfieldError err = readFile(ctx, argv[1]);
    if (err != HOPFIELD_OK) {
       handle_error(err);
-      return 1;
+      result = 1;
+      goto cleanup;
    }
    printf(
       "ready\n"
       "- Number of neurons: %d * %d = %d, number of patterns = %d\n",
       ctx->nRows, ctx->nColumns, ctx->patternSize, ctx->nPatterns);
+
+   if (!ensurePatternBuffers(ctx, &inputPattern, &inputPatternWithNoise,
+                             &outputPattern)) {
+      fprintf(stderr, "Error: Out of memory\n");
+      result = 1;
+      goto cleanup;
+   }
 
    int stCapacity = storageCapacity(ctx->patternSize);
    if (stCapacity < ctx->nPatterns) {
@@ -89,7 +101,8 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    bool learned = learnPatterns(ctx, rule);
    if (!learned) {
       fprintf(stderr, "Error: Failed to learn patterns\n");
-      return 1;
+      result = 1;
+      goto cleanup;
    }
    printf("ready\n");
    printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
@@ -101,7 +114,8 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
       err = readNoisyFile(ctx, argv[2]);
       if (err != HOPFIELD_OK) {
          handle_error(err);
-         return 1;
+         result = 1;
+         goto cleanup;
       }
       printf("ready\n\n");
       printf("- Number of noisy patterns: %d\n\n", ctx->nNoisyPatterns);
@@ -124,13 +138,21 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
          err = readFile(ctx, fileName);
          if (err != HOPFIELD_OK) {
             handle_error(err);
-            return 1;
+            result = 1;
+            goto cleanup;
          }
          printf(
             "ready\n\n"
             "- Number of neurons: %d * %d = %d, number of patterns: "
             "%d\n\n",
             ctx->nRows, ctx->nColumns, ctx->patternSize, ctx->nPatterns);
+
+         if (!ensurePatternBuffers(ctx, &inputPattern,
+                                   &inputPatternWithNoise, &outputPattern)) {
+            fprintf(stderr, "Error: Out of memory\n");
+            result = 1;
+            goto cleanup;
+         }
 
          stCapacity = storageCapacity(ctx->patternSize);
          if (stCapacity < ctx->nPatterns) {
@@ -143,7 +165,8 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
           printf("- Learning patterns by %s learning rule .... ", ruleName);
           if (!learnPatterns(ctx, rule)) {
             fprintf(stderr, "Error: Failed to learn patterns\n");
-            return 1;
+            result = 1;
+            goto cleanup;
          }
          printf("ready\n\n");
          printf("- Learning result: 1 connection matrix, size %d x %d\n\n",
@@ -162,13 +185,15 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
                      ctx->nPatterns);
                   if (scanf(" %d", &indexPattern) != 1) {
                       fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                      return 1;
+                      result = 1;
+                      goto cleanup;
                    }
                    puts("");
                    if (indexPattern < 1 || indexPattern > ctx->nPatterns) {
                       fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
                               indexPattern);
-                      return 1;
+                      result = 1;
+                      goto cleanup;
                    }
                   indexPattern--;
                   showIndexedPattern(ctx, indexPattern);
@@ -182,7 +207,8 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
 
                    if (scanf(" %d", &noise) != 1) {
                       fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                      return 1;
+                      result = 1;
+                      goto cleanup;
                    }
                }
 
@@ -203,14 +229,16 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
                          ctx->nNoisyPatterns);
                   if (scanf(" %d", &indexPattern) != 1) {
                       fprintf(stderr, "\n\tERROR: invalid input\n\n");
-                      return 1;
+                      result = 1;
+                      goto cleanup;
                    }
                    puts("");
                    if (indexPattern < 1 ||
                        indexPattern > ctx->nNoisyPatterns) {
                       fprintf(stderr, "\n\tERROR: index %d out of range\n\n",
                               indexPattern);
-                      return 1;
+                      result = 1;
+                      goto cleanup;
                    }
                   indexPattern--;
                   puts("");
@@ -228,7 +256,8 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
              default:
                 fprintf(stderr,
                         "\n\tSYSTEM ERROR: this should never happen!\n\n");
-                return 1;
+                result = 1;
+                goto cleanup;
          }
       }
        if (argc == 2) {
@@ -246,7 +275,11 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
        menu = getchar();
    }
 
-   return 0;
+cleanup:
+   free(inputPattern);
+   free(inputPatternWithNoise);
+   free(outputPattern);
+   return result;
 }
 
 static bool usage(int argc)
@@ -293,6 +326,32 @@ static bool learnPatterns(HopfieldContext *ctx, LearningRule rule)
    }
 }
 
+static bool ensurePatternBuffers(HopfieldContext *ctx, double **inputPattern,
+                                 double **inputPatternWithNoise,
+                                 double **outputPattern)
+{
+   if (ctx == NULL || ctx->patternSize <= 0) {
+      return false;
+   }
+   size_t bytes = (size_t)ctx->patternSize * sizeof(double);
+   double *ip = (double *)realloc(*inputPattern, bytes);
+   if (ip == NULL) {
+      return false;
+   }
+   *inputPattern = ip;
+   double *np = (double *)realloc(*inputPatternWithNoise, bytes);
+   if (np == NULL) {
+      return false;
+   }
+   *inputPatternWithNoise = np;
+   double *op = (double *)realloc(*outputPattern, bytes);
+   if (op == NULL) {
+      return false;
+   }
+   *outputPattern = op;
+   return true;
+}
+
 static void handle_error(HopfieldError err)
 {
    switch (err) {
@@ -307,6 +366,9 @@ static void handle_error(HopfieldError err)
          break;
       case HOPFIELD_ERR_SIZE_EXCEEDED:
          fprintf(stderr, "Error: Pattern size exceeded maximum\n");
+         break;
+      case HOPFIELD_ERR_OUT_OF_MEMORY:
+         fprintf(stderr, "Error: Out of memory\n");
          break;
       default:
          fprintf(stderr, "Error: Unknown error (%d)\n", err);

@@ -13,9 +13,9 @@ extern "C" {
 #endif
 
 /* Pure functions - no context needed */
-bool isSymmetric(const int patternSize, const double w[][NMAX_NEURONS]);
+bool isSymmetric(const int patternSize, const double *const w[]);
 bool hasZeroDiagonal(const int patternSize,
-                     const double w[][NMAX_NEURONS]);
+                     const double *const w[]);
 int storageCapacity(const int patternSize);
 
 double calcOverlap(const int patternSize, const double pattern1[],
@@ -31,16 +31,16 @@ bool learnPseudoInverse(HopfieldContext *ctx);
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance);
 
 void calcOutputPattern(const int patternSize,
-                       const double w[][NMAX_NEURONS],
+                       const double *const w[],
                        const double inputPattern[],
                        double outputPattern[]);
 
 void calcOutputPatternAsync(const int patternSize,
-                            const double w[][NMAX_NEURONS],
+                            const double *const w[],
                             double pattern[]);
 
 double calcEnergy(const int patternSize, const double pattern[],
-                  const double w[][NMAX_NEURONS]);
+                  const double *const w[]);
 
 bool convergePattern(HopfieldContext *ctx,
                      const double inputPattern[],

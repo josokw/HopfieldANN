@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-bool isSymmetric(const int patternSize, const double w[][NMAX_NEURONS])
+bool isSymmetric(const int patternSize, const double *const w[])
 {
-   assert(patternSize > 0 && patternSize <= NMAX_NEURONS);
+   assert(patternSize > 0);
 
    bool symmetric = true;
 
@@ -25,9 +25,9 @@ bool isSymmetric(const int patternSize, const double w[][NMAX_NEURONS])
    return symmetric;
 }
 
-bool hasZeroDiagonal(const int patternSize, const double w[][NMAX_NEURONS])
+bool hasZeroDiagonal(const int patternSize, const double *const w[])
 {
-   assert(patternSize > 0 && patternSize <= NMAX_NEURONS);
+   assert(patternSize > 0);
 
    bool hasZD = true;
 
@@ -48,8 +48,8 @@ int storageCapacity(const int patternSize)
 
 bool learnHebbian(HopfieldContext *ctx)
 {
-   if (ctx == NULL || ctx->nPatterns <= 0 || ctx->nPatterns > NMAX_PATTERNS ||
-       ctx->patternSize <= 0 || ctx->patternSize > NMAX_NEURONS) {
+   if (ctx == NULL || ctx->patterns == NULL || ctx->W == NULL ||
+       ctx->nPatterns <= 0 || ctx->patternSize <= 0) {
       return false;
    }
 
@@ -66,24 +66,24 @@ bool learnHebbian(HopfieldContext *ctx)
          else {
             for (int pat = 0; pat < ctx->nPatterns; pat++) {
                ctx->W[row][column] += ctx->patterns[pat][row] *
-                                 ctx->patterns[pat][column] /
-                                 (double)ctx->patternSize;
+                                  ctx->patterns[pat][column] /
+                                  (double)ctx->patternSize;
             }
             ctx->W[column][row] = ctx->W[row][column];
          }
       }
    }
    assert(hasZeroDiagonal(ctx->patternSize,
-                          (const double (*)[NMAX_NEURONS])ctx->W));
+                          (const double *const *)ctx->W));
    assert(isSymmetric(ctx->patternSize,
-                       (const double (*)[NMAX_NEURONS])ctx->W));
+                       (const double *const *)ctx->W));
    return true;
 }
 
 bool learnStorkey(HopfieldContext *ctx)
 {
-   if (ctx == NULL || ctx->nPatterns <= 0 || ctx->nPatterns > NMAX_PATTERNS ||
-       ctx->patternSize <= 0 || ctx->patternSize > NMAX_NEURONS) {
+   if (ctx == NULL || ctx->patterns == NULL || ctx->W == NULL ||
+       ctx->nPatterns <= 0 || ctx->patternSize <= 0) {
       return false;
    }
 
@@ -95,10 +95,14 @@ bool learnStorkey(HopfieldContext *ctx)
       }
    }
 
+   double *field = (double *)malloc((size_t)N * sizeof(double));
+   if (field == NULL) {
+      return false;
+   }
+
    for (int pat = 0; pat < ctx->nPatterns; pat++) {
       double *xi = ctx->patterns[pat];
 
-      double field[NMAX_NEURONS];
       for (int i = 0; i < N; i++) {
          field[i] = 0.0;
          for (int k = 0; k < N; k++) {
@@ -119,25 +123,36 @@ bool learnStorkey(HopfieldContext *ctx)
       }
    }
 
+   free(field);
+
    assert(hasZeroDiagonal(ctx->patternSize,
-                            (const double (*)[NMAX_NEURONS])ctx->W));
+                          (const double *const *)ctx->W));
    assert(isSymmetric(ctx->patternSize,
-                        (const double (*)[NMAX_NEURONS])ctx->W));
+                       (const double *const *)ctx->W));
    return true;
 }
 
 bool learnPseudoInverse(HopfieldContext *ctx)
 {
-   if (ctx == NULL || ctx->nPatterns <= 0 || ctx->nPatterns > NMAX_PATTERNS ||
-       ctx->patternSize <= 0 || ctx->patternSize > NMAX_NEURONS) {
+   if (ctx == NULL || ctx->patterns == NULL || ctx->W == NULL ||
+       ctx->nPatterns <= 0 || ctx->patternSize <= 0) {
       return false;
    }
 
    const int N = ctx->patternSize;
    const int P = ctx->nPatterns;
 
+   double **G = allocMatrix(P, P);
+   double **inv = allocMatrix(P, P);
+   double **M = allocMatrix(P, N);
+   if (G == NULL || inv == NULL || M == NULL) {
+      freeMatrix(G);
+      freeMatrix(inv);
+      freeMatrix(M);
+      return false;
+   }
+
    /* Gram matrix G[mu][nu] = (1/N) sum_i xi^mu_i * xi^nu_i */
-   double G[NMAX_PATTERNS][NMAX_PATTERNS] = {{0}};
    for (int mu = 0; mu < P; mu++) {
       for (int nu = 0; nu < P; nu++) {
          double sum = 0.0;
@@ -149,7 +164,6 @@ bool learnPseudoInverse(HopfieldContext *ctx)
    }
 
    /* Invert G using Gauss-Jordan elimination with partial pivoting */
-   double inv[NMAX_PATTERNS][NMAX_PATTERNS] = {{0}};
    for (int mu = 0; mu < P; mu++) {
       inv[mu][mu] = 1.0;
    }
@@ -161,7 +175,10 @@ bool learnPseudoInverse(HopfieldContext *ctx)
          }
       }
       if (fabs(G[pivot][col]) < 1e-12) {
-         return false; /* singular: patterns are linearly dependent */
+         freeMatrix(G); /* singular: patterns are linearly dependent */
+         freeMatrix(inv);
+         freeMatrix(M);
+         return false;
       }
       if (pivot != col) {
          for (int k = 0; k < P; k++) {
@@ -191,7 +208,6 @@ bool learnPseudoInverse(HopfieldContext *ctx)
    }
 
    /* M[mu][i] = sum_nu inv[mu][nu] * xi^nu_i */
-   double M[NMAX_PATTERNS][NMAX_NEURONS];
    for (int mu = 0; mu < P; mu++) {
       for (int i = 0; i < N; i++) {
          double sum = 0.0;
@@ -220,15 +236,26 @@ bool learnPseudoInverse(HopfieldContext *ctx)
       }
    }
 
-   assert(isSymmetric(N, (const double (*)[NMAX_NEURONS])ctx->W));
+   freeMatrix(G);
+   freeMatrix(inv);
+   freeMatrix(M);
+
+   assert(isSymmetric(N, (const double *const *)ctx->W));
    return true;
 }
 
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
 {
-   if (ctx == NULL || patNumber < 0 || patNumber >= ctx->nPatterns ||
-       ctx->patternSize <= 0 || ctx->patternSize > NMAX_NEURONS) {
+   if (ctx == NULL || ctx->patterns == NULL || ctx->patternSize <= 0 ||
+       patNumber < 0 || patNumber >= ctx->nPatterns) {
       return -1;
+   }
+
+   if (ctx->noisyPatterns == NULL) {
+      ctx->noisyPatterns = allocMatrix(ctx->nPatterns, ctx->patternSize);
+      if (ctx->noisyPatterns == NULL) {
+         return -1;
+      }
    }
 
    if (chance < 0)
@@ -238,8 +265,16 @@ int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
 
    int nNoise = ctx->patternSize * chance / 100;
 
+   int *indices = (int *)malloc((size_t)ctx->patternSize * sizeof(int));
+   double *noisyPattern =
+       (double *)malloc((size_t)ctx->patternSize * sizeof(double));
+   if (indices == NULL || noisyPattern == NULL) {
+      free(indices);
+      free(noisyPattern);
+      return -1;
+   }
+
    /* Fisher-Yates partial shuffle: pick nNoise distinct indices in O(nNoise) */
-   int indices[NMAX_NEURONS];
    for (int i = 0; i < ctx->patternSize; i++) {
       indices[i] = i;
    }
@@ -251,18 +286,20 @@ int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
    }
 
    /* Build noisy pattern in a temp buffer, flip selected indices */
-   double noisyPattern[NMAX_NEURONS];
    copyPattern(ctx->patternSize, ctx->patterns[patNumber], noisyPattern);
    for (int i = 0; i < nNoise; i++) {
       noisyPattern[indices[i]] = -noisyPattern[indices[i]];
    }
    copyPattern(ctx->patternSize, noisyPattern,
                ctx->noisyPatterns[patNumber]);
+
+   free(indices);
+   free(noisyPattern);
    return nNoise;
 }
 
 void calcOutputPattern(const int patternSize,
-                       const double w[][NMAX_NEURONS],
+                       const double *const w[],
                        const double inputPattern[], double outputPattern[])
 {
    for (int outIndex = 0; outIndex < patternSize; outIndex++) {
@@ -275,10 +312,13 @@ void calcOutputPattern(const int patternSize,
 }
 
 void calcOutputPatternAsync(const int patternSize,
-                           const double w[][NMAX_NEURONS],
+                           const double *const w[],
                            double pattern[])
 {
-   int order[NMAX_NEURONS];
+   int *order = (int *)malloc((size_t)patternSize * sizeof(int));
+   if (order == NULL) {
+      return;
+   }
    for (int i = 0; i < patternSize; i++) {
       order[i] = i;
    }
@@ -296,6 +336,7 @@ void calcOutputPatternAsync(const int patternSize,
       }
       pattern[idx] = sign(delta);
    }
+   free(order);
 }
 
 double calcOverlap(const int patternSize, const double pattern1[],
@@ -321,7 +362,7 @@ int calcHammingDistance(const int patternSize, const double pattern1[],
 }
 
 double calcEnergy(const int patternSize, const double pattern[],
-                  const double w[][NMAX_NEURONS])
+                  const double *const w[])
 {
    double energy = 0.0;
 
@@ -341,25 +382,33 @@ bool convergePattern(HopfieldContext *ctx,
                      void *user_data,
                      double *finalEnergy)
 {
-   if (ctx == NULL || ctx->patternSize <= 0 ||
-       ctx->patternSize > NMAX_NEURONS) {
+   if (ctx == NULL || ctx->W == NULL || ctx->patternSize <= 0) {
       if (finalEnergy) *finalEnergy = 0.0;
       return false;
    }
 
-   double pattern[NMAX_NEURONS] = {0};
+   double *pattern =
+       (double *)malloc((size_t)ctx->patternSize * sizeof(double));
+   double *previousPattern =
+       (double *)malloc((size_t)ctx->patternSize * sizeof(double));
+   if (pattern == NULL || previousPattern == NULL) {
+      free(pattern);
+      free(previousPattern);
+      if (finalEnergy) *finalEnergy = 0.0;
+      return false;
+   }
+
    copyPattern(ctx->patternSize, inputPattern, pattern);
 
    double energy = calcEnergy(ctx->patternSize, pattern,
-                             (const double (*)[NMAX_NEURONS])ctx->W);
+                              (const double *const *)ctx->W);
    bool converged = false;
    int iter = 0;
 
    do {
-      double previousPattern[NMAX_NEURONS];
       copyPattern(ctx->patternSize, pattern, previousPattern);
       calcOutputPatternAsync(ctx->patternSize,
-                            (const double (*)[NMAX_NEURONS])ctx->W,
+                            (const double *const *)ctx->W,
                             pattern);
       int flips = 0;
       for (int i = 0; i < ctx->patternSize; i++) {
@@ -368,7 +417,7 @@ bool convergePattern(HopfieldContext *ctx,
          }
       }
       energy = calcEnergy(ctx->patternSize, pattern,
-                          (const double (*)[NMAX_NEURONS])ctx->W);
+                          (const double *const *)ctx->W);
       iter++;
       if (callback) callback(iter, energy, pattern, user_data);
       if (flips == 0) {
@@ -378,6 +427,8 @@ bool convergePattern(HopfieldContext *ctx,
    } while (iter < MAX_ITERATIONS);
 
    copyPattern(ctx->patternSize, pattern, outputPattern);
+   free(pattern);
+   free(previousPattern);
    if (finalEnergy) *finalEnergy = energy;
    return converged;
 }
@@ -390,5 +441,3 @@ bool calcAssociatedPattern(HopfieldContext *ctx,
    return convergePattern(ctx, inputPattern, associatedPattern,
                           NULL, NULL, finalEnergy);
 }
-
-

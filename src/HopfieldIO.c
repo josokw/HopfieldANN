@@ -2,18 +2,20 @@
 #include "HopfieldCalc.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 static HopfieldError read_pattern_rows(FILE *fh, int nRows, int nColumns,
-                                        double storage[][NMAX_NEURONS],
-                                        int patternIndex)
+                                       double *const storage[],
+                                       int patternIndex)
 {
-   char line[NMAX_NEURONS + 1];
+   char *line = (char *)malloc((size_t)nColumns + 2);
+   if (line == NULL) {
+      return HOPFIELD_ERR_OUT_OF_MEMORY;
+   }
 
    for (int nR = 0; nR < nRows; nR++) {
-      if (fgets(line, sizeof(line), fh) == NULL) {
-         if (ferror(fh)) {
-            return HOPFIELD_ERR_INVALID_FORMAT;
-         }
+      if (fgets(line, nColumns + 2, fh) == NULL) {
+         free(line);
          return HOPFIELD_ERR_INVALID_FORMAT;
       }
       if (line[0] == '\n' || line[0] == '\r') {
@@ -21,6 +23,7 @@ static HopfieldError read_pattern_rows(FILE *fh, int nRows, int nColumns,
          continue;
       }
       if (line[0] == '\0') {
+         free(line);
          return HOPFIELD_ERR_INVALID_FORMAT;
       }
       for (int nC = 0; nC < nColumns; nC++) {
@@ -32,6 +35,7 @@ static HopfieldError read_pattern_rows(FILE *fh, int nRows, int nColumns,
          }
       }
    }
+   free(line);
    return HOPFIELD_OK;
 }
 
@@ -56,17 +60,16 @@ HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
       return HOPFIELD_ERR_INVALID_FORMAT;
    }
 
-   if (ctx->nPatterns <= 0 || ctx->nPatterns > NMAX_PATTERNS) {
+   if (ctx->nPatterns <= 0) {
       fclose(hfDataFile);
       return HOPFIELD_ERR_SIZE_EXCEEDED;
    }
 
-   if (ctx->nRows > NMAX_NEURONS || ctx->nColumns > NMAX_NEURONS ||
-       ctx->nRows > NMAX_NEURONS / ctx->nColumns) {
+   if (!hopfield_context_resize(ctx, ctx->nRows, ctx->nColumns,
+                                ctx->nPatterns, 0)) {
       fclose(hfDataFile);
-      return HOPFIELD_ERR_SIZE_EXCEEDED;
+      return HOPFIELD_ERR_OUT_OF_MEMORY;
    }
-   ctx->patternSize = ctx->nColumns * ctx->nRows;
 
    for (int nP = 0; nP < ctx->nPatterns; nP++) {
       HopfieldError err = read_pattern_rows(hfDataFile, ctx->nRows,
@@ -121,9 +124,14 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
       return HOPFIELD_ERR_INVALID_FORMAT;
    }
 
-   if (ctx->nNoisyPatterns <= 0 || ctx->nNoisyPatterns > NMAX_PATTERNS) {
+   if (ctx->nNoisyPatterns <= 0) {
       fclose(hfDataFile);
       return HOPFIELD_ERR_SIZE_EXCEEDED;
+   }
+
+   if (!hopfield_context_set_noisy(ctx, ctx->nNoisyPatterns)) {
+      fclose(hfDataFile);
+      return HOPFIELD_ERR_OUT_OF_MEMORY;
    }
 
    for (int nP = 0; nP < ctx->nNoisyPatterns; nP++) {
@@ -262,8 +270,7 @@ void showAssociatedPattern(HopfieldContext *ctx,
                             const double inputPatternWithNoise[],
                             double associatedPattern[])
 {
-   if (ctx == NULL || ctx->patternSize <= 0 ||
-       ctx->patternSize > NMAX_NEURONS) {
+   if (ctx == NULL || ctx->patternSize <= 0) {
       return;
    }
 
@@ -271,7 +278,7 @@ void showAssociatedPattern(HopfieldContext *ctx,
 
    showPatternAndDifference(ctx, inputPattern, inputPatternWithNoise);
    double initialEnergy = calcEnergy(ctx->patternSize, inputPatternWithNoise,
-                                     (const double (*)[NMAX_NEURONS])ctx->W);
+                                     (const double *const *)ctx->W);
    printf("\n    Energy = %9.4f\n\n", initialEnergy);
 
    double finalEnergy;
