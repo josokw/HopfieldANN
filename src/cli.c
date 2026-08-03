@@ -16,7 +16,8 @@
 typedef enum {
    RULE_HEBBIAN,
    RULE_STORKEY,
-   RULE_PSEUDO_INVERSE
+   RULE_PSEUDO_INVERSE,
+   RULE_DAYDREAMING
 } LearningRule;
 
 static bool usage(int argc);
@@ -84,7 +85,8 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    }
 
    int ruleChoice = 0;
-   printf("- Learning rule: (H)ebbian, (S)torkey or (P)seudo-inverse? [H]: ");
+   printf("- Learning rule: (H)ebbian, (S)torkey, (P)seudo-inverse or "
+          "(D)aydreaming? [H]: ");
    ruleChoice = getchar();
    if (ruleChoice == EOF) {
       printf("\n- No input, using Hebbian learning rule\n");
@@ -94,6 +96,9 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
    }
    else if (ruleChoice == 'P' || ruleChoice == 'p') {
       rule = RULE_PSEUDO_INVERSE;
+   }
+   else if (ruleChoice == 'D' || ruleChoice == 'd') {
+      rule = RULE_DAYDREAMING;
    }
    ruleName = ruleNameOf(rule);
    if (ruleChoice != '\n' && ruleChoice != EOF) {
@@ -327,6 +332,8 @@ static const char *ruleNameOf(LearningRule rule)
          return "Storkey";
       case RULE_PSEUDO_INVERSE:
          return "pseudo-inverse";
+      case RULE_DAYDREAMING:
+         return "Daydreaming";
       default:
          return "Hebbian";
    }
@@ -339,6 +346,8 @@ static bool learnPatterns(HopfieldContext *ctx, LearningRule rule)
          return learnStorkey(ctx);
       case RULE_PSEUDO_INVERSE:
          return learnPseudoInverse(ctx);
+      case RULE_DAYDREAMING:
+         return learnDaydreaming(ctx);
       default:
          return learnHebbian(ctx);
    }

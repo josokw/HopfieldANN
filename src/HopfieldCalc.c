@@ -244,6 +244,123 @@ bool learnPseudoInverse(HopfieldContext *ctx)
    return true;
 }
 
+/* Largest |eigenvalue| of the symmetric matrix w, computed by power iteration.
+   This is the spectral norm ||w||_2 used to renormalize the coupling matrix. */
+static double spectralNorm(const int patternSize, double *const w[])
+{
+   double *v = (double *)malloc((size_t)patternSize * sizeof(double));
+   double *u = (double *)malloc((size_t)patternSize * sizeof(double));
+   if (v == NULL || u == NULL) {
+      free(v);
+      free(u);
+      return 0.0;
+   }
+
+   for (int i = 0; i < patternSize; i++) {
+      v[i] = (randomInt(0, 1) == 0) ? 1.0 : -1.0;
+   }
+
+   double norm = 0.0;
+   for (int iter = 0; iter < DAYDREAMING_NORM_ITERATIONS; iter++) {
+      for (int i = 0; i < patternSize; i++) {
+         double sum = 0.0;
+         for (int j = 0; j < patternSize; j++) {
+            sum += w[i][j] * v[j];
+         }
+         u[i] = sum;
+      }
+      norm = 0.0;
+      for (int i = 0; i < patternSize; i++) {
+         norm += u[i] * u[i];
+      }
+      norm = sqrt(norm);
+      if (norm < 1e-12) {
+         free(v);
+         free(u);
+         return 0.0;
+      }
+      for (int i = 0; i < patternSize; i++) {
+         v[i] = u[i] / norm;
+      }
+   }
+
+   free(v);
+   free(u);
+   return norm;
+}
+
+/* Daydreaming learning rule (Serricchio et al., "Daydreaming Hopfield Networks
+   and their surprising effectiveness on correlated data", 2025). Starts from the
+   Hebbian coupling matrix, then repeatedly reinforces a random stored pattern
+   while unlearning the fixed point reached from a random configuration. Both
+   terms are updated every step, so the procedure can be iterated indefinitely
+   without destroying the stored patterns. */
+bool learnDaydreaming(HopfieldContext *ctx)
+{
+   if (ctx == NULL || ctx->patterns == NULL || ctx->W == NULL ||
+       ctx->nPatterns <= 0 || ctx->patternSize <= 0) {
+      return false;
+   }
+
+   const int N = ctx->patternSize;
+   const int P = ctx->nPatterns;
+
+   if (!learnHebbian(ctx)) {
+      return false;
+   }
+
+   double *xi = (double *)malloc((size_t)N * sizeof(double));
+   double *sigma = (double *)malloc((size_t)N * sizeof(double));
+   double *fixed = (double *)malloc((size_t)N * sizeof(double));
+   if (xi == NULL || sigma == NULL || fixed == NULL) {
+      free(xi);
+      free(sigma);
+      free(fixed);
+      return false;
+   }
+
+   const double tau = DAYDREAMING_TAU_FACTOR * (double)N;
+   const double scale = 1.0 / (tau * (double)N);
+
+   for (int epoch = 0; epoch < DAYDREAMING_EPOCHS; epoch++) {
+      for (int step = 0; step < N; step++) {
+         int mu = randomInt(0, P - 1);
+         copyPattern(N, ctx->patterns[mu], xi);
+         for (int i = 0; i < N; i++) {
+            sigma[i] = (randomInt(0, 1) == 0) ? 1.0 : -1.0;
+         }
+         convergePattern(ctx, sigma, fixed, NULL, NULL, NULL);
+         for (int i = 0; i < N; i++) {
+            for (int j = i + 1; j < N; j++) {
+               double delta =
+                  scale * (xi[i] * xi[j] - fixed[i] * fixed[j]);
+               ctx->W[i][j] += delta;
+               ctx->W[j][i] = ctx->W[i][j];
+            }
+         }
+      }
+
+      double norm = spectralNorm(N, ctx->W);
+      if (norm > 0.0) {
+         for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+               ctx->W[i][j] /= norm;
+            }
+         }
+      }
+   }
+
+   free(xi);
+   free(sigma);
+   free(fixed);
+
+   assert(hasZeroDiagonal(ctx->patternSize,
+                          (const double *const *)ctx->W));
+   assert(isSymmetric(ctx->patternSize,
+                       (const double *const *)ctx->W));
+   return true;
+}
+
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
 {
    if (ctx == NULL || ctx->patterns == NULL || ctx->patternSize <= 0 ||

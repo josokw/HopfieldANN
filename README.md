@@ -90,7 +90,32 @@ any learning rule.
 
 The interactive prompt accepts `P` for this rule:
 
-    Learning rule: (H)ebbian, (S)torkey or (P)seudo-inverse? [H]:
+    Learning rule: (H)ebbian, (S)torkey, (P)seudo-inverse or (D)aydreaming? [H]:
+
+### Daydreaming learning rule
+
+The Daydreaming learning rule (Serricchio et al., "Daydreaming Hopfield Networks and their
+surprising effectiveness on correlated data", *Neural Networks* 186 (2025) 107216) starts from
+the Hebbian coupling matrix and then repeatedly applies an iterative update that, at every
+step, reinforces a randomly chosen stored pattern while *unlearning* the spurious attractor
+reached by the zero-temperature dynamics from a random initial configuration:
+
+    J_ij ← J_ij + (1/(τ·N)) (ξ^μ_i·ξ^μ_j − σ_i·σ_j)
+
+where μ is a pattern picked uniformly at random, σ is the fixed point reached from a random
+state, and τ is an inverse learning rate. After each epoch of N steps the coupling matrix is
+renormalized by its spectral norm ‖J‖₂ (computed by power iteration). The procedure needs no
+fine-tuning — for large enough τ the result is τ-independent — and can be iterated indefinitely
+without the destructive forgetting that plagues plain dreaming/unlearning rules.
+
+Daydreaming produces larger basins of attraction and higher practical storage capacity than the
+Hebbian rule, works well on correlated patterns, and is fully local (each weight update depends
+only on neuron values). The diagonal stays exactly zero because ξ_i² − σ_i² = 0. The default
+training uses 10 epochs with τ = N, tunable via `DAYDREAMING_EPOCHS` and `DAYDREAMING_TAU_FACTOR`
+in `src/HopfieldConfig.h`.
+
+The interactive prompt accepts `D` for this rule. Note that training performs N dynamics runs
+per epoch, so it takes noticeably longer than the one-shot rules on larger grids.
 
 ## Input example for learning (training) 4 patterns
 
@@ -315,6 +340,9 @@ Features added during this review:
 - **Pseudo-inverse (Moore–Penrose) learning rule** — weight matrix built from the inverse
   Gram matrix, making every stored pattern an exact fixed point (capacity up to N − 1,
   provided patterns are linearly independent)
+- **Daydreaming learning rule** — iterative reinforcement of stored patterns plus
+  unlearning of spurious attractors, with larger basins of attraction and higher
+  capacity than Hebbian, including on correlated data
 - **`convergePattern()`** — callback-based convergence engine that separates
   iteration logic from display, enabling reuse and testing
 - **Overlap and Hamming distance** — quantitative recall quality metrics reported

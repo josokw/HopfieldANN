@@ -22,6 +22,10 @@ set(LIB_SOURCE_FILES
 add_library(hopfield_lib STATIC ${LIB_SOURCE_FILES})
 target_include_directories(hopfield_lib PUBLIC src)
 
+if(NOT MSVC)
+    target_link_libraries(hopfield_lib PRIVATE m)
+endif()
+
 if(MSVC)
     target_compile_options(hopfield_lib PRIVATE /W4)
 else()

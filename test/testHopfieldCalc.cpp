@@ -296,6 +296,53 @@ TEST_F(HopfieldCalcTest, LearnPseudoInverseRejectsInvertedDependent) {
    EXPECT_FALSE(learnPseudoInverse(ctx));
 }
 
+TEST_F(HopfieldCalcTest, LearnDaydreamingSymmetric) {
+   allocate(4, 2);
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
+   ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = 1;
+
+   EXPECT_TRUE(learnDaydreaming(ctx));
+
+   EXPECT_TRUE(isSymmetric(ctx->patternSize, ctx->W));
+   EXPECT_TRUE(hasZeroDiagonal(ctx->patternSize, ctx->W));
+}
+
+TEST_F(HopfieldCalcTest, LearnDaydreamingRecall) {
+   // Two orthogonal patterns on 16 neurons.
+   allocate(16, 2);
+   for (int i = 0; i < 8; i++) {
+      ctx->patterns[0][i] = 1.0;
+      ctx->patterns[0][i + 8] = -1.0;
+      ctx->patterns[1][i] = (i % 2 == 0) ? 1.0 : -1.0;
+      ctx->patterns[1][i + 8] = (i % 2 == 0) ? 1.0 : -1.0;
+   }
+
+   EXPECT_TRUE(learnDaydreaming(ctx));
+
+   double input[TEST_MAX_NEURONS] = {0};
+   double associated[TEST_MAX_NEURONS] = {0};
+   double energy;
+
+   input[0] = -ctx->patterns[0][0];  // flip one bit
+   for (int i = 1; i < 16; i++) {
+      input[i] = ctx->patterns[0][i];
+   }
+
+   bool converged = calcAssociatedPattern(ctx, input, associated, &energy);
+
+   EXPECT_TRUE(converged);
+   EXPECT_LT(energy, 0.0);
+   EXPECT_GE(calcOverlap(16, associated, ctx->patterns[0]), 0.9);
+}
+
+TEST_F(HopfieldCalcTest, LearnDaydreamingRejectsEmpty) {
+   allocate(4, 0);
+
+   EXPECT_FALSE(learnDaydreaming(ctx));
+}
+
 TEST_F(HopfieldCalcTest, CalcEnergy) {
     allocate(2, 0);
     double pattern[TEST_MAX_NEURONS] = {0};
