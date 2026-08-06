@@ -16,6 +16,12 @@ typedef struct {
     int nPatterns;
     int patternSize;
     int nNoisyPatterns;
+
+    /* Modern Hopfield (softmax/exp-energy) retrieval. When set, recall uses the
+       stored patterns directly with the exponential-energy update rule instead
+       of the symmetric weight matrix W. */
+    bool modernHopfield;
+    double modernBeta;
 } HopfieldContext;
 
 typedef enum {

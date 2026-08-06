@@ -29,6 +29,7 @@ bool learnHebbian(HopfieldContext *ctx);
 bool learnStorkey(HopfieldContext *ctx);
 bool learnPseudoInverse(HopfieldContext *ctx);
 bool learnDaydreaming(HopfieldContext *ctx);
+bool learnModernHopfield(HopfieldContext *ctx);
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance);
 
 void calcOutputPattern(const int patternSize,
@@ -42,6 +43,10 @@ void calcOutputPatternAsync(const int patternSize,
 
 double calcEnergy(const int patternSize, const double pattern[],
                   const double *const w[]);
+
+/* Modern Hopfield energy E(x) = -lse(beta, Xi^T x) + 0.5 * ||x||^2. Uses the
+   stored patterns as the memory (requires ctx->modernHopfield). */
+double calcModernEnergy(const HopfieldContext *ctx, const double pattern[]);
 
 bool convergePattern(HopfieldContext *ctx,
                      const double inputPattern[],

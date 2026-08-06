@@ -117,6 +117,36 @@ in `src/HopfieldConfig.h`.
 The interactive prompt accepts `D` for this rule. Note that training performs N dynamics runs
 per epoch, so it takes noticeably longer than the one-shot rules on larger grids.
 
+### Modern Hopfield (softmax / exponential-energy) learning rule
+
+The Modern Hopfield learning rule (Ramsauer et al., "Hopfield Networks is All You Need",
+2020) stores the patterns **themselves** as the memory and retrieves with a single
+softmax-attention read-out over continuous states:
+
+    x ← Ξ · softmax(β · Ξᵀ x)          with  E(x) = −lse(β, Ξᵀx) + ½‖x‖²
+
+where Ξ is the N×M matrix of stored patterns, β is the inverse softmax temperature
+(default `MODERN_BETA = 1.0` in `src/HopfieldConfig.h`; larger β means sharper,
+near-argmax retrieval), and `lse` is the log-sum-exp computed with a stable
+max-subtraction so `exp(β·N)` never overflows.
+
+This is the model behind the **2024 Nobel Prize in Physics** line of work: its update rule is
+mathematically identical to the attention mechanism inside Transformers. Because the
+energy is exponential rather than quadratic, the practical storage capacity grows far
+beyond the classical ~0.14·N limit — in tests, 32 random patterns on 64 neurons (more than
+5× the classical capacity) are all retrieved exactly. Clean inputs settle in a single
+update; noisy inputs need one or two. The final output is thresholded back to ±1 so the
+grid display and the overlap/Hamming metrics work unchanged.
+
+Note that, as with the pseudo-inverse rule, the recall machinery does not use the symmetric
+weight matrix `W`; `W` is still filled with the Hebbian coupling matrix so the connection
+matrix invariants and output messages stay consistent, but the stored patterns are the
+actual memory.
+
+The interactive prompt accepts `M` for this rule:
+
+    Learning rule: (H)ebbian, (S)torkey, (P)seudo-inverse, (D)aydreaming or (M)odern? [H]:
+
 ## Input example for learning (training) 4 patterns
 
 Example input format plain ASCII input file for training the network: **supervised learning**.
@@ -343,13 +373,16 @@ Features added during this review:
 - **Daydreaming learning rule** — iterative reinforcement of stored patterns plus
   unlearning of spurious attractors, with larger basins of attraction and higher
   capacity than Hebbian, including on correlated data
+- **Modern Hopfield (softmax / exp-energy) learning rule** — pattern-based retrieval
+  via the attention-equivalent update `x ← Ξ·softmax(β·Ξᵀx)`, with exponential
+  storage capacity beyond the classical ~0.14·N limit
 - **`convergePattern()`** — callback-based convergence engine that separates
   iteration logic from display, enabling reuse and testing
 - **Overlap and Hamming distance** — quantitative recall quality metrics reported
   after each simulation
 - **`R`(un again) and Enter(repeat)** — menu options to re-run the last simulation
   without re-entering parameters
-- **Google Test suite** — 37 unit tests across two test suites for algorithmic
+- **Google Test suite** — 57 unit tests across two test suites for algorithmic
   correctness and I/O error handling
 - **VS Code launch/tasks configuration** — integrated single-key build and debug
   support

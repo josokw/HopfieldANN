@@ -321,8 +321,14 @@ void showAssociatedPattern(HopfieldContext *ctx,
    struct ShowIterationData cb_data = {ctx, inputPattern};
 
    showPatternAndDifference(ctx, inputPattern, inputPatternWithNoise);
-   double initialEnergy = calcEnergy(ctx->patternSize, inputPatternWithNoise,
-                                     (const double *const *)ctx->W);
+   double initialEnergy;
+   if (ctx->modernHopfield) {
+      initialEnergy = calcModernEnergy(ctx, inputPatternWithNoise);
+   }
+   else {
+      initialEnergy = calcEnergy(ctx->patternSize, inputPatternWithNoise,
+                                 (const double *const *)ctx->W);
+   }
    printf("\n    Energy = %9.4f\n\n", initialEnergy);
 
    double finalEnergy;

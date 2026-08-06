@@ -13,4 +13,9 @@
 #define DAYDREAMING_TAU_FACTOR 1.0       /* tau = factor * N (paper uses tau = N) */
 #define DAYDREAMING_NORM_ITERATIONS 50   /* power-iteration steps for the spectral norm */
 
+/* Modern Hopfield learning rule (Ramsauer et al., 2020). */
+#define MODERN_BETA 1.0                  /* inverse softmax temperature: larger =
+                                            sharper (near-argmax) retrieval */
+#define MODERN_CONVERGENCE_EPSILON 1e-6  /* max |x_i - prev_i| that ends iteration */
+
 #endif

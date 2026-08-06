@@ -76,6 +76,7 @@ check "mode1-default-rule"     0 "\n1\n10\nE\n" "$F" "Recall quality" "" "" 0 -1
 check "mode1-storkey"          0 "S\n1\n10\nE\n" "$F" "Storkey" "" "" 0 -1
 check "mode1-pseudo-inverse"   0 "P\n1\n10\nE\n" "$F" "pseudo-inverse" "" "" 0 -1
 check "mode1-daydreaming"      0 "D\n1\n10\nE\n" "$F" "Daydreaming" "" "Recall quality" 1 -1
+check "mode1-modern"           0 "M\n1\n10\nE\n" "$F" "modern Hopfield" "" "Recall quality" 1 -1
 check "banner-version"         0 "\n1\n10\nE\n" "$F" "hopfieldann v[0-9]" "" "Number of neurons" 1 -1
 
 # --- noise-level validation ------------------------------------------------

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 
@@ -341,6 +342,151 @@ TEST_F(HopfieldCalcTest, LearnDaydreamingRejectsEmpty) {
    allocate(4, 0);
 
    EXPECT_FALSE(learnDaydreaming(ctx));
+}
+
+/* Deterministic xorshift64 PRNG so the modern Hopfield capacity tests are
+   reproducible regardless of libc rand() implementation or test order. */
+static uint64_t xorshift64(uint64_t *state) {
+    uint64_t x = *state;
+    x ^= x << 13;
+    x ^= x >> 7;
+    x ^= x << 17;
+    *state = x;
+    return x;
+}
+
+static double randomSign(uint64_t *state) {
+    return (xorshift64(state) & 1u) ? 1.0 : -1.0;
+}
+
+static void fillOrthogonalPatterns(HopfieldContext *ctx) {
+    const int N = ctx->patternSize;
+    const int P = ctx->nPatterns;
+    for (int mu = 0; mu < P; mu++) {
+        for (int i = 0; i < N; i++) {
+            ctx->patterns[mu][i] = ((i + mu) % 2 == 0) ? 1.0 : -1.0;
+        }
+    }
+}
+
+TEST_F(HopfieldCalcTest, LearnModernHopfieldSymmetric) {
+   allocate(4, 2);
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = -1;
+   ctx->patterns[0][2] = 1; ctx->patterns[0][3] = -1;
+   ctx->patterns[1][0] = -1; ctx->patterns[1][1] = 1;
+   ctx->patterns[1][2] = -1; ctx->patterns[1][3] = 1;
+
+   EXPECT_TRUE(learnModernHopfield(ctx));
+   EXPECT_TRUE(ctx->modernHopfield);
+
+   EXPECT_TRUE(isSymmetric(ctx->patternSize, ctx->W));
+   EXPECT_TRUE(hasZeroDiagonal(ctx->patternSize, ctx->W));
+}
+
+TEST_F(HopfieldCalcTest, LearnModernHopfieldRejectsEmpty) {
+   allocate(4, 0);
+
+   EXPECT_FALSE(learnModernHopfield(ctx));
+}
+
+TEST_F(HopfieldCalcTest, ModernHopfieldExactRecall) {
+   allocate(16, 2);
+   fillOrthogonalPatterns(ctx);
+
+   EXPECT_TRUE(learnModernHopfield(ctx));
+
+   double input[TEST_MAX_NEURONS] = {0};
+   double associated[TEST_MAX_NEURONS] = {0};
+   double energy;
+
+   for (int mu = 0; mu < ctx->nPatterns; mu++) {
+      copyPattern(16, ctx->patterns[mu], input);
+      bool converged = calcAssociatedPattern(ctx, input, associated, &energy);
+
+      EXPECT_TRUE(converged);
+      EXPECT_LT(energy, 0.0);
+      for (int i = 0; i < 16; i++) {
+         EXPECT_DOUBLE_EQ(associated[i], ctx->patterns[mu][i]);
+      }
+   }
+}
+
+TEST_F(HopfieldCalcTest, ModernHopfieldNoisyRecall) {
+   allocate(16, 2);
+   fillOrthogonalPatterns(ctx);
+
+   EXPECT_TRUE(learnModernHopfield(ctx));
+
+   double input[TEST_MAX_NEURONS] = {0};
+   double associated[TEST_MAX_NEURONS] = {0};
+   double energy;
+
+   copyPattern(16, ctx->patterns[0], input);
+   input[0] = -input[0];
+   input[3] = -input[3];
+
+   bool converged = calcAssociatedPattern(ctx, input, associated, &energy);
+
+   EXPECT_TRUE(converged);
+   EXPECT_LT(energy, 0.0);
+   EXPECT_GE(calcOverlap(16, associated, ctx->patterns[0]), 0.9);
+}
+
+TEST_F(HopfieldCalcTest, ModernHopfieldSinglePattern) {
+   allocate(8, 1);
+   ctx->patterns[0][0] = 1; ctx->patterns[0][1] = 1;
+   ctx->patterns[0][2] = -1; ctx->patterns[0][3] = -1;
+   ctx->patterns[0][4] = 1; ctx->patterns[0][5] = -1;
+   ctx->patterns[0][6] = 1; ctx->patterns[0][7] = 1;
+
+   EXPECT_TRUE(learnModernHopfield(ctx));
+
+   double input[TEST_MAX_NEURONS] = {0};
+   double associated[TEST_MAX_NEURONS] = {0};
+   double energy;
+
+   copyPattern(8, ctx->patterns[0], input);
+   input[2] = -input[2];
+
+   bool converged = calcAssociatedPattern(ctx, input, associated, &energy);
+
+   EXPECT_TRUE(converged);
+   for (int i = 0; i < 8; i++) {
+      EXPECT_DOUBLE_EQ(associated[i], ctx->patterns[0][i]);
+   }
+}
+
+/* Key modern-Hopfield property: practical capacity far above the classical
+   0.138*N limit. 32 random patterns on 64 neurons (> 0.14 * 64 ~ 9) must all
+   be retrieved exactly from clean input. */
+TEST_F(HopfieldCalcTest, ModernHopfieldCapacityBeyondClassical) {
+   const int N = 64;
+   const int P = 32;
+   allocate(N, P);
+
+   uint64_t state = 0x9E3779B97F4A7C15ull;
+   for (int mu = 0; mu < P; mu++) {
+      for (int i = 0; i < N; i++) {
+         ctx->patterns[mu][i] = randomSign(&state);
+      }
+   }
+
+   EXPECT_TRUE(learnModernHopfield(ctx));
+
+   double input[TEST_MAX_NEURONS] = {0};
+   double associated[TEST_MAX_NEURONS] = {0};
+   double energy;
+
+   for (int mu = 0; mu < P; mu++) {
+      copyPattern(N, ctx->patterns[mu], input);
+      bool converged = calcAssociatedPattern(ctx, input, associated, &energy);
+
+      EXPECT_TRUE(converged);
+      EXPECT_LT(energy, 0.0);
+      for (int i = 0; i < N; i++) {
+         EXPECT_DOUBLE_EQ(associated[i], ctx->patterns[mu][i]);
+      }
+   }
 }
 
 TEST_F(HopfieldCalcTest, CalcEnergy) {

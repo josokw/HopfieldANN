@@ -53,6 +53,8 @@ bool learnHebbian(HopfieldContext *ctx)
       return false;
    }
 
+   ctx->modernHopfield = false;
+
    for (int row = 0; row < ctx->patternSize; row++) {
       for (int column = 0; column < ctx->patternSize; column++) {
          ctx->W[row][column] = 0.0;
@@ -86,6 +88,8 @@ bool learnStorkey(HopfieldContext *ctx)
        ctx->nPatterns <= 0 || ctx->patternSize <= 0) {
       return false;
    }
+
+   ctx->modernHopfield = false;
 
    int N = ctx->patternSize;
 
@@ -138,6 +142,8 @@ bool learnPseudoInverse(HopfieldContext *ctx)
        ctx->nPatterns <= 0 || ctx->patternSize <= 0) {
       return false;
    }
+
+   ctx->modernHopfield = false;
 
    const int N = ctx->patternSize;
    const int P = ctx->nPatterns;
@@ -302,6 +308,8 @@ bool learnDaydreaming(HopfieldContext *ctx)
       return false;
    }
 
+   ctx->modernHopfield = false;
+
    const int N = ctx->patternSize;
    const int P = ctx->nPatterns;
 
@@ -359,6 +367,190 @@ bool learnDaydreaming(HopfieldContext *ctx)
    assert(isSymmetric(ctx->patternSize,
                        (const double *const *)ctx->W));
    return true;
+}
+
+/* Modern Hopfield learning rule (Ramsauer et al., "Hopfield Networks is All You
+   Need", 2020). The stored patterns themselves are the memory; retrieval is one
+   softmax-attention read-out, x <- Xi * softmax(beta * Xi^T x), whose energy
+   E(x) = -lse(beta, Xi^T x) + 0.5*||x||^2 can store exponentially many patterns
+   with exponentially small retrieval error. W is still filled with the Hebbian
+   coupling matrix so the connection-matrix invariants hold, but retrieval uses
+   the stored patterns directly. */
+bool learnModernHopfield(HopfieldContext *ctx)
+{
+   if (ctx == NULL || ctx->patterns == NULL || ctx->W == NULL ||
+       ctx->nPatterns <= 0 || ctx->patternSize <= 0) {
+      return false;
+   }
+
+   if (!learnHebbian(ctx)) {
+      return false;
+   }
+
+   ctx->modernHopfield = true;
+   ctx->modernBeta = MODERN_BETA;
+
+   assert(isSymmetric(ctx->patternSize, (const double *const *)ctx->W));
+   assert(hasZeroDiagonal(ctx->patternSize, (const double *const *)ctx->W));
+   return true;
+}
+
+/* Compute the M overlaps a_mu = beta * <xi^mu, pattern> and return their max. */
+static double computeOverlaps(const HopfieldContext *ctx, const double pattern[],
+                              double overlaps[])
+{
+   const int P = ctx->nPatterns;
+   const int N = ctx->patternSize;
+   const double beta = ctx->modernBeta;
+
+   double maxA = -HUGE_VAL;
+   for (int mu = 0; mu < P; mu++) {
+      double sum = 0.0;
+      for (int i = 0; i < N; i++) {
+         sum += ctx->patterns[mu][i] * pattern[i];
+      }
+      overlaps[mu] = beta * sum;
+      if (overlaps[mu] > maxA) {
+         maxA = overlaps[mu];
+      }
+   }
+   return maxA;
+}
+
+/* Log-sum-exp of beta * Xi^T x computed from the pre-scaled overlaps, shifted
+   by their max for numerical stability. */
+static double lseFromOverlaps(const double overlaps[], int nPatterns,
+                              double maxA)
+{
+   double sum = 0.0;
+   for (int mu = 0; mu < nPatterns; mu++) {
+      sum += exp(overlaps[mu] - maxA);
+   }
+   return maxA + log(sum);
+}
+
+double calcModernEnergy(const HopfieldContext *ctx, const double pattern[])
+{
+   if (ctx == NULL || ctx->patterns == NULL || ctx->nPatterns <= 0 ||
+       ctx->patternSize <= 0) {
+      return 0.0;
+   }
+
+   double *overlaps = (double *)malloc((size_t)ctx->nPatterns * sizeof(double));
+   if (overlaps == NULL) {
+      return 0.0;
+   }
+
+   double maxA = computeOverlaps(ctx, pattern, overlaps);
+   double energy = -lseFromOverlaps(overlaps, ctx->nPatterns, maxA);
+   for (int i = 0; i < ctx->patternSize; i++) {
+      energy += 0.5 * pattern[i] * pattern[i];
+   }
+
+   free(overlaps);
+   return energy;
+}
+
+/* Modern Hopfield retrieval: iterate x <- Xi * softmax(beta * Xi^T x) until the
+   state stabilizes (max |x_i - prev_i| < MODERN_CONVERGENCE_EPSILON) or the
+   iteration budget is exhausted. Clean inputs settle in a single update (the
+   paper's key property); noisy inputs need one more. The final output is
+   thresholded to +/- 1 so the binary display and recall-quality helpers stay
+   valid; the iteration callback receives a thresholded copy for the same
+   reason. */
+static bool convergeModernPattern(HopfieldContext *ctx,
+                                  const double inputPattern[],
+                                  double outputPattern[],
+                                  ConvergenceCallback callback,
+                                  void *user_data,
+                                  double *finalEnergy)
+{
+   const int N = ctx->patternSize;
+   const int P = ctx->nPatterns;
+
+   double *x = (double *)malloc((size_t)N * sizeof(double));
+   double *prev = (double *)malloc((size_t)N * sizeof(double));
+   double *overlaps = (double *)malloc((size_t)P * sizeof(double));
+   double *weights = (double *)malloc((size_t)P * sizeof(double));
+   double *display = (double *)malloc((size_t)N * sizeof(double));
+   if (x == NULL || prev == NULL || overlaps == NULL || weights == NULL ||
+       display == NULL) {
+      free(x);
+      free(prev);
+      free(overlaps);
+      free(weights);
+      free(display);
+      if (finalEnergy) *finalEnergy = 0.0;
+      return false;
+   }
+
+   copyPattern(N, inputPattern, x);
+
+   double energy = 0.0;
+   bool converged = false;
+   int iter = 0;
+
+   do {
+      copyPattern(N, x, prev);
+
+      double maxA = computeOverlaps(ctx, x, overlaps);
+      double norm = 0.0;
+      for (int mu = 0; mu < P; mu++) {
+         weights[mu] = exp(overlaps[mu] - maxA);
+         norm += weights[mu];
+      }
+      for (int mu = 0; mu < P; mu++) {
+         weights[mu] /= norm;
+      }
+
+      /* x <- Xi * softmax(beta * Xi^T x) */
+      for (int i = 0; i < N; i++) {
+         double sum = 0.0;
+         for (int mu = 0; mu < P; mu++) {
+            sum += ctx->patterns[mu][i] * weights[mu];
+         }
+         x[i] = sum;
+      }
+
+      /* E(x) = -lse(beta, Xi^T x) + 0.5 * ||x||^2, evaluated at the new state */
+      maxA = computeOverlaps(ctx, x, overlaps);
+      energy = -lseFromOverlaps(overlaps, P, maxA);
+      for (int i = 0; i < N; i++) {
+         energy += 0.5 * x[i] * x[i];
+      }
+
+      iter++;
+      if (callback) {
+         for (int i = 0; i < N; i++) {
+            display[i] = (double)sign(x[i]);
+         }
+         callback(iter, energy, display, user_data);
+      }
+
+      double maxDelta = 0.0;
+      for (int i = 0; i < N; i++) {
+         double delta = fabs(x[i] - prev[i]);
+         if (delta > maxDelta) {
+            maxDelta = delta;
+         }
+      }
+      if (maxDelta < MODERN_CONVERGENCE_EPSILON) {
+         converged = true;
+         break;
+      }
+   } while (iter < MAX_ITERATIONS);
+
+   for (int i = 0; i < N; i++) {
+      outputPattern[i] = (double)sign(x[i]);
+   }
+
+   free(x);
+   free(prev);
+   free(overlaps);
+   free(weights);
+   free(display);
+   if (finalEnergy) *finalEnergy = energy;
+   return converged;
 }
 
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
@@ -499,7 +691,17 @@ bool convergePattern(HopfieldContext *ctx,
                      void *user_data,
                      double *finalEnergy)
 {
-   if (ctx == NULL || ctx->W == NULL || ctx->patternSize <= 0) {
+   if (ctx == NULL || ctx->patternSize <= 0) {
+      if (finalEnergy) *finalEnergy = 0.0;
+      return false;
+   }
+
+   if (ctx->modernHopfield) {
+      return convergeModernPattern(ctx, inputPattern, outputPattern,
+                                   callback, user_data, finalEnergy);
+   }
+
+   if (ctx->W == NULL) {
       if (finalEnergy) *finalEnergy = 0.0;
       return false;
    }
