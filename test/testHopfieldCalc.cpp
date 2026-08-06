@@ -630,6 +630,145 @@ TEST_F(HopfieldIOTest, ReadFileBeyondOldLimits) {
     std::filesystem::remove(path);
 }
 
+static std::string writeTempDat(const std::string &name,
+                                const std::string &content) {
+    std::filesystem::path path =
+        std::filesystem::temp_directory_path() / name;
+    {
+        std::ofstream out(path);
+        out << content;
+    }
+    return path.string();
+}
+
+TEST_F(HopfieldIOTest, ReadFileRejectsOverlongRow) {
+    std::string path = writeTempDat("hopfield_overlong.dat",
+        "4 4 2\n"
+        "....\n"
+        ".....\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n");
+    EXPECT_EQ(readFile(ctx, path.c_str()), HOPFIELD_ERR_INVALID_FORMAT);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, ReadFileRejectsShortRow) {
+    std::string path = writeTempDat("hopfield_short.dat",
+        "4 4 2\n"
+        "....\n"
+        "...\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n");
+    EXPECT_EQ(readFile(ctx, path.c_str()), HOPFIELD_ERR_INVALID_FORMAT);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, ReadFileRejectsIllegalChar) {
+    std::string path = writeTempDat("hopfield_badchar.dat",
+        "4 4 1\n"
+        "....\n"
+        "..x.\n"
+        "....\n"
+        "....\n");
+    EXPECT_EQ(readFile(ctx, path.c_str()), HOPFIELD_ERR_INVALID_FORMAT);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, ReadFileRejectsTruncatedLastRow) {
+    std::string path = writeTempDat("hopfield_truncated.dat",
+        "4 4 1\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "..");
+    EXPECT_EQ(readFile(ctx, path.c_str()), HOPFIELD_ERR_INVALID_FORMAT);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, ReadFileAcceptsCRLF) {
+    std::string path = writeTempDat("hopfield_crlf.dat",
+        "4 4 1\r\n"
+        "*...\r\n"
+        "....\r\n"
+        "....\r\n"
+        "....\r\n");
+    ASSERT_EQ(readFile(ctx, path.c_str()), HOPFIELD_OK);
+    EXPECT_EQ(ctx->nRows, 4);
+    EXPECT_EQ(ctx->nColumns, 4);
+    EXPECT_EQ(ctx->nPatterns, 1);
+    EXPECT_EQ(ctx->patternSize, 16);
+    EXPECT_DOUBLE_EQ(ctx->patterns[0][0], 1.0);
+    EXPECT_DOUBLE_EQ(ctx->patterns[0][1], -1.0);
+    EXPECT_DOUBLE_EQ(ctx->patterns[0][15], -1.0);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, ReadFileSkipsBlankLinesBetweenPatterns) {
+    // Blank line right after the header and between patterns (hopf03 layout).
+    // Regression guard against the row counter underflowing past zero.
+    std::string path = writeTempDat("hopfield_blanks.dat",
+        "4 4 2\n"
+        "\n"
+        "*...\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "\n"
+        "*...\n"
+        "....\n"
+        "....\n"
+        "....\n");
+    ASSERT_EQ(readFile(ctx, path.c_str()), HOPFIELD_OK);
+    EXPECT_EQ(ctx->nPatterns, 2);
+    EXPECT_DOUBLE_EQ(ctx->patterns[0][0], 1.0);
+    EXPECT_DOUBLE_EQ(ctx->patterns[0][1], -1.0);
+    EXPECT_DOUBLE_EQ(ctx->patterns[1][0], 1.0);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, ReadFileAcceptsTrailingBlankLine) {
+    std::string path = writeTempDat("hopfield_trailing.dat",
+        "4 4 1\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "\n");
+    ASSERT_EQ(readFile(ctx, path.c_str()), HOPFIELD_OK);
+    EXPECT_EQ(ctx->nPatterns, 1);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, ReadFileRejectsHeaderJunk) {
+    std::string path = writeTempDat("hopfield_headerjunk.dat",
+        "4 4 1 extra\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n");
+    EXPECT_EQ(readFile(ctx, path.c_str()), HOPFIELD_ERR_INVALID_FORMAT);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, ReadFileRejectsHeaderPartial) {
+    std::string path = writeTempDat("hopfield_headerpartial.dat",
+        "4 4\n"
+        "....\n"
+        "....\n"
+        "....\n"
+        "....\n");
+    EXPECT_EQ(readFile(ctx, path.c_str()), HOPFIELD_ERR_INVALID_FORMAT);
+    std::filesystem::remove(path);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

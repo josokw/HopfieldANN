@@ -109,7 +109,7 @@ check "reload-nonexistent"     1 "P\n1\n15\nL\ndata/nope.dat\nE\n" "$F" "File no
 # --- storage-capacity warning -------------------------------------------------
 # Fixture: 2x2 grid (4 neurons) -> capacity 1 < 2 patterns, so the warning fires.
 CAP="$TMP/capacity_warn.dat"
-printf '2 2 2\n\n. *\n* .\n\n* .\n. *\n' >"$CAP"
+printf '2 2 2\n\n..\n*.\n\n*.\n..\n' >"$CAP"
 check "capacity-warning"       0 "P\n1\n50\nE\n" "$CAP" "associative storage capacity" "" "" 0 -1
 check "capacity-warning-learns" 0 "P\n1\n50\nE\n" "$CAP" "Recall quality" "" "" 0 -1
 

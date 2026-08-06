@@ -3,26 +3,62 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+
+/* Read the "rows columns patterns" header and reject any trailing non-blank
+   content on the header line, which would otherwise be parsed as pattern
+   data. The header's own line ending is consumed. */
+static HopfieldError read_pattern_header(FILE *fh, int *nRows, int *nColumns,
+                                         int *nPatterns)
+{
+   if (fscanf(fh, "%d %d %d", nRows, nColumns, nPatterns) != 3) {
+      return HOPFIELD_ERR_INVALID_FORMAT;
+   }
+   int c;
+   while ((c = fgetc(fh)) != '\n' && c != EOF) {
+      if (c != ' ' && c != '\t' && c != '\r') {
+         return HOPFIELD_ERR_INVALID_FORMAT;
+      }
+   }
+   return HOPFIELD_OK;
+}
 
 static HopfieldError read_pattern_rows(FILE *fh, int nRows, int nColumns,
                                        double *const storage[],
                                        int patternIndex)
 {
-   char *line = (char *)malloc((size_t)nColumns + 2);
+   /* Content + optional CR + LF + NUL. A full CRLF row (nColumns + 2 chars)
+      fits exactly; anything longer fails the length check below. */
+   size_t bufSize = (size_t)nColumns + 3;
+   if (bufSize > INT_MAX) {
+      return HOPFIELD_ERR_OUT_OF_MEMORY;
+   }
+   char *line = (char *)malloc(bufSize);
    if (line == NULL) {
       return HOPFIELD_ERR_OUT_OF_MEMORY;
    }
 
-   for (int nR = 0; nR < nRows; nR++) {
-      if (fgets(line, nColumns + 2, fh) == NULL) {
+   int nR = 0;
+   while (nR < nRows) {
+      if (fgets(line, (int)bufSize, fh) == NULL) {
          free(line);
          return HOPFIELD_ERR_INVALID_FORMAT;
       }
-      if (line[0] == '\n' || line[0] == '\r') {
-         nR--;
+      size_t len = strlen(line);
+      if (len > 0 && line[len - 1] == '\n') {
+         line[--len] = '\0';
+      }
+      if (len > 0 && line[len - 1] == '\r') {
+         line[--len] = '\0';
+      }
+      if (len == 0) {
+         /* Blank lines separate patterns (and end the header). Skip them
+            without advancing the row counter, so leading blanks do not
+            shift the first real row. */
          continue;
       }
-      if (line[0] == '\0') {
+      if (len != (size_t)nColumns) {
          free(line);
          return HOPFIELD_ERR_INVALID_FORMAT;
       }
@@ -30,10 +66,15 @@ static HopfieldError read_pattern_rows(FILE *fh, int nRows, int nColumns,
          if (line[nC] == '*') {
             storage[patternIndex][nR * nColumns + nC] = 1.0;
          }
-         else {
+         else if (line[nC] == '.') {
             storage[patternIndex][nR * nColumns + nC] = -1.0;
          }
+         else {
+            free(line);
+            return HOPFIELD_ERR_INVALID_FORMAT;
+         }
       }
+      nR++;
    }
    free(line);
    return HOPFIELD_OK;
@@ -49,10 +90,11 @@ HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
    if (hfDataFile == NULL) {
       return HOPFIELD_ERR_FILE_NOT_FOUND;
    }
-   if (fscanf(hfDataFile, "%d %d %d", &ctx->nRows, &ctx->nColumns,
-              &ctx->nPatterns) != 3) {
+   HopfieldError err = read_pattern_header(hfDataFile, &ctx->nRows,
+                                           &ctx->nColumns, &ctx->nPatterns);
+   if (err != HOPFIELD_OK) {
       fclose(hfDataFile);
-      return HOPFIELD_ERR_INVALID_FORMAT;
+      return err;
    }
 
    if (ctx->nRows <= 0 || ctx->nColumns <= 0) {
@@ -108,10 +150,12 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
       return HOPFIELD_ERR_FILE_NOT_FOUND;
    }
 
-   if (fscanf(hfDataFile, "%d %d %d", &nNoisyRows, &nNoisyColumns,
-               &ctx->nNoisyPatterns) != 3) {
+   HopfieldError err = read_pattern_header(hfDataFile, &nNoisyRows,
+                                           &nNoisyColumns,
+                                           &ctx->nNoisyPatterns);
+   if (err != HOPFIELD_OK) {
       fclose(hfDataFile);
-      return HOPFIELD_ERR_INVALID_FORMAT;
+      return err;
    }
 
    if (nNoisyRows <= 0 || nNoisyColumns <= 0) {
