@@ -360,10 +360,10 @@ See the [License](./License) file.
 
 ## Updates guided by opencode (2026)
 
-Code quality improvements were performed using AI-assisted review with
+Code quality improvements were performed using AI-assisted reviews with
 **big-pickle (opencode/big-pickle)**.
 
-Features added during this review:
+Features added during this reviews:
 
 - **Storkey learning rule** — alternative learning rule with local-field correction
   for reduced crosstalk between stored patterns
