@@ -105,6 +105,8 @@ check "repeat-enter-prompts-once" 0 "P\n1\n15\n\nE\n" "$F" "" "" "Choose pattern
 # reload-L asserts "= 256", which depends on hopf03.dat staying a 16x16 grid.
 check "reload-L"               0 "P\n1\n15\nL\ndata/hopf03.dat\n1\n15\nE\n" "$F" "= 256" "" "Recall quality" 1 -1
 check "reload-nonexistent"     1 "P\n1\n15\nL\ndata/nope.dat\nE\n" "$F" "File not found" "" "" 0 -1
+LONGNAME="$(printf 'x%.0s' {1..120})"
+check "reload-too-long"        1 "P\n1\n15\nL\n${LONGNAME}\nE\n" "$F" "file name too long" "" "" 0 -1
 
 # --- storage-capacity warning -------------------------------------------------
 # Fixture: 2x2 grid (4 neurons) -> capacity 1 < 2 patterns, so the warning fires.

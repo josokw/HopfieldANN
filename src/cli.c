@@ -139,11 +139,29 @@ int run_cli(HopfieldContext *ctx, int argc, char *argv[])
       if (argc == 2 && (menu == 'L' || menu == 'l')) {
          clearInput();
          printf("- Input patterns file name: ");
-          fgets(fileName, MAXFILENAME_SIZE, stdin);
-          size_t fileNameLen = strlen(fileName);
-          if (fileNameLen > 0 && fileName[fileNameLen - 1] == '\n') {
-             fileName[fileNameLen - 1] = '\0';
-         }
+           if (fgets(fileName, MAXFILENAME_SIZE, stdin) == NULL) {
+              fprintf(stderr, "\n\tERROR: could not read file name\n\n");
+              result = 1;
+              goto cleanup;
+           }
+           size_t fileNameLen = strlen(fileName);
+           if (fileNameLen > 0 && fileName[fileNameLen - 1] == '\n') {
+              fileName[fileNameLen - 1] = '\0';
+           }
+           else if (fileNameLen == MAXFILENAME_SIZE - 1) {
+              /* Buffer filled without a newline: the name is either exactly
+                 MAXFILENAME_SIZE - 1 characters (newline still pending) or
+                 longer. Peek at the next character to tell the two apart. */
+              int c = getchar();
+              if (c != '\n' && c != EOF) {
+                 clearInput();
+                 fprintf(stderr, "\n\tERROR: file name too long "
+                                 "(max %d characters)\n\n",
+                         MAXFILENAME_SIZE - 1);
+                 result = 1;
+                 goto cleanup;
+              }
+           }
          printf("\n- Loading input patterns data .... ");
          err = readFile(ctx, fileName);
          if (err != HOPFIELD_OK) {
