@@ -259,7 +259,7 @@ All storage (patterns, noisy patterns and the weight matrix) is allocated
 dynamically at load time based on the input file header, so there is no fixed
 maximum for the number of neurons or the number of learning patterns.
 
-Go to the **HopfieldANN** directory. Use _CMake_ and _make_ to build the application:
+Go to the **HopfieldANN** directory. Use *CMake* and *make* to build the application:
 
     git clone https://github.com/josokw/HopfieldANN.git
     cd HopfieldANN
@@ -267,11 +267,11 @@ Go to the **HopfieldANN** directory. Use _CMake_ and _make_ to build the applica
     cmake ..
     make -j
 
-The executable can be found in the _bin_ directory.
+The executable can be found in the *bin* directory.
 
 ## Executing: using an input file containing patterns to learn
 
-Input file examples can be found in the _data_ directory:
+Input file examples can be found in the *data* directory:
 
 - `hopf01.dat` — 10×10, 7 patterns (letters and shapes)
 - `hopf01noisy.dat` — 10×10, 4 noisy variants of hopf01
@@ -285,7 +285,7 @@ Starting the program without parameters will show the usage help:
 
     USAGE: hopfieldann <patterns filename> <noisy patterns filename>
 
-If the _build_ directory is the current directory:
+If the *build* directory is the current directory:
 
     ../bin/hopfieldann ../data/hopf01.dat
 
