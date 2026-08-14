@@ -117,6 +117,13 @@ in `src/HopfieldConfig.h`.
 The interactive prompt accepts `D` for this rule. Note that training performs N dynamics runs
 per epoch, so it takes noticeably longer than the one-shot rules on larger grids.
 
+> **Known performance issue**: The current implementation runs full asynchronous convergence
+> (up to 1000 sweeps) at each of the `DAYDREAMING_EPOCHS × N` steps, making Daydreaming
+> unusably slow for grids larger than ~50 neurons. For interactive use on the provided
+> demo data (100–256 neurons), prefer **Hebbian, Storkey, Pseudo-inverse, or Modern**
+> learning rules. A fix replacing full convergence with a single async sweep per step is
+> planned.
+
 ### Modern Hopfield (softmax / exponential-energy) learning rule
 
 The Modern Hopfield learning rule (Ramsauer et al., "Hopfield Networks is All You Need",
