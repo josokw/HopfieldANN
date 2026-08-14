@@ -279,6 +279,8 @@ Input file examples can be found in the *data* directory:
 - `hopf03.dat` — 16×16, 6 patterns (geometric shapes)
 - `hopf04.dat` — 10×10, 5 patterns (diverse symbols)
 
+### Interactive mode
+
 Starting the program without parameters will show the usage help:
 
     USAGE: hopfieldann <patterns filename>
@@ -290,6 +292,32 @@ If the *build* directory is the current directory:
     ../bin/hopfieldann ../data/hopf01.dat
 
     ../bin/hopfieldann ../data/hopf01.dat ../data/hopf01noisy.dat
+
+### Batch mode (non-interactive)
+
+Run single or multiple simulations without entering the interactive menu:
+
+    # Single pattern, Hebbian, 10% noise
+    hopfieldann patterns.dat --rule hebbian --pattern 1 --noise 10
+
+    # Multiple patterns, Storkey, reproducible seed
+    hopfieldann patterns.dat --rule storkey --pattern 1,3,5 --noise 20 --seed 42
+
+    # Mode 2 with pre-made noisy file
+    hopfieldann patterns.dat noisy.dat --pattern 1,2
+
+    # Save/load weight matrix
+    hopfieldann patterns.dat --rule modern --pattern 1 --noise 10 --save-weights weights.bin
+    hopfieldann patterns.dat --load-weights weights.bin --pattern 1 --noise 10
+
+    # Quiet mode (exit code only)
+    hopfieldann patterns.dat --rule hebbian --pattern 1 --noise 10 --quiet
+
+    # Verbose (show energy per iteration)
+    hopfieldann patterns.dat --rule hebbian --pattern 1 --noise 10 --verbose
+
+    # Save recall output to file
+    hopfieldann patterns.dat --rule hebbian --pattern 1 --noise 10 --output recall.dat
 
 ## Interactive menu
 
@@ -340,6 +368,48 @@ A warning is shown if the number of stored patterns exceeds the theoretical capa
 
     Warning: associative storage capacity 13 exceeded
 
+## Batch mode reference
+
+### Command-line options
+
+| Option | Description |
+|--------|-------------|
+| `-r, --rule RULE` | Learning rule: `hebbian`, `storkey`, `pseudo-inverse`, `daydreaming`, `modern` (default: interactive prompt) |
+| `-p, --pattern LIST` | Pattern indices 1..N, comma-separated (e.g., `1,3,5`). In mode 2, uses noisy pattern indices. |
+| `-n, --noise PERCENT` | Noise level 0–100 (mode 1 only) |
+| `-s, --seed VALUE` | Random seed for reproducible runs |
+| `-q, --quiet` | Suppress non-error output; only exit code indicates result |
+| `-v, --verbose` | Show energy per iteration during convergence |
+| `-o, --output FILE` | Save recall pattern(s) to FILE (appends for multiple patterns) |
+| `-w, --save-weights FILE` | Save weight matrix after learning (binary `.bin` format) |
+| `-l, --load-weights FILE` | Load weight matrix, skip learning |
+| `-h, --help` | Show help |
+
+### Exit codes (batch mode)
+
+| Code | Meaning |
+|------|---------|
+| `0` | All patterns converged |
+| `1` | Usage error, file error, or learning failed |
+| `2` | At least one pattern did not converge |
+| `3` | Invalid pattern index or noise value |
+
+### Config file
+
+Optional `.hopfieldrc` in the current directory or `$HOME`. Format:
+
+```ini
+rule = storkey
+seed = 12345
+noise = 15
+verbose = true
+save_weights = weights.bin
+load_weights = weights.bin
+output = recall.dat
+```
+
+CLI options override config file values.
+
 ## Test scripts
 
 Using file redirection for generating test data:
@@ -374,7 +444,7 @@ Features added during this reviews:
   unlearning of spurious attractors, with larger basins of attraction and higher
   capacity than Hebbian, including on correlated data
 - **Modern Hopfield (softmax / exp-energy) learning rule** — pattern-based retrieval
-  via the attention-equivalent update `x ← Ξ·softmax(β·Ξᵀx)`, with exponential
+  via the attention-equivalent update `x ← ��·softmax(β·�����x)`, with exponential
   storage capacity beyond the classical ~0.14·N limit
 - **`convergePattern()`** — callback-based convergence engine that separates
   iteration logic from display, enabling reuse and testing
@@ -386,6 +456,12 @@ Features added during this reviews:
   correctness and I/O error handling
 - **VS Code launch/tasks configuration** — integrated single-key build and debug
   support
+- **Batch mode (v1.16.0)** — non-interactive CLI with `--rule`, `--pattern` (comma-separated),
+  `--noise`, `--seed`, `--quiet`, `--verbose`, `--output`, `--save-weights`, `--load-weights`
+- **Weight matrix I/O (v1.16.0)** — binary save/load of trained weights for reuse
+- **Config file (v1.16.0)** — `.hopfieldrc` for persistent defaults
+- **Phase 1 bug fixes (v1.15.2)** — atomic buffer allocation, noisyPatterns size handling,
+  configurable pseudo-inverse threshold
 
 Note: the Google Test suite has grown since; the convergence engine now terminates only when
 a full asynchronous sweep produces no neuron flips, guaranteeing convergence to a true fixed

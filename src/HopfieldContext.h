@@ -56,4 +56,10 @@ bool hopfield_context_resize(HopfieldContext *ctx, int nRows, int nColumns,
    weight matrix are preserved. */
 bool hopfield_context_set_noisy(HopfieldContext *ctx, int nNoisyPatterns);
 
+/* Save weight matrix and metadata to binary file. */
+bool hopfield_save_weights(const HopfieldContext *ctx, const char *filename);
+
+/* Load weight matrix and metadata from binary file. Resizes context to match. */
+bool hopfield_load_weights(HopfieldContext *ctx, const char *filename);
+
 #endif

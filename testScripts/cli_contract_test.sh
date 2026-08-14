@@ -125,6 +125,51 @@ check "mode2-repeat-enter"     0 "\n1\n\nE\n" "$F $FN" "Recall quality" "" "2D i
 check "mode2-repeat-prompts-once" 0 "\n1\n\nE\n" "$F $FN" "" "" "Choose noisy pattern" 1 1
 
 # ---------------------------------------------------------------------------
+# Batch mode tests
+# ---------------------------------------------------------------------------
+
+# --- help ---
+check "help"                   0 "" "$F --help" "Usage:" "" "" 0 -1
+
+# --- batch mode (mode 1) ---
+check "batch-mode1-single"     0 "" "$F --rule hebbian --pattern 1 --noise 10" "Pattern 1:" "Choose pattern" "converged=yes" 1 -1
+check "batch-mode1-multi"      0 "" "$F --rule hebbian --pattern 1,3,5 --noise 10" "Pattern 1:" "Choose pattern" "converged=yes" 3 3
+check "batch-mode1-quiet"      0 "" "$F --rule hebbian --pattern 1 --noise 10 --quiet" "" "Learning patterns" "" 0 -1
+check "batch-mode1-seed"       0 "" "$F --rule hebbian --pattern 1 --noise 10 --seed 42" "converged=yes" "" "" 0 -1
+
+# --- batch mode with save/load weights ---
+W1="$TMP/weights1.bin"
+check "batch-save-weights"     0 "" "$F --rule hebbian --pattern 1 --noise 10 --save-weights $W1" "Saving weight matrix" "Choose pattern" "" 0 -1
+check "batch-load-weights"     0 "" "$F --load-weights $W1 --pattern 1 --noise 10" "Loading weight matrix" "Choose pattern" "" 0 -1
+
+# --- batch mode with output file ---
+O1="$TMP/output1.dat"
+check "batch-output-file"      0 "" "$F --rule hebbian --pattern 1 --noise 10 --output $O1" "converged=yes" "Choose pattern" "" 0 -1
+
+# --- batch mode verbose ---
+check "batch-verbose"          0 "" "$F --rule hebbian --pattern 1 --noise 10 --verbose" "Energy =" "Choose pattern" "" 0 -1
+
+# --- batch mode (mode 2) ---
+check "batch-mode2-single"     0 "" "$F $FN --pattern 1" "Pattern 1:" "Choose pattern" "converged=yes" 1 -1
+check "batch-mode2-multi"      0 "" "$F $FN --pattern 1,2,3" "Pattern 1:" "Choose pattern" "converged=yes" 3 3
+
+# --- exit codes ---
+check "exit-code-success"      0 "" "$F --rule hebbian --pattern 1 --noise 10 --quiet" "" "" "" 0 -1
+check "exit-code-invalid-index" 3 "" "$F --rule hebbian --pattern 99 --noise 10 --quiet" "out of range" "" "" 0 -1
+check "exit-code-invalid-noise" 1 "" "$F --rule hebbian --pattern 1 --noise 150 --quiet" "out of range" "" "" 0 -1
+
+# --- config file ---
+CFG=".hopfieldrc"
+cat >"$CFG" <<'EOFCFG'
+rule = storkey
+seed = 12345
+noise = 15
+verbose = true
+EOFCFG
+check "config-file-rule"       0 "" "$F --pattern 1" "Storkey" "" "converged=yes" 0 -1
+check "config-file-noise"      0 "" "$F --pattern 1" "15% noisy" "" "converged=yes" 0 -1
+rm -f "$CFG"
+
 rm -f "$OUT"
 if [ "$FAIL" -eq 0 ]; then
     printf 'CLI contract: %d cases, all passed.\n' "$PASS"

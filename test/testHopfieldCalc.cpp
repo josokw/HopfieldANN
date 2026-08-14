@@ -915,6 +915,86 @@ TEST_F(HopfieldIOTest, ReadFileRejectsHeaderPartial) {
     std::filesystem::remove(path);
 }
 
+TEST_F(HopfieldIOTest, SaveLoadWeightsBinary) {
+    readFile(ctx, "data/hopf01.dat");
+    ASSERT_TRUE(learnHebbian(ctx));
+
+    std::filesystem::path path =
+        std::filesystem::temp_directory_path() / "hopfield_weights_test.bin";
+    ASSERT_TRUE(hopfield_save_weights(ctx, path.string().c_str()));
+
+    HopfieldContext *ctx2 = hopfield_context_create();
+    ASSERT_NE(ctx2, nullptr);
+    ASSERT_TRUE(hopfield_load_weights(ctx2, path.string().c_str()));
+
+    EXPECT_EQ(ctx2->nRows, ctx->nRows);
+    EXPECT_EQ(ctx2->nColumns, ctx->nColumns);
+    EXPECT_EQ(ctx2->nPatterns, ctx->nPatterns);
+    EXPECT_EQ(ctx2->patternSize, ctx->patternSize);
+    EXPECT_EQ(ctx2->modernHopfield, ctx->modernHopfield);
+    EXPECT_DOUBLE_EQ(ctx2->modernBeta, ctx->modernBeta);
+
+    for (int i = 0; i < ctx->patternSize; i++) {
+        for (int j = 0; j < ctx->patternSize; j++) {
+            EXPECT_DOUBLE_EQ(ctx2->W[i][j], ctx->W[i][j]);
+        }
+    }
+
+    hopfield_context_destroy(ctx2);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, LoadWeightsResizesContext) {
+    readFile(ctx, "data/hopf01.dat");
+    ASSERT_TRUE(learnHebbian(ctx));
+
+    std::filesystem::path path =
+        std::filesystem::temp_directory_path() / "hopfield_weights_test.bin";
+    ASSERT_TRUE(hopfield_save_weights(ctx, path.string().c_str()));
+
+    HopfieldContext *ctx2 = hopfield_context_create();
+    ASSERT_NE(ctx2, nullptr);
+    // Create context with different dimensions - should be resized on load
+    ASSERT_TRUE(hopfield_context_resize(ctx2, 5, 5, 3, 0));
+    EXPECT_EQ(ctx2->patternSize, 25);
+    EXPECT_EQ(ctx2->nPatterns, 3);
+
+    ASSERT_TRUE(hopfield_load_weights(ctx2, path.string().c_str()));
+
+    // Context should be resized to match saved weights
+    EXPECT_EQ(ctx2->nRows, ctx->nRows);
+    EXPECT_EQ(ctx2->nColumns, ctx->nColumns);
+    EXPECT_EQ(ctx2->nPatterns, ctx->nPatterns);
+    EXPECT_EQ(ctx2->patternSize, ctx->patternSize);
+
+    hopfield_context_destroy(ctx2);
+    std::filesystem::remove(path);
+}
+
+TEST_F(HopfieldIOTest, LoadWeightsModernHopfield) {
+    readFile(ctx, "data/hopf01.dat");
+    ASSERT_TRUE(learnModernHopfield(ctx));
+    ASSERT_TRUE(ctx->modernHopfield);
+
+    std::filesystem::path path =
+        std::filesystem::temp_directory_path() / "hopfield_weights_modern.bin";
+    ASSERT_TRUE(hopfield_save_weights(ctx, path.string().c_str()));
+
+    HopfieldContext *ctx2 = hopfield_context_create();
+    ASSERT_NE(ctx2, nullptr);
+    ASSERT_TRUE(hopfield_load_weights(ctx2, path.string().c_str()));
+
+    EXPECT_TRUE(ctx2->modernHopfield);
+    EXPECT_DOUBLE_EQ(ctx2->modernBeta, MODERN_BETA);
+
+    // W should be Hebbian (for display), recall uses patterns directly
+    EXPECT_TRUE(isSymmetric(ctx2->patternSize, ctx2->W));
+    EXPECT_TRUE(hasZeroDiagonal(ctx2->patternSize, ctx2->W));
+
+    hopfield_context_destroy(ctx2);
+    std::filesystem::remove(path);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
