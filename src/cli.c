@@ -397,29 +397,32 @@ static bool learnPatterns(HopfieldContext *ctx, LearningRule rule)
 }
 
 static bool ensurePatternBuffers(HopfieldContext *ctx, double **inputPattern,
-                                 double **inputPatternWithNoise,
-                                 double **outputPattern)
+                                  double **inputPatternWithNoise,
+                                  double **outputPattern)
 {
-   if (ctx == NULL || ctx->patternSize <= 0) {
-      return false;
-   }
-   size_t bytes = (size_t)ctx->patternSize * sizeof(double);
-   double *ip = (double *)realloc(*inputPattern, bytes);
-   if (ip == NULL) {
-      return false;
-   }
-   *inputPattern = ip;
-   double *np = (double *)realloc(*inputPatternWithNoise, bytes);
-   if (np == NULL) {
-      return false;
-   }
-   *inputPatternWithNoise = np;
-   double *op = (double *)realloc(*outputPattern, bytes);
-   if (op == NULL) {
-      return false;
-   }
-   *outputPattern = op;
-   return true;
+    if (ctx == NULL || ctx->patternSize <= 0) {
+       return false;
+    }
+    size_t bytes = (size_t)ctx->patternSize * sizeof(double);
+    double *ip = (double *)realloc(*inputPattern, bytes);
+    if (ip == NULL) {
+       return false;
+    }
+    double *np = (double *)realloc(*inputPatternWithNoise, bytes);
+    if (np == NULL) {
+       free(ip);
+       return false;
+    }
+    double *op = (double *)realloc(*outputPattern, bytes);
+    if (op == NULL) {
+       free(ip);
+       free(np);
+       return false;
+    }
+    *inputPattern = ip;
+    *inputPatternWithNoise = np;
+    *outputPattern = op;
+    return true;
 }
 
 static void handle_error(HopfieldError err)

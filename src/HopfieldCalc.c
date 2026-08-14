@@ -180,12 +180,12 @@ bool learnPseudoInverse(HopfieldContext *ctx)
             pivot = row;
          }
       }
-      if (fabs(G[pivot][col]) < 1e-12) {
-         freeMatrix(G); /* singular: patterns are linearly dependent */
-         freeMatrix(inv);
-         freeMatrix(M);
-         return false;
-      }
+if (fabs(G[pivot][col]) < PSEUDO_INVERSE_SINGULARITY_THRESHOLD) {
+          freeMatrix(G); /* singular: patterns are linearly dependent */
+          freeMatrix(inv);
+          freeMatrix(M);
+          return false;
+       }
       if (pivot != col) {
          for (int k = 0; k < P; k++) {
             double tmp = G[col][k];
@@ -555,24 +555,30 @@ static bool convergeModernPattern(HopfieldContext *ctx,
 
 int addNoiseToPattern(HopfieldContext *ctx, const int patNumber, int chance)
 {
-   if (ctx == NULL || ctx->patterns == NULL || ctx->patternSize <= 0 ||
-       patNumber < 0 || patNumber >= ctx->nPatterns) {
-      return -1;
-   }
+    if (ctx == NULL || ctx->patterns == NULL || ctx->patternSize <= 0 ||
+        patNumber < 0 || patNumber >= ctx->nPatterns) {
+       return -1;
+    }
 
-   if (ctx->noisyPatterns == NULL) {
-      ctx->noisyPatterns = allocMatrix(ctx->nPatterns, ctx->patternSize);
-      if (ctx->noisyPatterns == NULL) {
-         return -1;
-      }
-   }
+    if (ctx->noisyPatterns == NULL || patNumber >= ctx->nNoisyPatterns) {
+       int required = patNumber + 1;
+       if (ctx->noisyPatterns != NULL) {
+          freeMatrix(ctx->noisyPatterns);
+       }
+       ctx->noisyPatterns = allocMatrix(required, ctx->patternSize);
+       if (ctx->noisyPatterns == NULL) {
+          ctx->nNoisyPatterns = 0;
+          return -1;
+       }
+       ctx->nNoisyPatterns = required;
+    }
 
-   if (chance < 0)
-      chance = 0;
-   if (chance > MAX_NOISE_PERCENT)
-      chance = MAX_NOISE_PERCENT;
+    if (chance < 0)
+       chance = 0;
+    if (chance > MAX_NOISE_PERCENT)
+       chance = MAX_NOISE_PERCENT;
 
-   int nNoise = ctx->patternSize * chance / 100;
+    int nNoise = ctx->patternSize * chance / 100;
 
    int *indices = (int *)malloc((size_t)ctx->patternSize * sizeof(int));
    double *noisyPattern =

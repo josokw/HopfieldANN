@@ -8,6 +8,10 @@
                                               inverted pattern (W(-x) = -Wx) */
 #define STORAGE_CAPACITY_FACTOR 0.138
 
+/* Pseudo-inverse learning rule: singularity threshold for Gram matrix pivoting.
+   If |pivot| < this threshold, patterns are considered linearly dependent. */
+#define PSEUDO_INVERSE_SINGULARITY_THRESHOLD 1e-12
+
 /* Daydreaming learning rule (Serricchio et al., 2025). */
 #define DAYDREAMING_EPOCHS 10            /* training epochs (each = N steps) */
 #define DAYDREAMING_TAU_FACTOR 1.0       /* tau = factor * N (paper uses tau = N) */
