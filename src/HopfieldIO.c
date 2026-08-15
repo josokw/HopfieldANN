@@ -1,16 +1,16 @@
 #include "HopfieldIO.h"
 #include "HopfieldCalc.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 
-/* Read the "rows columns patterns" header and reject any trailing non-blank
-   content on the header line, which would otherwise be parsed as pattern
-   data. The header's own line ending is consumed. */
-static HopfieldError read_pattern_header(FILE *fh, int *nRows, int *nColumns,
-                                         int *nPatterns)
+/* Read the "rows columns patterns" header and reject any trailing
+   non-blank content on the header line, which would otherwise be parsed as
+   pattern data. The header's own line ending is consumed. */
+static HopfieldError read_pattern_header(FILE *fh, int *nRows,
+                                         int *nColumns, int *nPatterns)
 {
    if (fscanf(fh, "%d %d %d", nRows, nColumns, nPatterns) != 3) {
       return HOPFIELD_ERR_INVALID_FORMAT;
@@ -28,8 +28,8 @@ static HopfieldError read_pattern_rows(FILE *fh, int nRows, int nColumns,
                                        double *const storage[],
                                        int patternIndex)
 {
-   /* Content + optional CR + LF + NUL. A full CRLF row (nColumns + 2 chars)
-      fits exactly; anything longer fails the length check below. */
+   /* Content + optional CR + LF + NUL. A full CRLF row (nColumns + 2
+      chars) fits exactly; anything longer fails the length check below. */
    size_t bufSize = (size_t)nColumns + 3;
    if (bufSize > INT_MAX) {
       return HOPFIELD_ERR_OUT_OF_MEMORY;
@@ -90,8 +90,8 @@ HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
    if (hfDataFile == NULL) {
       return HOPFIELD_ERR_FILE_NOT_FOUND;
    }
-   HopfieldError err = read_pattern_header(hfDataFile, &ctx->nRows,
-                                           &ctx->nColumns, &ctx->nPatterns);
+   HopfieldError err = read_pattern_header(
+      hfDataFile, &ctx->nRows, &ctx->nColumns, &ctx->nPatterns);
    if (err != HOPFIELD_OK) {
       fclose(hfDataFile);
       return err;
@@ -114,8 +114,8 @@ HopfieldError readFile(HopfieldContext *ctx, const char fileName[])
    }
 
    for (int nP = 0; nP < ctx->nPatterns; nP++) {
-      HopfieldError err = read_pattern_rows(hfDataFile, ctx->nRows,
-                                             ctx->nColumns, ctx->patterns, nP);
+      HopfieldError err = read_pattern_rows(
+         hfDataFile, ctx->nRows, ctx->nColumns, ctx->patterns, nP);
       if (err != HOPFIELD_OK) {
          fclose(hfDataFile);
          return err;
@@ -150,9 +150,8 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
       return HOPFIELD_ERR_FILE_NOT_FOUND;
    }
 
-   HopfieldError err = read_pattern_header(hfDataFile, &nNoisyRows,
-                                           &nNoisyColumns,
-                                           &ctx->nNoisyPatterns);
+   HopfieldError err = read_pattern_header(
+      hfDataFile, &nNoisyRows, &nNoisyColumns, &ctx->nNoisyPatterns);
    if (err != HOPFIELD_OK) {
       fclose(hfDataFile);
       return err;
@@ -179,9 +178,8 @@ HopfieldError readNoisyFile(HopfieldContext *ctx, const char fileName[])
    }
 
    for (int nP = 0; nP < ctx->nNoisyPatterns; nP++) {
-      HopfieldError err = read_pattern_rows(hfDataFile, ctx->nRows,
-                                             ctx->nColumns,
-                                             ctx->noisyPatterns, nP);
+      HopfieldError err = read_pattern_rows(
+         hfDataFile, ctx->nRows, ctx->nColumns, ctx->noisyPatterns, nP);
       if (err != HOPFIELD_OK) {
          fclose(hfDataFile);
          return err;
@@ -270,7 +268,8 @@ bool showPatternAndDifference(const HopfieldContext *ctx,
    return true;
 }
 
-bool showPatternAsVector(const HopfieldContext *ctx, const double pattern[])
+bool showPatternAsVector(const HopfieldContext *ctx,
+                         const double pattern[])
 {
    if (ctx == NULL) {
       return false;
@@ -301,7 +300,7 @@ struct ShowIterationData {
 };
 
 static void show_iteration(int iteration, double energy,
-                            const double pattern[], void *user_data)
+                           const double pattern[], void *user_data)
 {
    (void)iteration;
    const struct ShowIterationData *data = user_data;
@@ -310,9 +309,9 @@ static void show_iteration(int iteration, double energy,
 }
 
 void showAssociatedPattern(HopfieldContext *ctx,
-                            const double inputPattern[],
-                            const double inputPatternWithNoise[],
-                            double associatedPattern[])
+                           const double inputPattern[],
+                           const double inputPatternWithNoise[],
+                           double associatedPattern[])
 {
    if (ctx == NULL || ctx->patternSize <= 0) {
       return;
@@ -335,11 +334,12 @@ void showAssociatedPattern(HopfieldContext *ctx,
    convergePattern(ctx, inputPatternWithNoise, associatedPattern,
                    show_iteration, &cb_data, &finalEnergy);
 
-   double overlap = calcOverlap(ctx->patternSize, inputPattern,
-                                associatedPattern);
+   double overlap =
+      calcOverlap(ctx->patternSize, inputPattern, associatedPattern);
    int hamming = calcHammingDistance(ctx->patternSize, inputPattern,
                                      associatedPattern);
-   printf("\n    Recall quality: overlap = %7.4f, "
-          "Hamming distance = %d / %d\n",
-          overlap, hamming, ctx->patternSize);
+   printf(
+      "\n    Recall quality: overlap = %7.4f, "
+      "Hamming distance = %d / %d\n",
+      overlap, hamming, ctx->patternSize);
 }

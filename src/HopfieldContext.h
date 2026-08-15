@@ -5,32 +5,32 @@
 #include <stdbool.h>
 
 typedef struct {
-    /* Pattern storage (dynamically allocated, NULL until sized) */
-    double **patterns;
-    double **noisyPatterns;
-    double **W;
+   /* Pattern storage (dynamically allocated, NULL until sized) */
+   double **patterns;
+   double **noisyPatterns;
+   double **W;
 
-    /* Metadata */
-    int nRows;
-    int nColumns;
-    int nPatterns;
-    int patternSize;
-    int nNoisyPatterns;
+   /* Metadata */
+   int nRows;
+   int nColumns;
+   int nPatterns;
+   int patternSize;
+   int nNoisyPatterns;
 
-    /* Modern Hopfield (softmax/exp-energy) retrieval. When set, recall uses the
-       stored patterns directly with the exponential-energy update rule instead
-       of the symmetric weight matrix W. */
-    bool modernHopfield;
-    double modernBeta;
+   /* Modern Hopfield (softmax/exp-energy) retrieval. When set, recall uses
+      the stored patterns directly with the exponential-energy update rule
+      instead of the symmetric weight matrix W. */
+   bool modernHopfield;
+   double modernBeta;
 } HopfieldContext;
 
 typedef enum {
-    HOPFIELD_OK = 0,
-    HOPFIELD_ERR_FILE_NOT_FOUND,
-    HOPFIELD_ERR_INVALID_FORMAT,
-    HOPFIELD_ERR_INDEX_OUT_OF_RANGE,
-    HOPFIELD_ERR_SIZE_EXCEEDED,
-    HOPFIELD_ERR_OUT_OF_MEMORY
+   HOPFIELD_OK = 0,
+   HOPFIELD_ERR_FILE_NOT_FOUND,
+   HOPFIELD_ERR_INVALID_FORMAT,
+   HOPFIELD_ERR_INDEX_OUT_OF_RANGE,
+   HOPFIELD_ERR_SIZE_EXCEEDED,
+   HOPFIELD_ERR_OUT_OF_MEMORY
 } HopfieldError;
 
 /* Allocate an (rows x cols) matrix in one contiguous block with a row
@@ -57,9 +57,11 @@ bool hopfield_context_resize(HopfieldContext *ctx, int nRows, int nColumns,
 bool hopfield_context_set_noisy(HopfieldContext *ctx, int nNoisyPatterns);
 
 /* Save weight matrix and metadata to binary file. */
-bool hopfield_save_weights(const HopfieldContext *ctx, const char *filename);
+bool hopfield_save_weights(const HopfieldContext *ctx,
+                           const char *filename);
 
-/* Load weight matrix and metadata from binary file. Resizes context to match. */
+/* Load weight matrix and metadata from binary file. Resizes context to
+ * match. */
 bool hopfield_load_weights(HopfieldContext *ctx, const char *filename);
 
 #endif

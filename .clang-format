@@ -1,5 +1,5 @@
 ---
-Language: C
+Language: Cpp
 BasedOnStyle:  llvm
 AccessModifierOffset: -3
 AlignAfterOpenBracket: Align
@@ -83,7 +83,7 @@ SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard: C11
+Standard: Auto
 TabWidth: 3
 UseTab: Never
 
